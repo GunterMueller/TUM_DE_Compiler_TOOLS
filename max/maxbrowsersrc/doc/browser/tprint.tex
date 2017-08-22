@@ -1,0 +1,694 @@
+\section{Funktionsbeschreibungen des Moduls {\tt tprint.c}}
+
+\begin{description}
+
+\item[\tt BackgroundMapProcedure]{\bf :\\}
+BackgroundMapProcedure() ist eine Xt Hintergrundfunktion. Sie ist f"ur das Mappen des Viewports zust"andig. \\
+IN:
+\begin{itemize}
+   \item XtPointer client\_data ist ein Pointer auf das zu mappende Widget.
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item Boolean BackgroundMapProcedure() hat als R"uckgabewert immer TRUE, um Xt mitzuteilen, da"s die Funktion aus derBackground Procedure Liste wieder entfernt werden soll.
+\end{itemize}
+
+\item[\tt CreateXCONTEXT]{\bf :\\}
+CreateXCONTEXT() stellt einen neuen X-Kontext bereit. Der Inhalt der Struktur wird so weit wie m"oglich belegt. \\
+IN:
+\begin{itemize}
+   \item int argc ist der Argument Counter der Procedur main().
+   \item char **argv ist der Argument Vektor der Procedur main().
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item XCONTEXT *CreateNewXCONTEXT() liefert als Ergebnis einen Pointer auf den neu allocierten und initialisiertenKontext.
+\end{itemize}
+
+\item[\tt CopyXCONTEXT]{\bf :\\}
+CopyXCONTEXT() kopiert einen X-Kontext, wobei auch der ben"otigte Speicherbereich reserviert wird. Der Inhalt der neuen Struktur wird so weit wie m"oglich belegt. \\
+IN:
+\begin{itemize}
+   \item XCONTEXT *xcontext ist ein Pointer auf den zu kopierenden Kontext.
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item XCONTEXT *CopyXCONTEXT() liefert als Ergebnis einen Pointer auf den neu allocierten und initialisiertenKontext.
+\end{itemize}
+
+\item[\tt DestroyXCONTEXT]{\bf :\\}
+DestroyXCONTEXT() gibt den durch einen X-Kontext belegten Speicherbereich frei. \\
+IN:
+\begin{itemize}
+   \item XCONTEXT *xcontext ist ein Pointer auf den zu zerst"orenden Kontext.
+\end{itemize}
+OUT:
+
+\item[\tt UpdateMaxTree]{\bf :\\}
+UpdateMaxTree() verbindet alle MAX Knoten eines Baumes mit einem vorgegebenen Kontext. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf die Wurzel des MAX-Baumes, der an den Kontext gebunden werden soll.
+   \item Context *context ist ein Pointer auf den zu setzenden Kontext.
+\end{itemize}
+OUT:
+
+\item[\tt CopyContext]{\bf :\\}
+CopyContext() kopiert einen Kontext, wobei Speicher f"ur die Kopie allociert und der Inhalt der Struktur belegt wird. Der zu diesem Kontext geh"orende MAX-Baum mu"s mit angegeben werden. Der Kontext wird au"serdem in die Kontexthierarchie eingeh"angt. \\
+IN:
+\begin{itemize}
+   \item Context *source ist ein Pointer auf die Quelle.
+   \item MAX\_NODE *max\_node ist ein Pointer auf die Wurzel des MAX-Baumes, der an den Kontext gebunden werden soll.
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item Context *CopyContext() gibt einen Pointer auf den neu allocierten und initialisierten Kontext zur"uck.
+\end{itemize}
+
+\item[\tt DestroyContext]{\bf :\\}
+DestroyContext() zerst"ort einen Baum von Kontexten, einschlie"slich aller rechten Nachbarn. \\
+IN:
+\begin{itemize}
+   \item Context *context ist ein Pointer die Wurzel des zu zerst"orenden Kontextbaumes.
+\end{itemize}
+OUT:
+
+\item[\tt InsertNodeWidget]{\bf :\\}
+InsertNodeWidget() f"ugt abh"angig von einem MAX-Node ein NodeWidget in ein TreeWidget ein. \\
+IN:
+\begin{itemize}
+   \item Widget tree ist das TreeWidget, in welches der neue Knoten eingef"ugt werden soll.
+   \item Widget parent ist das Parent Widget, unter welchem der neue Knoten im Baum eingeh"angt werden soll.
+   \item MAX\_NODE *node ist ein Pointer auf einen MAX-Knoten, welcher f"ur den Inhalt des neuen NodeWidgets verantwortlich sein soll.
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item Widget InsertNodeWidget() gibt das neu erzeugte Node Widget zur"uck.
+\end{itemize}
+
+\item[\tt MakeCleanTree]{\bf :\\}
+MakeCleanTree() sorgt daf"ur, da"s der MAX-Baum in einem definierten Initialzustand "ubergeht. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_tree ist ein Pointer auf die Wurzel des Baums.
+\end{itemize}
+OUT:
+
+\item[\tt CreateTree]{\bf :\\}
+CreateTree() ist eine rekursive Funktion zur Umwandlung eins MAX-Baumes in ein Tree Widget. \\
+IN:
+\begin{itemize}
+   \item Context *context ist ein Pointer auf die Kontextstruktur des Baumes.
+   \item MAX\_NODE *max\_tree ist ein Pointer auf die Wurzel des umzuwandelnden MAX-Baumes.
+   \item Widget parent ist das Eltern Widget des zu erzeugenden Unterbaums (gegebenenfalls NULL).
+\end{itemize}
+OUT:
+
+\item[\tt CreatePath]{\bf :\\}
+CreatePath() "uberpr"uft, ob zu einem gegebenen MAX Knoten ein entsprechender Pfad im Widget Baum existiert und legt diesen gegebenenfalls an, d.h. zugefaltete Unterb"aume werden aufgeklappt. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf den zu bearbeitenden MAX Knoten.
+\end{itemize}
+OUT:
+
+\item[\tt CreateTreeViewport]{\bf :\\}
+CreateTreeViewport() generiert zu einem gegebenen Kontext einen Viewport mit dem entsprechenden Widget Baum. \\
+IN:
+\begin{itemize}
+   \item Context *context ist ein Pointer auf den Kontext.
+\end{itemize}
+OUT:
+
+\item[\tt DestroySubtree]{\bf :\\}
+DestroySubtree() l"oscht einen Widget-Baum. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf den Wurzelknoten im zugeh"origen MAX-Baum.
+\end{itemize}
+OUT:
+
+\item[\tt CreateSubtree]{\bf :\\}
+CreateSubtree() generiert den zu einem MAX Knoten geh"orenden Unterbaum als Widget Unterbaum - es wird {\bf nur} der Unterbaum generiert. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf den MAX Knoten, dessen Unterbaum dargestellt werden soll.
+\end{itemize}
+OUT:
+
+\item[\tt FindNextNodePreorderSubtree]{\bf :\\}
+FindNextNodePreorderSubtree() sucht zu einem vorgegebenen Namen rekursiv nach dem n"achsten Knoten in Preorder. Es wird nur im Unterbaum gesucht. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf den ersten Knoten des Suchdurchlaufes.
+   \item char *name ist ein Pointer auf eine Zeichenkette, die den Namen des gesuchten Knoten enth"alt.
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item MAX\_NODE *FindNextNodePreorderSubtree() liefert den Pointer auf einen eventuell gefundenen Knoten. Bei erfolgloser Suche wird NULL zur"uckgegeben.
+\end{itemize}
+
+\item[\tt FindNextNodePreorder]{\bf :\\}
+FindNextNodePreorder() sucht zu einem vorgegebenen Namen nach dem n"achsten Knoten in Preorder. Es werden auch die entsprechenden "ubergeordneten Knoten durchsucht. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf den ersten Knoten des Suchdurchlaufes.
+   \item char *name ist ein Pointer auf eine Zeichenkette, die den Namen des gesuchten Knoten enth"alt.
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item MAX\_NODE *FindNextNodePreorder() liefert den Pointer auf einen eventuell gefundenen Knoten. Bei erfolgloserSuche wird NULL zur"uckgegeben.
+\end{itemize}
+
+\item[\tt FindPreviousNodePreorderSubtree]{\bf :\\}
+FindPreviousNodePreorderSubtree() sucht zu einem vorgegebenen Namen rekursiv nach dem n"achsten Knoten in Preorder. Es wird nur im Unterbaum gesucht. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf den ersten Knoten des Suchdurchlaufes.
+   \item char *name ist ein Pointer auf eine Zeichenkette, die den Namen des gesuchten Knoten enth"alt.
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item MAX\_NODE *FindPreviousNodePreorderSubtree() liefert den Pointerauf einen eventuell gefundenen Knoten. Bei erfolgloser Suche wird NULL zur"uckgegeben.
+\end{itemize}
+
+\item[\tt FindPreviousNodePreorder]{\bf :\\}
+FindPreviousNodePreorder() sucht zu einem vorgegebenen Namen nach dem vorhergehen den Knoten in Preorder. Es werden auch Vorg"angerknoten ber"ucksichtigt. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf den ersten Knoten des Suchdurchlaufes.
+   \item char *name ist ein Pointer auf eine Zeichenkette, die den Namen des gesuchten Knoten enth"alt.
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item MAX\_NODE *FindPreviousNodePreorder() liefert den Pointer auf einen eventuell gefundenen Knoten. Bei erfolgloserSuche wird NULL zur"uckgegeben.
+\end{itemize}
+
+\item[\tt FindNextNodePostorderSubtree]{\bf :\\}
+FindNextNodePostorderSubtree() sucht zu einem vorgegebenen Namen rekursiv nach dem n"achsten Knoten in Postorder. Es wird nur im Unterbaum gesucht. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf den ersten Knoten des Suchdurchlaufes.
+   \item char *name ist ein Pointer auf eine Zeichenkette, die den Namen des gesuchten Knoten enth"alt.
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item MAX\_NODE *FindNextNodePostorderSubtree() liefert den Pointer auf einen eventuell gefundenen Knoten. Bei erfolgloser Suche wird NULL zur"uckgegeben.
+\end{itemize}
+
+\item[\tt FindNextNodePostorder]{\bf :\\}
+FindNextNodePostorder() sucht zu einem vorgegebenen Namen nach dem n"achsten Knoten in Postorder. Es werden auch Vorg"angerknoten ber"ucksichtigt. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf den ersten Knoten des Suchdurchlaufes.
+   \item char *name ist ein Pointer auf eine Zeichenkette, die den Namen des gesuchten Knoten enth"alt.
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item MAX\_NODE *FindNextNodePostorder() liefert den Pointer auf einen eventuell gefundenen Knoten. Bei erfolgloser Suche wird NULL zur"uckgegeben.
+\end{itemize}
+
+\item[\tt FindPreviousNodePostorderSubtree]{\bf :\\}
+FindPreviousNodePostorderSubtree() sucht zu einem vorgegebenen Namen rekursiv nach dem vorgehenden Knoten in Postorder. Es wird nur im Unterbaum gesucht. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf den ersten Knoten des Suchdurchlaufes.
+   \item char *name ist ein Pointer auf eine Zeichenkette, die den Namen des gesuchten Knoten enth"alt.
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item MAX\_NODE *FindPreviousNodePostorderSubtree() liefert den Pointer auf einen eventuell gefundenen Knoten.Bei erfolgloser Suche wird NULL zur"uckgegeben.
+\end{itemize}
+
+\item[\tt FindPreviousNodePostorder]{\bf :\\}
+FindPreviousNodePostorder() sucht zu einem vorgegebenen Namen nach dem vorhergehenden Knoten in Postorder. Es werden auch "ubergeordnete Knoten ber"ucksichtigt. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf den ersten Knoten des Suchdurchlaufes.
+   \item char *name ist ein Pointer auf eine Zeichenkette, die den Namen des gesuchten Knoten enth"alt.
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item MAX\_NODE *FindPreviousNodePostorder() liefert den Pointer auf einen eventuell gefundenen Knoten. Bei erfolgloser Suche wird NULL zur"uckgegeben.
+\end{itemize}
+
+\item[\tt NodeCallback]{\bf :\\}
+NodeCallback() ist als Callback-Procedure zu jedem Baumknoten eingeh"angt. Sie "ubernimmt die Reaktion auf die mittlere und die rechte Maustaste. \\
+IN:
+\begin{itemize}
+   \item Widget node ist das angeklickte WidgetXtPointer client\_data ist ein Pointer auf den zugeh"origen Max-Knoten.
+   \item XtPointer call\_data gibt den Mausbutton an.
+\end{itemize}
+OUT:
+
+\item[\tt CreateX\_INFO]{\bf :\\}
+CreateX\_INFO() generiert eine neue X\_INFO Struktur und belegt sie mit Defaultwerten. \\
+IN: \\
+OUT:
+\begin{itemize}
+   \item X\_INFO *CreateX\_INFO() liefert einen Pointer auf die neu bereitgestellte X\_INFO Struktur.
+\end{itemize}
+
+\item[\tt CopyX\_INFO]{\bf :\\}
+CopyX\_INFO() kopiert den Inhalt einer X\_INFO Struktur und allokiert den ben"otigten Speicherbereich. \\
+IN:
+\begin{itemize}
+   \item X\_INFO *xinfo ist ein Pointer auf die zu kopierende Struktur.
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item X\_INFO *CopyX\_INFO() liefert einen Pointer auf die neu bereitgestellte X\_INFO Struktur.
+\end{itemize}
+
+\item[\tt DestroyX\_INFO]{\bf :\\}
+DestroyX\_INFO() zerst"ort eine X\_INFO Struktur. \\
+IN:
+\begin{itemize}
+   \item X\_INFO *xinfo ist ein Pointer auf die zu zerst"orende Struktur.
+\end{itemize}
+OUT:
+
+\item[\tt GetActualAttrMask]{\bf :\\}
+GetActualAttrMask() gibt die zu einem Kontext, der durch einen MAX Knoten angegeben wird, geh"orende Attributmaske zur"uck. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf einen MAX Knoten im gew"unschten Kontext.
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item AttrMask *GetActualAttrMask() liefert einen Pointer auf die Attributmaske.
+\end{itemize}
+
+\item[\tt UnmanageViewport]{\bf :\\}
+UnmanageViewport() sorgt daf"ur, da"s der Viewport nicht mehr gemanaged wird. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf einen MAX Knoten im Viewport.
+\end{itemize}
+OUT:
+
+\item[\tt ManageViewport]{\bf :\\}
+ManageViewport() sorgt daf"ur, da"s der Viewport wieder gemanaged wird. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf einen MAX Knoten im Viewport.
+\end{itemize}
+OUT:
+
+\item[\tt UnmarkAllNodesFromRoot]{\bf :\\}
+UnmarkAllNodesFromRoot() entfernt eventuell vorhandene Markierungen (ab Root des MAX\_NODE) von allen MAX Knoten. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf einen beliebigen MAX Knoten des Baumes.
+\end{itemize}
+OUT:
+
+\item[\tt RaiseWindow]{\bf :\\}
+RaiseWindow() legt das Window, das zu dem angegebenen Knoten geh"ort oben auf den Windowstack. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf einen beliebigen MAX Knoten innerhalb des Fensters.
+\end{itemize}
+OUT:
+
+\item[\tt CenterNode]{\bf :\\}
+CenterNode() zentriert einen MAX Knoten in seinem Fenster. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf den zu zentrierenden MAX Knoten.
+\end{itemize}
+OUT:
+
+\item[\tt ShowAttributes]{\bf :\\}
+ShowAttributes() bewirkt das Anzeigen der Attribute eines MAX Knotens. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf den zu bearbeitenden MAX Knoten.
+\end{itemize}
+OUT:
+
+\item[\tt HideAttributes]{\bf :\\}
+HideAttributes() bewirkt das Verstecken der Attribute eines MAX Knotens. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf den zu bearbeitenden MAX Knoten.
+\end{itemize}
+OUT:
+
+\item[\tt MarkNode]{\bf :\\}
+MarkNode() bewirkt das Markieren eines MAX Knotens. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf den zu bearbeitenden MAX Knoten.
+\end{itemize}
+OUT:
+
+\item[\tt MarkSubtree]{\bf :\\}
+MarkSubtree() bewirkt das Markieren eines MAX Unterbaumes. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf die Wurzel des zu bearbeitenden MAX Unterbaums.
+\end{itemize}
+OUT:
+
+\item[\tt MarkShowedSubtree]{\bf :\\}
+MarkShowedSubtree() bewirkt das Markieren des sichtbaren Bereichs eines MAX Unterbaumes. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf die Wurzel des zu bearbeitenden MAX Unterbaum.
+\end{itemize}
+OUT:
+
+\item[\tt UnmarkNode]{\bf :\\}
+UnmarkNode() bewirkt das Entfernen der Markierung eines MAX Knotens. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf den zu bearbeitenden MAX Knoten.
+\end{itemize}
+OUT:
+
+\item[\tt UnmarkSubtree]{\bf :\\}
+UnmarkSubtree() bewirkt das Entfernen der Markierungen in einem MAX Unterbaum. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf die Wurzel des zu bearbeitenden MAX Unterbaums.
+\end{itemize}
+OUT:
+
+\item[\tt UnmarkShowedSubtree]{\bf :\\}
+UnmarkShowedSubtree() bewirkt das Entfernen der Markierungen im sichtbaren Bereich eines MAX Unterbaums. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf den zu bearbeitenden MAX Baum.
+\end{itemize}
+OUT:
+
+\item[\tt ShowSubtree]{\bf :\\}
+ShowSubtree() bewirkt das Auffalten des zu einem MAX Knoten geh"orenden Unterbaums. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf den zu bearbeitenden MAX Knoten.
+\end{itemize}
+OUT:
+
+\item[\tt HideSubtree]{\bf :\\}
+HideSubtree() bewirkt das Verschatten des zu einem MAX Knoten geh"orenden Unterbaums. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf den zu bearbeitenden MAX Knoten.
+\end{itemize}
+OUT:
+
+\item[\tt MarkPath]{\bf :\\}
+MarkPath() bewirkt das Markieren aller Knoten zwischen der Wurzel des MAX Baumes und dem angegebenen MAX Knoten. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf den zu bearbeitenden MAX Knoten.
+\end{itemize}
+OUT:
+
+\item[\tt UnmarkPath]{\bf :\\}
+UnmarkPath() bewirkt das L"oschen der Markierungen an allen MAX Knoten zwischen der Wurzel des MAX Baumes und dem angegebenen MAX Knoten. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf den zu bearbeitenden MAX Knoten.
+\end{itemize}
+OUT:
+
+\item[\tt CopySubtree]{\bf :\\}
+CopySubtree() kopiert den zu einem angegebenen MAX Knoten geh"orenden Unterbaum und Kontext, und zeigt diesen in einem neuen Fenster an. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf die Wurzel des zu kopierenden MAX Knoten.
+\end{itemize}
+OUT:
+
+\item[\tt GotoFirstNodePreorder]{\bf :\\}
+GotoFirstNodePreorder() bewirkt einen Sprung zum ersten MAX Knoten mit gleichem Namen in Preorder. Dieser Knoten wird in der Mitte des Fensters zentriert und markiert. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf den urspr"unglichen MAX Knoten.
+\end{itemize}
+OUT:
+
+\item[\tt GotoLastNodePreorder]{\bf :\\}
+GotoLastNodePreorder() bewirkt einen Sprung zum letzten MAX Knoten mit gleichem Namen in Preorder. Dieser Knoten wird in der Mitte des Fensters zentriert und markiert. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf den urspr"unglichen MAX Knoten.
+\end{itemize}
+OUT:
+
+\item[\tt GotoNextNodePreorder]{\bf :\\}
+GotoNextNodePreorder() bewirkt einen Sprung zum n"achsten MAX Knoten mit gleichem Namen in Preorder. Dieser Knoten wird in der Mitte des Fensters zentriert und markiert. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf den urspr"unglichen MAX Knoten.
+\end{itemize}
+OUT:
+
+\item[\tt GotoPreviousNodePreorder]{\bf :\\}
+GotoPreviousNodePreorder() bewirkt einen Sprung zum vorhergehenden MAX Knoten mit gleichem Namen in Preorder. Dieser Knoten wird in der Mitte des Fensters zentriert und markiert. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf den urspr"unglichen MAX Knoten.
+\end{itemize}
+OUT:
+
+\item[\tt GotoFirstNodePostorder]{\bf :\\}
+GotoFirstNodePostorder() bewirkt einen Sprung zum ersten MAX Knoten mit gleichem Namen in Postorder. Dieser Knoten wird in der Mitte des Fensters zentriert und markiert. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf den urspr"unglichen MAX Knoten.
+\end{itemize}
+OUT:
+
+\item[\tt GotoLastNodePostorder]{\bf :\\}
+GotoLastNodePostorder() bewirkt einen Sprung zum letzten MAX Knoten mit gleichem Namen in Postorder. Dieser Knoten wird in der Mitte des Fensters zentriert und markiert. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf den urspr"unglichen MAX Knoten.
+\end{itemize}
+OUT:
+
+\item[\tt GotoNextNodePostorder]{\bf :\\}
+GotoNextNodePostorder() bewirkt einen Sprung zum n"achsten MAX Knoten mit gleichem Namen in Postorder. Dieser Knoten wird in der Mitte des Fensters zentriert und markiert. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf den urspr"unglichen MAX Knoten.
+\end{itemize}
+OUT:
+
+\item[\tt GotoPreviousNodePostorder]{\bf :\\}
+GotoPreviousNodePostorder() bewirkt einen Sprung zum vorhergehenden MAX Knoten mit gleichem Namen in Postorder. Dieser Knoten wird in der Mitte des Fensters zentriert und markiert. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf den urspr"unglichen MAX Knoten.
+\end{itemize}
+OUT:
+
+\item[\tt HideSubtreeMarkedNodes]{\bf :\\}
+HideSubtreeMarkedNodes() bewirkt das Zusammenfalten aller an markierten MAX Knoten h"angenden Unterb"aume. Es werden auch Unterb"aume in Unterb"aumen zusammengefaltet. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf die Wurzel des zu bearbeitenden MAX Baum.
+\end{itemize}
+OUT:
+
+\item[\tt ShowSubtreeMarkedNodes]{\bf :\\}
+ShowSubtreeMarkedNodes() bewirkt das Anzeigen aller an markierten MAX Knoten h"angenden Unterb"aume. Die Funktion wirkt auch auf markierte aber eventuell nicht sichtbare Knoten. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf die Wurzel des zu bearbeitenden MAX Unterbaums.
+\end{itemize}
+OUT:
+
+\item[\tt HideSubtreeNamedNodes]{\bf :\\}
+HideSubtreeNamedNodes() bewirkt das Zusammenfalten aller an MAX Knoten mit bestimmten Namen h"angenden Unterb"aume. Es werden auch Unterb"aume in Unterb"aumen zusammengefaltet. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf die Wurzel des zu bearbeitenden MAX Unterbaums.
+   \item char *name ist ein Pointer auf die Zeichenkette mit dem MAX Knotennamen.
+\end{itemize}
+OUT:
+
+\item[\tt ShowSubtreeNamedNodes]{\bf :\\}
+ShowSubtreeNamedNodes() bewirkt das Auffalten aller an MAX Knoten mit bestimmten Namen h"angenden Unterb"aume. Es werden auch Unterb"aume in Unterb"aumen aufgefaltet. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf die Wurzel des zu bearbeitenden MAX Knoten.
+   \item char *name ist ein Pointer auf die Zeichenkette mit dem MAX Knotennamen.
+\end{itemize}
+OUT:
+
+\item[\tt MarkAllNodes]{\bf :\\}
+MarkAllNodes() markiert alle Knoten in einem MAX Unterbaum. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf die Wurzel des zu bearbeitenden MAX Unterbaumes.
+\end{itemize}
+OUT:
+
+\item[\tt MarkShowedNodes]{\bf :\\}
+MarkShowedNodes() markiert alle auf dem Bildschirm sichtbaren MAX Knoten. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf die Wurzel des zu bearbeitenden MAX Unterbaumes.
+\end{itemize}
+OUT:
+
+\item[\tt MarkNamedNodes]{\bf :\\}
+MarkNamedNodes() markiert alle mit einem bestimmten Namen benannten MAX Knoten. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf die Wurzel des zu bearbeitenden MAX Unterbaumes.
+   \item char *name ist ein Pointer auf die Zeichenkette mit dem MAX Knotennamen.
+\end{itemize}
+OUT:
+
+\item[\tt UnmarkAllNodes]{\bf :\\}
+UnmarkAllNodes() entfernt eventuell vorhandene Markierungen von allen MAX Knoten. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf die Wurzel des zu bearbeitenden MAX Unterbaumes.
+\end{itemize}
+OUT:
+
+\item[\tt UnmarkShowedNodes]{\bf :\\}
+UnmarkShowedNodes() entfernt alle vorhandene Markierungen im sichtbaren Bereich des Baumes. von allen MAX Knoten. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf die Wurzel des zu bearbeitenden MAX Unterbaumes.
+\end{itemize}
+OUT:
+
+\item[\tt UnmarkNamedNodes]{\bf :\\}
+UnmarkNamedNodes() entfernt Markierungen an allen mit einem bestimmten Namen benannten MAX Knoten. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf die Wurzel des zu bearbeitenden MAX Unterbaumes.
+   \item char *name ist ein Pointer auf die Zeichenkette mit dem MAX Knotennamen.
+\end{itemize}
+OUT:
+
+\item[\tt HideAttributesNamedNodes]{\bf :\\}
+HideAttributesNamedNodes() bewirkt das Verstecken der Attribute an allen mit einem bestimmten Namen bezeichneten MAX Knoten. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf die Wurzel des zu bearbeitenden MAX Unterbaumes.
+   \item char *name ist ein Pointer auf die Zeichenkette mit dem MAX Knotennamen.
+\end{itemize}
+OUT:
+
+\item[\tt HideAttributesMarkedNodes]{\bf :\\}
+HideAttributesMarkedNodes() bewirkt das Verstecken der Attribute an allen markierten MAX Knoten. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf die Wurzel des zu bearbeitenden MAX Unterbaumes.
+\end{itemize}
+OUT:
+
+\item[\tt HideAttributesAllNodes]{\bf :\\}
+HideAttributesAllNodes() bewirkt das Verstecken aller Attribute. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf die Wurzel des zu bearbeitenden MAX Unterbaumes.
+\end{itemize}
+OUT:
+
+\item[\tt ShowAttributesNamedNodes]{\bf :\\}
+ShowAttributesNamedNodes() bewirkt das Anzeigen der Attribute an allen mit einem bestimmten Namen bezeichneten MAX Knoten. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf die Wurzel des zu bearbeitenden MAX Unterbaumes.
+   \item char *name ist ein Pointer auf die Zeichenkette mit dem MAX Knotennamen.
+\end{itemize}
+OUT:
+
+\item[\tt ShowAttributesMarkedNodes]{\bf :\\}
+ShowAttributesMarkedNodes() bewirkt das Anzeigen der Attribute an allen markierten MAX Knoten. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf die Wurzel des zu bearbeitenden MAX Unterbaumes.
+\end{itemize}
+OUT:
+
+\item[\tt ShowAttributesAllNodes]{\bf :\\}
+ShowAttributesAllNodes() bewirkt das Anzeigen aller Attribute in einem MAX Baum. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf die Wurzel des zu bearbeitenden MAX Unterbaumes.
+\end{itemize}
+OUT:
+
+\item[\tt GotoFirstNamedNodePreorder]{\bf :\\}
+GotoFirstNamedNodePreorder() bewirkt einen Sprung zum ersten MAX Knoten mit bestimmtem Namen in Preorder. Dieser Knoten wird in der Mitte des Fensters zentriert und markiert. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf die Wurzel des zu bearbeitenden MAX Unterbaumes.
+   \item char *name ist ein Pointer auf die Zeichenkette mit dem MAX Knotennamen.
+\end{itemize}
+OUT:
+
+\item[\tt GotoLastNamedNodePreorder]{\bf :\\}
+GotoLastNamedNodePreorder() bewirkt einen Sprung zum letzten MAX Knoten mit bestimmtem Namen in Preorder. Dieser Knoten wird in der Mitte des Fensters zentriert und markiert. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf die Wurzel des zu bearbeitenden MAX Unterbaumes.
+   \item char *name ist ein Pointer auf die Zeichenkette mit dem MAX Knotennamen.
+\end{itemize}
+OUT:
+
+\item[\tt GotoFirstNamedNodePostorder]{\bf :\\}
+GotoFirstNamedNodePostorder() bewirkt einen Sprung zum ersten MAX Knoten mit bestimmtem Namen in Postorder. Dieser Knoten wird in der Mitte des Fensters zentriert und markiert. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf die Wurzel des zu bearbeitenden MAX Unterbaumes.
+   \item char *name ist ein Pointer auf die Zeichenkette mit dem MAX Knotennamen.
+\end{itemize}
+OUT:
+
+\item[\tt GotoLastNamedNodePostorder]{\bf :\\}
+GotoLastNamedNodePostorder() bewirkt einen Sprung zum letzten MAX Knoten mit bestimmtem Namen in Postorder. Dieser Knoten wird in der Mitte des Fensters zentriert und markiert. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf die Wurzel des zu bearbeitenden MAX Unterbaumes.
+   \item char *name ist ein Pointer auf die Zeichenkette mit dem MAX Knotennamen.
+\end{itemize}
+OUT:
+
+\item[\tt CopyTree]{\bf :\\}
+CopyTree() kopiert den zu einem angegebenen MAX Knoten geh"orenden Gesamtbaum und Kontext, und zeigt diesen in einem neuen Fenster an. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf die Wurzel des zu bearbeitenden MAX Unterbaumes.
+\end{itemize}
+OUT:
+
+\item[\tt CloseWindow]{\bf :\\}
+CloseWindow() schlie"st das zu einem MAX Knoten geh"orende Fenster. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_node ist ein Pointer auf einen beliebigen MAX Knoten innerhalb des zu schlie"senden Fensters.
+\end{itemize}
+OUT:
+
+\item[\tt CreateMainShell]{\bf :\\}
+  \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_tree ist ein Pointer auf den darzustellenden MAX Baum.
+   \item int argc ist der von main() bereitgestellte Argumentcounter.
+   \item char **argv ist der von main() bereitgestellte Argumentvektor.
+\end{itemize}
+OUT:
+
+\item[\tt CreateNewShell]{\bf :\\}
+CreateNewShell "offnet eine ne"u Shell f"ur einen MAX-Tree. Dieser MAX-Tree mu"s keinen eigenen Kontext besitzen. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE *max\_tree ist ein Pointer auf die Wurzel des darzustellenden MAX Baumes.
+   \item MAX\_NODE *max\_node ist ein Pointer auf den MAX-Knoten, dessen Kontext kopiert werden soll.
+\end{itemize}
+OUT:
+\end{description}

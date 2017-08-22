@@ -1,0 +1,32 @@
+CC=cc
+LD=cc
+INCLD=ld -r -o # inkrementeller Lader, Aufruf $(INCLD) Zielmodul Objekte
+# Compileroptionen
+FLGS=
+DBG=
+WARNS=
+OPT=
+INCLS=
+DEFS=
+# Systemkommandos
+ABORT=/bin/false
+AR=ar r
+CHMOD=chmod
+CP=cp
+ECHO=echo
+EXEEXI=-f
+MAKE=gmake
+MKDIR=mkdir
+MV=mv
+RANLIB=ranlib
+RM=rm -f
+# Namenskonventionen
+LIBPREF=lib
+LIBEXT=.a
+DEBRIS=core gmon.out mon.out # beim clean zu loeschende Dateien
+WILD=*# universelles Wildcard
+#X11 Location for mugbrowser
+X11LIB= -L/usr/X11R6/lib
+X11INC= -I/usr/X11R6/include
+SOCKETLIB=
+

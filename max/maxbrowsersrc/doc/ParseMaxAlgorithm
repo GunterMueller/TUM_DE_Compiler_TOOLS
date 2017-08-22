@@ -1,0 +1,31 @@
+Eingabe zu Anfang:
+
+	MAX-Term ( variabel )
+	und die Term-Struktur Information ( statisch )
+
+Benoetigt: Baumstruktur des MAX-Termes.
+
+Durchlauf durch alle Produktionen....
+
+	Wenn die linke Seite eine Listproduction ist und die Sorten
+		dann liefere eine Liste der Listproductionelemente
+	
+		rufe den Parser dazu rekursiv auf
+
+	Wenn die linke Seite eine Tupelproduction ist und die Sorten
+		dann liefere eine Liste der Tupelproductionelemente
+
+		rufe den Parser dazu rekursiv auf
+
+
+	Wenn die linke Seite eine Klassenproduktion ist, dann:
+		wenn die rechte Seite keine Elemente hat, und die
+		Sorten uebereinstimmen, DANN ist liefere einen
+		Knoten mit dem Namen der aktuellen Sorte
+
+		
+		WENN die rechte Seite definiert ist, dann laufe
+		fuer alle rechten Elemente durch und parse da weiter,
+		wos bei denen angegeben ist. Wenn du ein Terminal erreichst,
+		dann terminiere.
+

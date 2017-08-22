@@ -1,0 +1,68 @@
+
+Hallo Thomas,
+
+ich habe die Einf"uhrung und die Schlu\3bemerkungen eingetragen und
+bin jetzt mit dem Hauptteil recht zufireden. Was  mir gar nicht
+schmeckt, ist die L"ange des Anhangs. Da mu\3 umbedingt noch was getan 
+werden, um die Studenten nicht vom Lesen abzuschrecken: L"ange
+schreckt ab! Und auch um Papier zu sparen. Meine Vorschl"age:
+
+1. tifl_spec.h wird weggelassen (tr"agt nichts wesentliches bei 
+und es ist auch keine Quelle)
+
+2. Die Anzahl der Operatoren wird vermindert (etwa kein dvd, gt, ge,
+lt); beachte dies hat auch Auswirkung auf die .m Datei. 
+
+3. Das Hauptprogramm wird gek"urzte: keine statistic, keine Erzeugung
+einer Datei .tree, keine treeprint-Funktion oder wenn, dann 
+die cases mit "..." abk"urzen.
+
+4. F"ur die Stapel-Version nur die wirklichen Unterschiede zur 
+Environment-Version angeben und kurz erl"autern. 
+
+Vielleicht fallen Dir noch weitere Stellen zu k"urzen ein; meiner Meinung
+nach sollte der Anhang nicht l"anger als der Hauptteil sein. 
+
+Schlie\3lich noch ein paar allgemeine Anmerkungen:
+
+1. Du hast an vielen Stellen in den Quellen einen Gegenschr"ager "\"
+(backslash) vor dem Zeilenwechsel. Der ist "uberfl"ussig und kann
+auf Studenten in gedruckter Form als notwendig interpretiert werden.
+Bitte eliminiere diese "\".
+
+2. Die overfull boxes sind allerdings relevant und bedeuten ganz einfach,
+da\3 die Zeilen zu lang sind. Pr"ufe jedenfalls, ob nirgendwo eine Zeile
+abgeschnitten wird (an einigen Stellen passiert das sicher; die
+pt-Angabe gibt an um wieviel points die Zeile zu lang ist, wo bei
+"zu lang" relativ zur definierten Zeilenl"ange zu verstehen ist.
+
+3. Was ich gerne noch ge"andert h"atte, ist die statische Allokation 
+der Stacks. Das ist kein moderner Programmierstil und sollte
+Studenten nicht unter die Augen kommen.
+
+4. Noch eine Marginalie bzgl. der Yacc-Datei: Es w"are sch"oner 
+die vordefinierten Operationen nicht mitten in die Grammatikregeln
+reinzuquetschen; schau Dir mal an, wie es im MAX-system gemacht ist.
+
+Mit den "Anderungen kann das Tutorial dann in Druck gehen. Aber 
+selbst auf die Gefahr hin, da\3 ich mich wiederhole, bitte teste
+alle "Anderungen an den Quellen ausgiebig. Es ist "argerlich, wenn
+die Leser viel Zeit damit verbringen, etwas zu verstehen, was sich 
+schlie\3lich als Fehler entpuppt. (Die Bilder habe ich nicht gepr"uft)
+
+Die .tar-Datei findest Du wieder auf der suneickel2 in meinem HOME.
+
+
+Hattest Du Zeit f"ur die Pattern?
+
+
+Advent, Advent, in German land 
+gibs TeX-Feils, die koana kennt,
+erst eins, dann zwei, dann drei, dann vier, 
+dann steht das Tutorial vor der T"ur.
+
+Beste Gr"u\3e,
+
+Arnd.
+
+

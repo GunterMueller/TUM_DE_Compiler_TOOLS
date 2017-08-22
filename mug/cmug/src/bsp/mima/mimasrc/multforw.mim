@@ -1,0 +1,28 @@
+program testforward
+        { Programm mit "forwrd spezifizierter Prozedur }
+begin
+   int a, b, c;
+   bool b_is_odd; 
+   procspec odd (int in ;  var bool res );
+
+   proc even (int in; var bool res);
+   begin if in = 0 then res := true else call odd(in-1,res) fi end;
+   
+   proc odd;
+   begin if in = 0 then res := false else call even(in-1,res) fi end;
+
+{ altaegyptische Multiplikation }
+   write('Bitte zwei natuerliche Zahlen eingeben',newline);
+   read(a, b);
+   write(newline, a, '*', b, '=');
+   c := 0;
+   while b>0 do
+      call odd(b, b_is_odd);
+      if b_is_odd then c := c+a fi;
+      b := b/2;
+      a := a*2
+   od;
+   write(c,newline)
+end
+
+

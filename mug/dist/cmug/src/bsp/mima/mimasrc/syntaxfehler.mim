@@ -1,0 +1,66 @@
+
+{f.mima : calcul.mima mit absichtlich eingebauten Fehlern             }
+{         geloeschte Teile auskommentiert, eingefuegte mit + markiert }
+
+program CALCULATOR ;{+}
+begin
+   int OPNO,OPERATION,X {,} Y;
+   const ENDOP  = 10,
+         ADDOP  = 1,
+         MULTOP = 2 {;}
+
+   proc RESULT( var bool MESSAGE; int var{+} RES );
+   {begin}
+     OPNO := OPNO + 1;
+     write('operation number ',OPNO);
+     if MESSAGE = true then write('  addition        ')
+                       else write('  multiplication  ') fi;
+     write('  result is : ',RES, newline)
+   end;  { proc RESULT }
+
+   proc TEST (var int OPERATION, FIRST, SECOND );
+   begin
+     bool MESSAGE;
+ 
+     proc ADD( int VAL1, VAL2 );
+     begin
+       int SUM;
+       MESSAGE := true;
+       SUM := VAL1 + VAL2;
+       call RESULT(message, SUM)
+     end; { proc TEST }
+
+     proc MULT( var int OPER1, OPER2 );
+     begin
+       MESSAGE := false;
+       call RESULT(MESSAGE, OPER1*OPER2 )
+     end; { proc MULT }
+ 
+     { body TEST }
+     if OPERATION = ADDOP
+     then call ADD( FIRST, SECOND )
+     else if OPERATION = MULTOP
+          then call MULT( FIRST,SECOND )
+          else write('unknown operation',newline);
+               return
+          {fi}
+     fi
+   end; { proc TEST }
+
+   MAINPROGR : { named block }
+      begin
+        OPNO := 0 1{+} 2{+};
+        write('calculator ready',newline);
+        read (OPERATION);
+        while OPERATION ne ENDOP
+        do
+          read(x,y);
+          call TEST( OPERATION, X, Y );
+          read (OPERATION)
+        od;
+        write('calculator stops',newline) ;{+}
+      end { block MAINPROGR }
+  end{+}
+end { program CALCULATOR }
+
+

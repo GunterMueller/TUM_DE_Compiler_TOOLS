@@ -1,0 +1,48 @@
+program vartest
+begin
+  const i = 3;
+  array 3 int globfeld;
+  int glob;
+  { Prozedurdeklaration Level 1 }
+  proc plev1(var array 3 int feld1; int x1);
+    begin
+    int i;
+    { Prozedurdeklaration Level 2 }
+    proc plev2(var int y2; var array 3 int feld2; bool z2; var int x2);
+       begin
+         int loc;
+         array 3 int feld3;
+         loc := y2 + i + x1 - 4;
+         write ('LOC = ',loc,' LOC sollte 3 sein ',newline);
+         while loc >= 0 do
+           feld3[feld2[loc]] := (globfeld[feld1[loc]]+1);
+           write('FELD3[',loc,']=',feld3[loc],newline);
+           loc := loc-1
+         od;
+         if z2 then    call plev2(i,feld1,false,x2)
+               else   
+                 feld2[2] := feld2[2]*13;
+                 x2 := x2+17;
+                 feld1[1] := feld1[1] *11;
+                 feld2[3] := feld2[3] *19
+         fi
+       end;
+       i := x1 -1 ;
+       call plev2(i,globfeld,true,feld[0])
+       end;
+glob := 0;
+while glob <=3 do
+    globfeld[glob] := glob;
+    glob := glob+1
+od;
+write('GLOBFELD nach der Initialisierung: ',newline);
+write(globfeld[0],globfeld[1],globfeld[2],globfeld[3]);
+write(newline);
+call plev1(globfeld,I);
+write ('GLOBFELD nach Aufruf von PLEV1:',newline);
+write(globfeld[0],globfeld[1],globfeld[2],globfeld[3]);
+write(newline,'GLOBFELD-Werte sollten sein:',newline);
+write('17 11 26,57',newline)
+end
+ 
+             

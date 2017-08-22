@@ -1,0 +1,156 @@
+Eingelesen: Tue Jan 16 16:15:30 1996
+81235431
+1 32 256 276 
+54 125 
+0 -1 -2 
+256 
+256 
+29 12 266 258 261 0 
+-1 
+266 
+23 267 24 0 
+0 
+-1 
+267 
+15 267 0 
+0 
+-1 
+258 
+14 258 0 
+265 258 0 
+262 258 0 
+275 258 0 
+0 
+-1 
+261 
+17 260 18 0 
+-1 
+262 
+1 263 20 0 
+-1 
+263 
+12 26 259 7 27 263 0 
+12 27 263 0 
+0 
+-1 
+259 
+11 0 
+11 8 259 0 
+-1 
+275 
+31 27 0 
+-1 
+265 
+19 264 20 0 
+-1 
+264 
+12 10 271 30 264 0 
+12 10 271 30 0 
+-1 
+260 
+13 271 3 257 30 260 0 
+271 3 257 30 260 0 
+14 260 0 
+0 
+-1 
+257 
+12 26 269 7 0 
+12 0 
+27 0 
+0 
+-1 
+269 
+268 0 
+268 8 269 0 
+-1 
+268 
+16 0 
+32 0 
+-1 
+271 
+271 4 273 0 
+273 0 
+-1 
+273 
+273 272 0 
+272 0 
+-1 
+272 
+270 28 0 
+270 22 276 0 
+270 0 
+-1 
+276 
+16 0 
+16 8 0 
+8 16 0 
+16 8 16 0 
+-1 
+270 
+32 0 
+25 274 6 0 
+21 25 274 6 0 
+26 271 7 0 
+12 0 
+2 26 271 7 0 
+-1 
+274 
+32 0 
+32 8 274 0 
+32 9 32 0 
+32 9 32 8 274 0 
+-1 
+-2 
+actionmakrossy 
+allbutsy 
+arrowsy 
+barsy 
+chrsy 
+closebracksy 
+closepsy 
+commasy 
+doubledotsy 
+equalsy 
+FORMPAR 
+IDENT 
+ignoresy 
+includesy 
+INSTRUCTSY 
+INTEGERSY 
+lexemessy 
+lexemesendsy 
+lexmakrossy 
+makroendsy 
+notsy 
+numbersy 
+optionssy 
+optionendsy 
+openbracksy 
+openpsy 
+PROGSTRINGSY 
+REGOP 
+scannersy 
+semicolonsy 
+SPECIALSY 
+STRINGSY 
+scanner 
+actionspec 
+definitions 
+formparlist 
+lexemes 
+main 
+makroact 
+makroactseq 
+makrolexemes 
+makros 
+option 
+optionseq 
+par 
+parlist 
+regelem 
+regexpr 
+regfaktor 
+regterm 
+setseq 
+specialact 
+times 

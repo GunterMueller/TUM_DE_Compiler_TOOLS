@@ -1,0 +1,63 @@
+This is TeX, C Version 3.14t3 (format=lplain 91.9.11)  19 NOV 1991 15:36
+**&lplain parlist
+(parlist.tex
+LaTeX Version 2.09 <14 January 1991>
+(/usr/local/lib/tex/contrib/article.sty
+Document Style `article' <16 Mar 88>.
+(/usr/local/lib/tex/contrib/art12.sty)
+\c@part=\count79
+\c@section=\count80
+\c@subsection=\count81
+\c@subsubsection=\count82
+\c@paragraph=\count83
+\c@subparagraph=\count84
+\c@figure=\count85
+\c@table=\count86
+) (/usr/local/lib/tex/contrib/a4wide.sty
+(/usr/local/lib/tex/contrib/a4.sty)) (/usr/local/lib/tex/contrib/german.sty
+Document Style Option `german' Version 2 as of 25 Feb 1988
+\U@C=\count87
+\U@B=\box25
+\U@D=\dimen99
+\language=\count88
+\USenglish=\count89
+\german=\count90
+\austrian=\count91
+\french=\count92
+\english=\count93
+) (parlist.aux)
+LaTeX Warning: Reference `instanz' on page 1 undefined.
+
+Overfull \hbox (4.1821pt too wide) in paragraph at lines 32--34
+[]$\twlsy h[]i$ \twlrm ist der Name des durch die In-stan-ti-ie-rung de-fi-nier
+-ten Da-ten-typs. $\twlsy h[]i$ \twlrm mu^^Y also
+
+\hbox(9.0+3.0)x460.72124, glue set - 1.0
+.\hbox(0.0+0.0)x0.0
+.\mathon
+.\twlsy h
+.\hbox(8.2+2.33331)x35.26147
+..\twlit L
+..\twlit i
+..\twlit s
+..\twlit t
+..\twlit t
+..etc.
+.\twlsy i
+.etc.
+
+[1
+
+] [2] (parlist.aux)
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+ ) 
+Here is how much of TeX's memory you used:
+ 225 strings out of 4477
+ 2079 string characters out of 63440
+ 32213 words of memory out of 262141
+ 2168 multiletter control sequences out of 9500
+ 18996 words of font info for 72 fonts, out of 72000 for 255
+ 0 hyphenation exceptions out of 607
+ 12i,12n,17p,177b,242s stack positions out of 300i,40n,60p,3000b,4000s
+
+Output written on parlist.dvi (2 pages, 3996 bytes).

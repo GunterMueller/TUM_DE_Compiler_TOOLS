@@ -1,0 +1,168 @@
+\subsection{tifl.c}
+\begin{verbatim}
+/*-------------      main program for TIFL     ---------*/
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include "tifl_spec.h"
+
+
+ELEMENT itos( ELEMENT i ){
+   char s[20];
+   sprintf(s,"%d", i );
+   return  atoe(s);
+}
+
+/*---------------------------------------------------------------------------
+  predefined functions 
+  ---------------------------------------------------------------------------*/
+
+  /* boolean ops  */
+ELEMENT or( ELEMENT o1, ELEMENT o2 ){   return btoe( etob(o1) || etob(o2) ); } 
+ELEMENT and( ELEMENT o1, ELEMENT o2 ){   return btoe( etob(o1) && etob(o2) ); }
+ELEMENT not( ELEMENT o1 ){ if(etob(o1))
+                             { return btoe( 0 ); }
+                           else 
+                             { return btoe( 1 ); }
+                         }
+
+  /* arithmetic ops  */
+ELEMENT add( ELEMENT o1, ELEMENT o2 ){   return itoe(etoi(o1) + etoi(o2)); }
+ELEMENT sub( ELEMENT o1, ELEMENT o2 ){   return itoe(etoi(o1) - etoi(o2)); }
+ELEMENT mul( ELEMENT o1, ELEMENT o2 ){   return itoe(etoi(o1) * etoi(o2)); }
+ELEMENT dvd( ELEMENT o1, ELEMENT o2 ){   
+                                      if(!etoi(o2))
+                                        { printf("\n !!! Division by zero\n");
+                                          return itoe(1);
+                                        }
+                                      else
+                                      { return itoe(etoi(o1) / etoi(o2)); }
+                                     }
+
+  /* relations  */
+ELEMENT lt( ELEMENT o1, ELEMENT o2 ){   return btoe(o1<o2); }
+ELEMENT gt( ELEMENT o1, ELEMENT o2 ){   return btoe(o1>o2); }
+ELEMENT le( ELEMENT o1, ELEMENT o2 ){   return btoe(o1<=o2); }
+ELEMENT ge( ELEMENT o1, ELEMENT o2 ){   return btoe(o1>=o2); }
+ELEMENT equ( ELEMENT o1, ELEMENT o2 ){   return btoe(o1 == o2); }
+ELEMENT ne( ELEMENT o1, ELEMENT o2 ){   return btoe(o1!=o2); }
+
+
+void  blanks( FILE* f, int n ){
+   while( n-- > 0 )   fprintf(f,"  ");
+}
+
+void  treeprint( FILE* f, ELEMENT n, int indent ){
+   ELEMENT  termv = term(n);
+
+   fprintf(f,"%6dN :  ", index(n,_Node) );
+   blanks(f,indent);
+   switch( sort(termv) ){
+   case _Ident:           fprintf(f,"\"%s\"\n", etoa(idtos(termv)) ); break;
+   case _Int:             fprintf(f,"value: %d\n", etoi(termv) );break;
+   case _Bool:            if( etob(termv) ){
+                            fprintf(f,"value: true\n");  break;
+                          } else {
+                            fprintf(f,"value: false\n"); break;
+                          }
+   case _String:          fprintf(f,"\"%s\"\n", etoa(termv) );break;
+   case _Program:         fprintf(f,"Program\n"); break;
+   case _LetExp:          fprintf(f,"LetExp\n"); break;
+   case _FctDeclList:     fprintf(f,"FctDeclList (%d)\n", numsubterms(termv));break;
+   case _FctDecl:         fprintf(f,"FctDecl\n");break;
+   case _Boolean:         fprintf(f,"Boolean\n");break;
+   case _Integer:         fprintf(f,"Integer\n");break;
+   case _ParDeclList:     fprintf(f,"ParDeclList (%d)\n", numsubterms(termv));break;
+   case _ParDecl:         fprintf(f,"ParDecl\n");break;
+   case _PredeclBody:     fprintf(f,"PredeclBody\n");break;
+   case _CondExp:         fprintf(f,"CondExp\n"); break;
+   case _FctAppl:         fprintf(f,"FctAppl\n"); break;
+   case _ExpList:         fprintf(f,"ExpList (%d)\n", numsubterms(termv)); break;
+   case _UsedId:          fprintf(f,"UsedId in line %d\n",etoi(term(son(2,n)))); break;
+   case _DeclId:          fprintf(f,"DeclId in line %d\n",etoi(term(son(2,n)))); break;
+   default:               fprintf(f,"************\n"); break;
+   }      
+   n = son(1,n);
+   while( n != nil() ){
+      treeprint(f,n,indent+1);
+      n = rbroth(n);
+   }
+}
+
+extern  ELEMENT yyread( FILE * );
+static  FILE  *out;
+
+int  main( int argc, char **argv ){
+    ELEMENT termv;
+    ELEMENT eval_result;
+    char   *filename = argv[1];
+    FILE   *fileptr;
+    int     leng = strlen(filename);
+    long    ix, bound;
+   
+   if( argc == 1 ){
+      fprintf(stdout,"Usage: tifl <file>\n");
+      return EXIT_FAILURE;
+   }
+   if( filename[leng-5] != '.' || filename[leng-4] != 't'  ||  filename[leng-3] != 'i' 
+      ||  filename[leng-2] != 'f'  ||  filename[leng-1] != 'l'){
+      fprintf(stdout,"tifl: input file does not end with \".tifl\"\n");
+      return EXIT_FAILURE;
+   }
+   fprintf(stdout,"+++ reading\n");
+   if( !( fileptr = fopen(filename,"r") ) ){
+      fprintf(stdout,"tifl: Can't open file %s for input\n",filename);
+      return EXIT_FAILURE;
+   }
+   termv = yyread( fileptr );
+
+   if( termv == nil() ){
+      fprintf(stdout,"tifl: fatal read error: exit\n",filename);
+      return EXIT_FAILURE;
+   }
+   fprintf(stdout,"+++ structure construction\n");
+
+   if(  init_tifl( termv )  ){
+      fprintf(stdout,"+++ statistics\n");
+      fprintf(stdout,"number of nodes:       %d\n", number(_Node) );
+      fprintf(stdout,"number of idents:      %d\n", number(_Ident) );
+      fprintf(stdout,"number of FctDecls:  %d\n", number(_FctDecl_) );
+
+      filename[leng-5] = '.';
+      filename[leng-4] = 't';
+      filename[leng-3] = 'r';
+      filename[leng-2] = 'e';
+      filename[leng-1] = 'e';
+      filename[leng] = '\0';
+      if( !( out = fopen(filename,"w") ) ){
+         fprintf(stdout,"tifl: Can't open file %s for output\n",filename);
+         return EXIT_FAILURE;
+      }
+      treeprint( out, root(), 0 );
+
+      printf("\n+++ TIFL-Interpreter started!\n");
+      printf("+++ environment version\n");
+      printf("\ninput program evaluates to :  ");
+
+      eval_result =  eval( son(1,root()), Env() );
+      if( sort(eval_result) == _Int )
+        {
+              printf("%d\n", etoi(eval_result) );
+        }
+      else
+        {
+         if( etob(eval_result) )
+           {
+            printf("true\n");
+           }
+         else
+           {
+            printf("false\n");
+           }
+        }
+
+   }
+   return EXIT_SUCCESS;
+}
+\end{verbatim}
+

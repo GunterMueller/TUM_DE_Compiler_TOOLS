@@ -1,0 +1,13 @@
+Um die in der Datei 'TBrowser' festgelegten Ressourcen in den Server zu laden, wird 'xrdb' verwendet.
+
+Bei Farbbildschirmen wird dazu folgender Aufruf verwendet:
+
+xrdb -merge TBrowser
+
+Bei Schwarz-Weiss-Bildschirmen wird folgendermassen aufgerufen:
+
+xrdb -merge -DSTATICGRAY TBrowser
+
+Und bei Graustufen-Bildschirmen so:
+
+xrdb -merge -DGRAYSCALE TBrowser

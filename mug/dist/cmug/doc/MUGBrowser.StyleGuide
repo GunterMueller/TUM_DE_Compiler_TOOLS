@@ -1,0 +1,87 @@
+
+                               RICHTLINIEN
+
+           zur Handhabung von Attributnamen mit dem Ziel einer
+       bestmoeglichen Repraesentation von Attributen durch Ikonen
+                  bei der Verwendung des MUG Browsers.
+
+
+I. Zuweisung von Ikonen an Attribute
+
+Generell  werden Ikonen an  Attributnamen  vergeben, also nicht an jedes
+einzelne Attribut. Attribute mit gleichen Namen erhalten gleiche Ikonen,
+Attribute mit unterschiedlichen  Namen erhalten unterschiedliche Ikonen.
+Lediglich die unten erwaehnten Praefixe 'a', 'd' und 'i' werden berueck-
+sichtigt, z. B.  erhalten die  Attribute  mit den Namen symtab, asymtab,
+dsymtab und isymtab die gleiche Ikonen.
+Die  Zuweisung  - welche Ikone fuer welchen  Attributnamen - erfolgt zu-
+naechst willkuerlich.  Um die  Darstellung  zu  perfektionieren  ist der
+Benutzer in der Lage, selbst Ikonen an  Attributnamen  zuzuweisen.  Dies
+erfolgt ueber die MUG Browser  Benutzeroberflaeche. Dabei stehen ihm die
+gesamte Anzahl von 112 unterschiedlichen  Ikonen zur  Verfuegung.  Diese
+Belegung kann in einer Datei gespeichert werden,  welche beim Aufruf des
+Browsers  oder von der  MUG Browser  Oberflaeche wieder  geladen  werden
+kann.
+
+
+II. Konventionen zur Benennung von Attributen
+
+Um eine ansprechende Umsetzung von Attributen in sie darstellende Ikonen
+zu erreichen wird eine Attributbenennung mit Konventionen empfohlen:
+
+(1) Ererbten, sog. inherited,  Attributen  sollte der  Buchstabe 'i' als
+    Praefix vorangestellt werden.
+
+(2) Synthetisierten,  sog.  synthesized  oder derived, Attributen sollte
+    der Buchstabe 'd' vorangestellt werden.
+
+(3) Hilfsattributen,  sog.  auxiliaries,  sollte ein 'a' oder kein Buch-
+    stabe vorangestellt werden.
+
+(4) Attribute  mit  gleicher  Bedeutung  sollten  (bis auf den  Praefix)
+    gleiche  Namen  erhalten,  auch  wenn sie sich in  unterschiedlichen
+    Produktionen befinden.
+
+(5) Attribute mit  unterschiedlicher Bedeutung sollten  unterschiedliche
+    Namen  erhalten,  auch wenn  sie sich  bereits in  unterschiedlichen
+    Produktionen befinden.
+
+Dadurch wird  gewaehrleistet, dass gleiche  Attribute durch die gleichen
+Ikonen repraesentiert  werden,  unterschiedliche durch  unterschiedliche
+Ikonen.  Da Attribute  haeufig  Einfluss auf die  gleichen  Attribute in
+anderen Produktionen haben,  und der Browser dies bei der Positionierung
+beruecksichtig,  wird ausserdem die  Kreuzung von  Abhaengigkeitspfeilen
+minimiert.
+
+
+III. Empfohlene Vorgehensweise bei der Vergabe von Ikonen an Attribute
+
+Folgende Vorgehensweise wird empfohlen,  um eine optimale Darstellung zu
+erreichen.
+
+(1) Halten Sie sich strikt an obige Konventioen!
+
+(2) Vergeben Sie beim ersten  Aufrufen von  MUG Browser andere Ikonen an
+    die Attribute,  die Ihrer Meinung nach eine  unglueckliche Ikone als
+    Repraesentant erhalten haben.  Versuchen Sie dabei eine Ikone auszu-
+    waehlen, die Sie an die Bedeutung des Attributs erinnert.  Es stehen
+    Ihnen beispielweise  allein 10 Uebersetzerbau-spezifische Ikonen zur
+    Verfuegung.
+
+(3) Speichern  Sie diese  Belegung in einer  Datei.  Sollten sie mehrere
+    attributierte Grammatiken in Arbeit haben,  koennen Sie auch mehrere
+    Belegungsdateien erstellen.
+
+(4) Laden Sie diese Datei von nun an bei jedem Starten des  MUG Browsers
+    mit der -c Option.
+
+(5) Erweitern  Sie die  Belegung  und  speichern Sie erneut,  falls neue
+    Attribute hinzukommen.
+
+
+IV. Schlusswort
+
+Wir hoffen,  dass Ihnen dieser  Browser hilft,  Zeit und  Nerven bei der
+Erstellung  einer  attributierten  Grammatik  - speziell  beim  Bestehen
+des Uebersetzerbau-Praktikums - zu sparen.
+

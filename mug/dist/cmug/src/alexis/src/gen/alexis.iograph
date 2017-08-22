@@ -1,0 +1,81 @@
+
+
+
+                    Globale Abhaengigkeiten
+                    ======================
+
+
+Nichtterminal "scanner" :
+	Keine Abhaengigkeiten
+
+Nichtterminal "actionspec" :
+	dautom	 <-	 icode	 iautom	 ignore	 
+	dcode	 <-	 icode	 iautom	 ignore	 
+
+Nichtterminal "definitions" :
+	dcode	 <-	 icode	 
+
+Nichtterminal "formparlist" :
+	dparanz	 <-	 iparanz	 
+	dcode	 <-	 iparanz	 icode	 
+
+Nichtterminal "lexemes" :
+	dautom	 <-	 icode	 iautom	 
+	dcode	 <-	 iautom	 icode	 
+
+Nichtterminal "main" :
+	dautom	 <-	 icode	 
+	dcode	 <-	 icode	 
+
+Nichtterminal "makroact" :
+	dcode	 <-	 icode	 
+
+Nichtterminal "makroactseq" :
+	dcode	 <-	 icode	 
+
+Nichtterminal "makrolexemes" :
+	dcode	 <-	 icode	 
+
+Nichtterminal "makros" :
+	dcode	 <-	 icode	 
+
+Nichtterminal "option" :
+	dcode	 <-	 icode	 
+
+Nichtterminal "optionseq" :
+	dcode	 <-	 icode	 
+
+Nichtterminal "par" :
+	Keine Abhaengigkeiten
+
+Nichtterminal "parlist" :
+	dpars	 <-	 iparanz	 ipars	 icode	 
+	dparanz	 <-	 iparanz	 
+	dcode	 <-	 iparanz	 ipars	 icode	 
+
+Nichtterminal "regelem" :
+	dautom	 <-	 icode	 
+	dcode	 <-	 icode	 
+
+Nichtterminal "regexpr" :
+	dautom	 <-	 icode	 
+	dcode	 <-	 icode	 
+
+Nichtterminal "regfaktor" :
+	dautom	 <-	 icode	 
+	dcode	 <-	 icode	 
+
+Nichtterminal "regterm" :
+	dautom	 <-	 icode	 
+	dcode	 <-	 icode	 
+
+Nichtterminal "setseq" :
+	dset	 <-	 icode	 
+	dcode	 <-	 icode	 
+
+Nichtterminal "specialact" :
+	dcode	 <-	 icode	 
+
+Nichtterminal "times" :
+	Keine Abhaengigkeiten
+

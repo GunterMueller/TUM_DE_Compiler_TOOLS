@@ -1,0 +1,127 @@
+
+Aufbau einer codierten kontextfreien Grammatik ("Grammatikinternform")
+______________________________________________________________________
+
+
+Feld                 Typ   Beschreibung
+
+{Dateikommentar}    | s |  optionaler Dateikommentar in beliebigem Format,
+                    |   |  muss in einer eigenen Zeile stehen.
+                    |   |  Enthaelt i.allg. den Namen des generierenden Programms,
+                    |   |  das Generierungsdatum etc.
+Dateikennung        | i |  Festgelegte Kennung fuer den Dateitypen (magic number).
+                    |   |  Format 812354xx, wobei die letzten zwei Stellen xx
+                    |   |  die Version der codierten Grammatik (momentan 01)
+                    |   |  identifizieren. Weitere Versionen werden 
+                    |   |  aufwaertskompatibel definiert, so dass anfangs nur die
+                    |   |  vorderen Stellen abgeprueft werden sollen.
+Mint Maxt           | i |  kleinstes und groesstes verwendetes Terminalzeichen 
+                    |   |
+Minn Maxn           | i |  kleinstes und groesstes verwendetes Nonterminalzeichen
+                    |   |
+Anzp                | i |  Anzahl der Produktionen in der Grammatik
+                    |   |
+Anzi                | i |  Anzahl der Items in der Grammatik, d.h. Summe der Laengen
+                    |   |  aller rechten Seiten (ohne linke Seiten).
+Delim_p             | i |  Begrenzungszeichen, mit dem jede rechte Seite
+                    |   |  abgeschlossen wird.
+Delim_r             | i |  Begrenzungszeichen, mit dem eine Regel, d.h. alle rechten
+                    |   |  Seiten zu einem Nonterminal, abgeschlossen wird.
+Ende_r              | i |  Begrenzungszeichen, mit dem die Folge der Regeln
+                    |   |  der Grammatik abgeschlossen wird.
+                    |   |
+                    |   |  Die Mengen Mint .. Maxt, Minn .. Maxn, Delim_p, Delim_r
+                    |   |  und Ende_r muessen disjunkt sein.
+                    |   |
+Axiom               | i |  Axiom der Grammatik, Minn <= Axiom <= Maxn
+                    |   |
+[                   |   |  Folge von Regeln = Produktionen mit gleicher linker Seite
+ L_seite            | i |  Linke Seite der folgenden Regel, Minn <= L_seite <= Maxn
+                    |   |  Falls L_seite < Axiom, so handelt es sich um eine Aktion,
+                    |   |  es darf nur eine epsilon-Produktion folgen.
+                    |   |  Jedes Nonterminalsymbol muss genau einmal als linke 
+                    |   |  Seite verwendet werden.
+  [                 |   |
+   Symb*            | i |  Folge der Symbole in einer rechten Seite zu L_seite.
+                    |   |  Minn <= Symb <= Maxn oder Mint <= Symb <= Maxt
+   Delim_p          | i |  Das oben definierte Begrenzungszeichen 
+  ]+                |   |
+ Delim_r            | i |  Das oben definierte Begrenzungszeichen 
+]+                  |   |
+                    |   |
+Ende_r              | i |  Das oben definierte Begrenzungszeichen 
+                    |   |
+Termname+           | s |  Die (Mint..Maxt) Externdarstellungen der Terminalsymbole
+                    |   |
+Nontname+           | s |  Die (Minn..Maxn) Externdarstellungen der Nonterminale
+                    |   |
+<zukuenftige        |   |  Ab hier werden zukuenftige Erweiterungen des 
+ Erweiterungen>     |   |  Dateiformates (gekennzeichnet durch die Versionsnummer) 
+                    |   |  angehaengt, z.B. Kosten fuer Fehlerbehandlung, 
+                    |   |  Praezedenzen, Produktionsnamen etc.
+                                        
+
+
+
+Feldtypen :
+           i : (Integer) vorzeichenbehaftete ganze Zahlen in Dezimaldarstellung,
+                         {+|-}[0..9]+,werden durch beliebig viele Leerzeichen und
+                         Zeilenenden getrennt .
+           s : (String)  nichtleere Zeichenreihe, die in einer eigenen Zeile steht.
+
+                                     
+Metazeichen der Beschreibung :  [ ]  Klammerung
+                                { }  optionale Teile
+                                 *   beliebig viele Vorkommen (auch leer)
+                                 +   beliebig viele Vorkommen (mindestens einmal)
+                                 |   Variante
+  
+Beispiel
+--------
+
+Einfache LALR(1)-Grammatik in MiniMUG-Notation :
+
+terminals
+ 1 STERN    2 IDENTIFIER     3 GLEICH
+
+axiom Grammar
+
+rules
+  Grammar -> Left GLEICH Right;
+             Right.
+  Left    -> STERN Right;
+             IDENTIFIER.
+  Right   -> Left.
+                          
+Codierte Grammatik :
+
+readg : lalr.grm 03 mar 89 10:23:04 | Dateikommentar
+812354301                           | Kennung, Version = 01
+1 3 -32000 -31998                   | Mint Maxt Minn Maxn
+5 8                                 | 5 Produktionen, 8 Items
+0 -1 -2                             | Delimiter
+-32000                              | Axiom : Grammar
+-32000                              | linke Seite  : Grammar
+-31999 3 -31998                     | rechte Seite : Left GLEICH Right
+0                                   | Ende der Produktion
+-31998                              | rechte Seite : Right
+0                                   | Ende der Produktion
+-1                                  | Ende der Regel zu Grammar
+-31999                              | linke Seite  : Left
+1 -31998                            | rechte Seite : STERN Right
+0                                   | Ende der Produktion       
+2                                   | rechte Seite : IDENTIFIER
+0                                   | Ende der Produktion
+-1                                  | Ende der Regel zu Left
+-31998                              | linke Seite  : Right
+-31999                              | rechte Seite : Left
+0                                   | Ende der Produktion
+-1                                  | Ende der Regel zu Right
+-2                                  | Ende der Regeln
+STERN                               | Externdarstellung Terminal 1
+IDENTIFIER                          | Externdarstellung Terminal 2
+GLEICH                              | Externdarstellung Terminal 3
+GRAMMAR                             | Externdarstellung Nonterminal -32000
+LEFT                                | Externdarstellung Nonterminal -31999
+RIGHT                               | Externdarstellung Nonterminal -31998
+

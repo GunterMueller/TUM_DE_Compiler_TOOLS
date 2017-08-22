@@ -1,0 +1,96 @@
+\section{Funktionsbeschreibung des Moduls {\tt bimsem.c}}
+
+Dieses Modul ist f"ur das Einlesen der Datei {\tt .g} zust"andig.
+Es enth"alt die semantischen Aktionen, die von der Bison-Grammatik
+aufgerufen werden.
+
+\begin{description}
+\item[\tt add\_production
+]{\bf :\\}
+F"ugt zur Liste der Sortenproduktionen eine neue
+ Produktion hinzu.
+ \\
+IN:
+\begin{itemize}
+   \item int type: Gibt Art der Produktion an (Liste,Tupel,Klasse)
+\item char * left: Zeiger auf linke Seite der Produktion
+\item char * right: Zeiger auf rechte Seite
+
+\end{itemize}
+\item[\tt sem\_sublist
+]{\bf :\\}
+Hilft beim Aufbau der Subsorten einer Sorte.
+ H"angt an den Buffer eine neue Sorte an, und gibt einen
+ Zeiger zurueck, der hinter diese Sorte zeigt.
+ \\
+IN:
+\begin{itemize}
+   \item char * dest: Ziel
+\item char * source: Ausgangssorte
+
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item char *: Zeiger auf das Ende des Buffers, hier kann die
+n"achste Sorte eingeh"angt werden.
+
+\end{itemize}
+
+\item[\tt add\_sort
+]{\bf :\\}
+F"ugt eine Sorte zur Liste der Sorten hinzu.
+ Eine Sonderbehandlung f"ur Sorten vom Typ ''Node'' ist n"otig,
+ da diese von nichts abgeleitet sein sollen und f"ur unsere
+ Darstellung die Wurzel des Baumes sind.
+ \\
+IN:
+\begin{itemize}
+   \item char * name: Name der Sorte
+\item struct SORT * parent: Zeiger auf Vatersorte. Ist dies
+Null, so wird ''Node'' als Vatersorte angenommen
+
+\end{itemize}
+\item[\tt add\_attr
+]{\bf :\\}
+F"ugt ein Attribut zur Liste der Attribute hinzu.
+ \\
+IN:
+\begin{itemize}
+   \item char * asortname: Sorte, f"ur die dieses Attribut
+definiert ist
+\item char * aname: Attributname
+\item char * rsortname: Ergebnissorte
+
+\end{itemize}
+\item[\tt add\_classsort
+]{\bf :\\}
+F"ugt eine Sorte, die eine Klasse ist, zur Liste
+ der Sorten hinzu.
+ \\
+IN:
+\begin{itemize}
+   \item char * name: Sortenname
+
+\end{itemize}
+\item[\tt dump\_info
+]{\bf :\\}
+Gibt Informationen "uber die internen Tabellen aus.
+ Wird nur zum Debuggen ben"otigt.
+ \\
+\item[\tt find\_sort
+]{\bf :\\}
+Sucht in der Tabelle der Sorteneintr"age nach einer
+ Sorte mit angegebenem Namen.
+ \\
+IN:
+\begin{itemize}
+   \item char * name: Sortenname
+
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item struct SORT *: Zeiger auf den Sorteneintrag oder NULL,
+falls Eintrag nicht gefunden.
+
+\end{itemize}
+\end{description}

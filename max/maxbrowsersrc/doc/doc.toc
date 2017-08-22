@@ -1,0 +1,17 @@
+\contentsline {section}{\numberline {1}Das Node Widget}{3}
+\contentsline {section}{\numberline {2}Interne Strukturen des Moduls {\ptt tprint.c}}{6}
+\contentsline {subsection}{\numberline {2.1}Die Strukturen {\ptt Context} und {\ptt XCONTEXT}}{6}
+\contentsline {subsection}{\numberline {2.2}Die Struktur {\ptt X\unhbox \voidb@x \kern .06em \vbox {\hrule width.3em}INFO}}{8}
+\contentsline {section}{\numberline {3}Funktionsbeschreibungen des Moduls {\ptt tprint.c}}{9}
+\contentsline {section}{\numberline {4}Die Widgethierarchie}{27}
+\contentsline {section}{\numberline {5}Zusammenspiel von Browser und MAX}{33}
+\contentsline {section}{\numberline {6}Algorithmen und Datenstrukturen des MAX-Browser Interfaces}{34}
+\contentsline {subsection}{\numberline {6.1}nodeinfo.h}{34}
+\contentsline {subsection}{\numberline {6.2}bimutil.c}{36}
+\contentsline {subsection}{\numberline {6.3}bim\unhbox \voidb@x \kern .06em \vbox {\hrule width.3em}std.c}{36}
+\contentsline {subsection}{\numberline {6.4}42.c}{37}
+\contentsline {section}{\numberline {7}Funktionsbeschreibung des Moduls {\ptt bimsem.c}}{39}
+\contentsline {section}{\numberline {8}Funktionsbeschreibung des Moduls {\ptt bimcode.c}}{41}
+\contentsline {section}{\numberline {9}Funktionsbeschreibung des Moduls {\ptt bim\unhbox \voidb@x \kern .06em \vbox {\hrule width.3em}util.c}}{44}
+\contentsline {section}{\numberline {10}Vorbereiten von MAX f\active@dq \dq@prtct{u@}r die Ausgabe der {\ptt .g}-Datei}{46}
+\contentsline {section}{\numberline {11}Modifizieren eines Compilers f\active@dq \dq@prtct{u@}r die Verwendung mit MAX}{46}

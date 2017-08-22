@@ -1,0 +1,58 @@
+\documentstyle[german,12pt]{article}
+\newcommand{\MAX}{{\tt MAX }}
+\begin{document}
+\section{Vorbereiten von \MAX f"ur die Ausgabe der {\tt.g}-Datei}
+Um die vom Browsersystem ben"otigte Datei mit Endung {\tt .g} ausgeben
+zu k"onnen wurde \MAX um das Modul {\tt max\_ggen.c} erweitert.\\
+Es enth"alt die Routinen zur Ausgabe der Datei. Die Einbindung in den
+Quellcode von {\tt max.c} erfolgt nach der Ausgabe des {\tt .c}-Files.
+Der Ausschnitt aus {\tt max.c} sieht dann wie folgt aus:
+\begin{verbatim}
+filename[leng-1] = 'c';
+if( !( cout = fopen(filename,"w") ) ){
+   fprintf(stdout,"max: Can't open file %s for output\n",filename);
+   return EXIT_FAILURE;
+}
+filename[leng-1] = 'g';
+if( !( gout = fopen(filename,"w") ) ){
+  fprintf(stdout,"max: Can't open file %s for output\n",filename);
+  return EXIT_FAILURE;
+}
+fprintf(stdout,"+++ generating");
+fprintf(stdout,"     ( syntax tree has %d nodes )\n", number(_Node) );
+\end{verbatim}
+Dann ist das Makefile so zu modifizieren, da\3 {\tt max\_ggen.c} 
+"ubersetzt und hinzugelinkt wird.
+%
+%
+%
+\section{Modifizieren eines Compilers f"ur die Verwendung mit \MAX}
+Um den Browser in einem mit \MAX generierten Compiler zu verwenden
+mu\3 der Quellocode von {\tt <sprache>.c} um ein Include und den
+Aufruf des Browsers erweitert werden.\\
+Das Include, das am Anfang der Datei eingef"ugt werden mu\3, hei\3t:
+\begin{verbatim}
+#include "/usr/stud/reichel/fopra/common/tbrowse.h"
+\end{verbatim}
+Es enth"alt die Definitionen f"ur den Browseraufruf.\\
+Der Browser selbst kann aufgerufen werden, sobald der Baum attributiert
+wurde. Dazu ist die Funktion {\tt Bim\_Viewer} einzuf"ugen.
+\begin{verbatim}
+if(  init_max( elem )  ){ /* now the syntax structure can be accessed  */
+    Bim_Viewer( root( ), argc, argv );
+\end{verbatim}
+Im Makefile f"ur die Sprache sind noch die folgenden Erg"anzungen
+einzuf"ugen:\\
+\begin{itemize}
+\item Erweitern der Includes: {\tt -I/usr/local/X11R5/include  -I/usr/stud/graf/fopra/export}
+\item Erg"anzen der Libraries: {\tt -lX11 -lXt -lXaw -lXmu}
+\item Hinzulinken des Archivs {\tt maxbrowser.a}
+\item Erzeugen der Datei {\tt 42.c}, "Ubersetzen und Linken
+\end{itemize}
+
+Es folgt ein Beispielsmakefile f"ur eine Sprache:
+\begin{verbatim}
+Alice got very tired of sitting next to her sister and of having nothing
+to do.
+\end{verbatim}
+\end{document}

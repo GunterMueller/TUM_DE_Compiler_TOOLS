@@ -1,0 +1,14 @@
+
+#verwendete Kommandos
+CP     = cp
+RM     = rm -rf
+MAKE   = make
+CHMOD  = chmod
+
+#C-Compiler
+CC              = gcc
+INCLUDES        =
+DEFINES         = -DLOW_ENDIAN -DNO_BROWSER
+DEBUG           = 
+CFLAGS          = $(DEFINES) $(DEBUG) $(INCLUDES)
+

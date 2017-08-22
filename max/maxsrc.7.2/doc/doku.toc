@@ -1,0 +1,50 @@
+\contentsline {section}{\numberline {1}Die MAX-Spezifikation in max\unhbox \voidb@x \kern .06em \vbox {\hrule width.3em}spec.m}{3}
+\contentsline {subsection}{\numberline {1.1}Neue MAX-Sorten}{3}
+\contentsline {subsubsection}{\numberline {1.1.1}Neue Sorten f\active@dq \dq@prtct{u@}r die Abh\active@dq \dq@prtct{a@}ngigkeitsanalyse}{3}
+\contentsline {subsubsection}{\numberline {1.1.2}Neue Sorten f\active@dq \dq@prtct{u@}r die Frontendgenerierung}{4}
+\contentsline {subsubsection}{\numberline {1.1.3}Neue Sorten f\active@dq \dq@prtct{u@}r die dynamische Semantik}{5}
+\contentsline {subsection}{\numberline {1.2}Neue Attribute f\active@dq \dq@prtct{u@}r die Frontendgenerierung}{5}
+\contentsline {subsection}{\numberline {1.3}Diverse Funktionen und Attribute der alten Version}{6}
+\contentsline {subsection}{\numberline {1.4}Funktionen zum Aufbau der Value-Terme}{6}
+\contentsline {subsection}{\numberline {1.5}Aufsammeln der FuncAppl@ in den R\active@dq \dq@prtct{u@}mpfen von Funktionen und Attributen}{6}
+\contentsline {subsection}{\numberline {1.6}Analyse der zyklischen Abh\active@dq \dq@prtct{a@}ngigkeiten der Funktionen und Attribute}{6}
+\contentsline {paragraph}{Vorgehensweise}{7}
+\contentsline {subsection}{\numberline {1.7}Aufbau der Value-Terme}{7}
+\contentsline {subsection}{\numberline {1.8}Elimination der Rekursion}{7}
+\contentsline {subsection}{\numberline {1.9}Vereinfachung der Value-Terme auf eine Normalform}{8}
+\contentsline {paragraph}{Hilfsfunktionen}{8}
+\contentsline {subsection}{\numberline {1.10}Abbildung der Value-Terme auf Baumordnungen}{9}
+\contentsline {paragraph}{Bedeutung der {\ptt OrderTup}}{9}
+\contentsline {paragraph}{Verkn\active@dq \dq@prtct{u@}pfungen der Baumordnungen}{10}
+\contentsline {paragraph}{Restliche Funktionen}{10}
+\contentsline {subsection}{\numberline {1.11}Auswahl der Strategien f\active@dq \dq@prtct{u@}r die Auswertungsgruppen}{10}
+\contentsline {paragraph}{Beachte}{11}
+\contentsline {subsubsection}{\numberline {1.11.1}Strategieberechnung}{11}
+\contentsline {subsection}{\numberline {1.12}Vorbereitung der Codegenerierung}{12}
+\contentsline {subsection}{\numberline {1.13}Bestimmung der Zwischenergebnisse}{12}
+\contentsline {subsection}{\numberline {1.14}Aufsammeln der Zwischenergebnisse}{13}
+\contentsline {section}{\numberline {2}Dynamische Semantik in max\unhbox \voidb@x \kern .06em \vbox {\hrule width.3em}dgen.c}{14}
+\contentsline {section}{\numberline {3}Frontendgenerierung in max\unhbox \voidb@x \kern .06em \vbox {\hrule width.3em}ygen.c}{15}
+\contentsline {subsection}{\numberline {3.1}Notwendige Seiteneffekte beim Parsen}{15}
+\contentsline {subsection}{\numberline {3.2}Bereitstellung der konkreten Syntax in Attributen}{15}
+\contentsline {subsection}{\numberline {3.3}Initialisierung von Sortenmengen}{16}
+\contentsline {subsection}{\numberline {3.4}Aufsammeln von Symbolen}{16}
+\contentsline {paragraph}{Bemerkung:}{16}
+\contentsline {subsection}{\numberline {3.5}Scannergenerierung}{17}
+\contentsline {subsection}{\numberline {3.6}Parsergenerierung}{17}
+\contentsline {subsection}{\numberline {3.7}Generierung von Rahmenprogramm und Makefile}{18}
+\contentsline {section}{\numberline {4}Codegenerierung in max\unhbox \voidb@x \kern .06em \vbox {\hrule width.3em}sgen.c}{19}
+\contentsline {subsection}{\numberline {4.1}Besonderheiten bei der Funktion prt\unhbox \voidb@x \kern .06em \vbox {\hrule width.3em}stdpart}{19}
+\contentsline {paragraph}{M\active@dq \dq@prtct{o@}gliche Attributauswertungsfunktionen}{19}
+\contentsline {paragraph}{Bemerkung}{20}
+\contentsline {paragraph}{Die Funktion {\ptt prt\unhbox \voidb@x \kern .06em \vbox {\hrule width.3em}heap\unhbox \voidb@x \kern .06em \vbox {\hrule width.3em}fcts}}{20}
+\contentsline {paragraph}{Die Funktion {\ptt prt\unhbox \voidb@x \kern .06em \vbox {\hrule width.3em}stack\unhbox \voidb@x \kern .06em \vbox {\hrule width.3em}fcts}}{20}
+\contentsline {paragraph}{Funktionen f\active@dq \dq@prtct{u@}r die Extern Pattern Class:}{20}
+\contentsline {subsection}{\numberline {4.2}Funktionen f\active@dq \dq@prtct{u@}r die Codegenerierung der Funktions- und Attributr\active@dq \dq@prtct{u@}mpfe}{20}
+\contentsline {subsection}{\numberline {4.3}Codegenerierung f\active@dq \dq@prtct{u@}r die Conditions}{20}
+\contentsline {subsection}{\numberline {4.4}Generierung der lokalen Variablen}{21}
+\contentsline {subsection}{\numberline {4.5}Ausgabe der globalen Deklarationen und R\active@dq \dq@prtct{u@}mpfe}{21}
+\contentsline {subsection}{\numberline {4.6}Sonstige Funktionen}{22}
+\contentsline {subsection}{\numberline {4.7}Steuerung der gesamten Attributauswertung}{22}
+\contentsline {subsection}{\numberline {4.8}Hilfsfunktionen}{23}
+\contentsline {subsection}{\numberline {4.9}Aufruf der gesamten Codegenerierung}{23}

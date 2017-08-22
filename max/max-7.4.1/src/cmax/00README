@@ -1,0 +1,23 @@
+CMAX Constraint Preprocessor for MAX
+
+Version 2.1.0
+
+(c) 1996-1998 by Aurel Huber,
+                 Munich University of Technology,
+                 Department of Computer Science
+                 Chair II (Prof. Dr. J. Eickel)
+
+-----------------------------------------------------------------------------
+
+The files in this directory contain the CMAX 2.1.0 sources as part of the
+MAX distribution (Version 7.4.0 and above).
+
+CMAX is a preprocessor that adds constraint solving capabilities to the MAX
+system. This is useful for including dataflow-analyzers in
+compilers/interpreters specified with MAX.
+
+Read the file INSTALL in the MAX home directory or in the current directory
+for information how to install MAX. 
+
+
+     

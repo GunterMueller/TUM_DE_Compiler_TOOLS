@@ -1,0 +1,78 @@
+scanner Alexis
+ 
+options
+  minimize
+  ignorecase                  { Gross- und Kleinschreibung werden bei
+                                der Generierung des Automaten ignoriert,
+                                sodass der erzeugte Scanner auf sie
+                                keine Ruecksicht nimmt                  }
+optionend
+ 
+ 
+include 'mugdefs.sci'
+
+include 'alexis.sci'
+ 
+lexmakros
+ 
+  { Beginn der Makrodefinitionen: }
+ 
+    string  = '''' (not(.''''.)| '''''')+ '''';
+ 
+makroend
+ 
+ 
+  { Hier beginnt die eigentliche Scannerbeschreibung: }
+ 
+lexemes
+ 
+  ignore Ws+                   -> { White Space }  ;
+ 
+  'actionmakros'        ->  code( 1,1);
+  'allbut'              ->  code( 2,1);
+  '->'                  ->  code( 3,1);                 { arrowsy      }
+  '|'                   ->  code( 4,1);                 { barsy        }
+  'chr(' digit#1,3 ')'  ->  prog ReturnChr(TOKEN,32); progend;{ z.B. chr(123)}
+  '.)'                  ->  code( 6,1);                 { closebracksy }
+  ')'                   ->  code( 7,1);                 { closepsy     }
+  ','                   ->  code( 8,1);                 { commasy      }
+  '..'                  ->  code( 9,1);                 { doubledotsy  }
+  '='                   ->  code(10,1);                 { equalsy      }
+  '%' (.'1'..'9'.)      ->  prog Ret_Fpar(TOKEN,11); progend;  { formparsy    }
+  'ignore'              ->  code(13,1);
+  'include ' string     ->  prog IncludeFile(TOKEN,14); progend;
+ 
+  'ignorecase'          ->  code(15,1);
+  'minimize'            ->  code(15,2);
+ 
+  digit+                ->  retint(16);                 { integersy    }
+  'lexemes'             ->  code(17,1);
+  'lexemesend'          ->  code(18,1);
+  'lexmakros'           ->  code(19,1);
+  'makroend'            ->  code(20,1);
+  'not'                 ->  code(21,1);
+  '#'                   ->  code(22,1);                 { numbersy     }
+  'options'             ->  code(23,1);
+  'optionend'           ->  code(24,1);
+  '(.'                  ->  code(25,1);                 { openbracksy  }
+  '('                   ->  code(26,1);                 { openpsy      }
+  'prog' allbut('progend') 'progend'
+                        ->  prog Ret_Prog(TOKEN,27); progend;  { progstringsy }
+ 
+  '*'                   ->  code(28,1);                 { RegOps       }
+  '+'                   ->  code(28,2);
+  '?'                   ->  code(28,3);
+ 
+  'scanner'             ->  code(29,1);
+  ';'                   ->  code(30,1);                 { semicolonsy  }
+ 
+  'externals'           ->  code(31,1);                 { specialsy    }
+  'scanend'             ->  code(31,2);
+  'scanerror'           ->  code(31,3);
+  'scaninit'            ->  code(31,4);
+ 
+  string                ->  RetStr(32);                { stringsy }
+  ident                 ->  RetId(12);
+ 
+ 
+lexemesend

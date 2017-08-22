@@ -1,0 +1,319 @@
+\documentstyle[11pt,german]{article}
+
+\begin{document}
+
+\section{Funktionsbeschreibung}
+
+\begin{description}
+
+\item[\tt ConnectMenuToNode]{\bf :\\}
+Versieht die Command-Buttons mit der Translationtable, die notwendig ist, um beim Anklicken eines Buttons das Knoten-Men"u aufzupoppen und es richtig handzuhaben. Au"serdem wird dem Node-Widget eine Callback-Funktion angeh"angt, die f"ur die Speicherung der Id des zuletzt angeklickten Knotens in einer globalen Variable sorgt. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE * node: Max-Node-Id des betreffenden Knotens.\item Widget w:        Node-Widget-Id des betreffenden Knotens.
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item --
+\end{itemize}
+
+\item[\tt CopyAttributeTreeCallback]{\bf :\\}
+Callback-Funktion, die aufgerufen wird, wenn der Such-Button, der sich neben einem angezeigten Tree-Attribut befindet, angeklickt wird. Kopiert den Unterbaum, dessen Wurzel der Wert dieses Tree-Attributs ist. \\
+IN:
+\begin{itemize}
+   \item Widget w:              Id des Such-Buttons, der angeklickt wurde. \item XtPointer client\_data: MAX\_NODE-Id des Wurzelknotens des anzuzeigenden Baums. \item XtPointer call\_data:   wird hier nicht ben"otigt.
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item --
+\end{itemize}
+
+\item[\tt CenterNodeCallback]{\bf :\\}
+Callback-Funktion, die durch Anklicken des Such-Buttons bei Attributen vom Typ MAX\_NODE aufgerufen wird. Sie sorgt daf"ur, da"s der Knoten, auf den durch das Attribut verwiesen wird, markiert und und in der Mitte des Fensters positioniert wird. Zuvor werden alle bis- her bestehenden Markierungen r"uckg"angig gemacht. \\
+IN:
+\begin{itemize}
+   \item Widget w:              Id des Buttons, an den CenterNodeCallback angeh"angt wird. \item XtPointer client\_data: MAX\_NODE-Id des Knotens, auf den verwiesen wird. \item XtPointer call\_data:   wird hier nicht ben"otigt.
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item --
+\end{itemize}
+
+\item[\tt IsMasked]{\bf :\\}
+Untersucht, ob ein bestimmtes Attribut in der f"ur es g"ultigen Attributmaske maskiert ist oder nicht und gibt den entsprechende Wahrheits- wert zur"uck. \\
+IN:
+\begin{itemize}
+   \item String name:            Name des zu "uberpr"ufenden Attributs. \item AttrMask * actual\_mask: die dazugeh"orige Attributmaske.
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item - True, falls das Attribut maskiert ist.\\
+         - False, falls das Attribut nicht maskiert ist.
+\end{itemize}
+
+\item[\tt CreateAttrList]{\bf :\\}
+Diese Funktion wird aufgerufen, wenn an einem Knoten die Liste der Attribute angezeigt werden soll. Dann wird die Attributliste als Label-Widget aus den einzelnen Teilstrings aufgebaut. Neben die Attribute werden ggf. Command-Widgets, die Search-Buttons, plaziert. Dies ist dann der Fall, wenn das betreffende Attribut einen Verweis auf einen Knoten oder einen Unterbaum darstellt. Das Label-Widget mit der Attributliste sowie die evtl. vorhandenen Search-Buttons werden in ein Form-Widget gepackt, das als Child-Widget an das Node-Widget, zu der die Attributliste geh"ort, geh"angt wird. Diese Funktion ber"ucksichtigt dabei, ob bestimmte Attribute maskiert sind. Dazu steht als Eingabe die aktuell g"ultige Attributmaske zur Verf"ugung. \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE * node: MAX\_NODE-Information des betreffenden Knotens. Hierdurch kann auf alle Attributinformationen dieses Knotens zugegriffen werden. \item Widget parent:   Id des Node-Widgets, an das die Liste angeh"angt wird. \item AttrMask * actual\_mask: Zeiger auf die im aktuellen Window g"ultige Attributmaske.
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item Widget: Id des Form-Widgets, das die Attributliste und die\\ 
+         Search-Buttons enth"alt.
+\end{itemize}
+
+\item[\tt GlobalMenuNotifyWithName]{\bf :\\}
+Callback-Funktion, die nach Auswahl eines bestimmten Sortennamens auf- gerufen wird, nachdem zuvor ein Eintrag eines globalen Men"us, der zus"atzlich einen Sortennamen ben"otigt, selektiert wurde. Die globale Variable current\_global\_index enth"alt dabei den Index des zuletzt selektierten Eintrags bzgl. der Liste 'globalm'. Gem"a"s diesem Index wird die entsprechende Funktion mit dem zuvor ausgew"ahlten Sortennamen aufgerufen. \\
+IN:
+\begin{itemize}
+   \item Widget w:      Id des List-Widgets, aus dem der Sortenname ausgew"ahlt wird. \item XtPointer client\_data: Zeiger auf die Knoten-Information der \\
+Wurzel des entsprechenden Fensters. \item XtPointer call\_data:   Zeiger auf eine Struktur, die die Informationen "uber den selektierten Sortennamen enth"alt.
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item --
+\end{itemize}
+
+\item[\tt SetCurrentGlobalIndex]{\bf :\\}
+Callback-Funktion, die durch Auswahl eines Eintrags in einem globalen Men"u aufgerufen wird. Besetzt die globale Variable current\_global\_index mit dem Index dieses Eintrags bzgl der Liste globalm (s.o.). \\
+IN:
+\begin{itemize}
+   \item Widget w:      Id des smeBSB-Widgets, das selektiert wurde. \item XtPointer client\_data: der zu speichernde Index. \item XtPointer call\_data:   wird hier nicht ben"otigt.
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item --
+\end{itemize}
+
+\item[\tt GlobalMenuNotifyWithoutName]{\bf :\\}
+Callback-Funktion, die durch Selektieren eines Eintrags eines globalen Men"us, der keinen zus"atzlichen Sortennamen ben"otigt, aufgerufen wird. Die globale Variable current\_global\_index enth"alt dabei den Index des zuletzt selektierten Eintrags bzgl. der Liste 'globalm'. Gem"a"s diesem Index wird die entsprechende Funktion aufgerufen. Bei Selektion des Eintrags 'Attribute Mask' (case 16) im Men"u 'Attributes' wird die im betreffenden Fenster aktuelle Attributmaske eingelesen und das Popup-Window der Attributmaske aufgepoppt. \\
+IN:
+\begin{itemize}
+   \item Widget w:      Id des smeBSB-Widgets, das selektiert wurde. \item XtPointer client\_data: Zeiger auf eine Struktur, die die Knoten-Information der Wurzel, die Id des Shell-Widgets der Attributmaske und einen Zeiger auf das Array der Toggle-Buttons f"ur die einzelnen Attribute enth"alt. \item XtPointer call\_data:   wird hier nicht ben"otigt.
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item --
+\end{itemize}
+
+\item[\tt GetCoordinates]{\bf :\\}
+Event-Handler-Funktion, die die absoluten Cursor-Koordinaten aus den Koordinaten des Toplevel-Windows und den Koordinaten des Cursors relativ zum Toplevel-Window berechnet. Letztere werden aus den Event-Information, die durch Anklicken eines Men"u-Buttons an den Event-Handler weitergereicht werden, ausgelesen. Schlie"slich werden mit den so berechneten Koordinaten die Resourcen f"ur die x- und y-Koordinaten der Widgets name\_shell (Sortenliste) und mask\_shell (Attributmaske) neu belegt. \\
+IN:
+\begin{itemize}
+   \item Widget w:      Id des angeklickten Widgets. \item XtPointer client\_data: wird hier nicht ben"otigt. \item XtPointer call\_data:   Event-Informationen mit den relativen\\
+ Cursor-Koordinaten.
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item --
+\end{itemize}
+
+\item[\tt PopupNameShell]{\bf :\\}
+Callback-Funktion, die aufgerufen wird, wenn in einem globalen Men"u\\
+ ein Eintrag selektiert wird, der die Auswahl eines Sortennamens erfordert. Sie sorgt f"ur das Aufpoppen der Sortenliste, wobei deren Titel gem"a"s dem selektierten Men"upunkt gesetzt wird. \\
+IN:
+\begin{itemize}
+   \item Widget w:      Id des selektierten smeBSB-Widgets. \item XtPointer client\_data: Index des Men"upunkts bzgl. der Liste 'globalm' (s.o.). \item XtPointer call\_data:   wird hier nicht ben"otigt.
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item --
+\end{itemize}
+
+\item[\tt UnselectAll]{\bf :\\}
+Callback-Funktion, die aufgerufen wird, wenn im Fenster zur Manipulation der Attributmaske der Button 'Unselect All' bedient wird. Sie sorgt daf"ur, da"s alle Toggle-Buttons dieses Fensters, die sich im Highlight-Zustand befinden, zur"uckgesetzt werden. \\
+IN:
+\begin{itemize}
+   \item Widget w:      Id des Buttons 'Unselect All'. \item XtPointer client\_data: Zeiger auf eine Struktur, die unter anderem einen Zeiger aufdas Array der Toggle-Buttons enth"alt. \item XtPointer call\_data:   wird hier nicht ben"otigt.
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item --
+\end{itemize}
+
+\item[\tt UpdateMask]{\bf :\\}
+Callback-Funktion, die aufgerufen wird, wenn im Fenster zur Manipulation der Attributmaske der Button 'OK' bedient wird. Sie sorgt daf"ur, da"s die durch selektierte und nicht selektierte Toggle-Buttons dargestellte Attributmaske in der entsprechenden Struktur abgespeichert wird. \\
+IN:
+\begin{itemize}
+   \item Widget w:      Id des Buttons 'OK'. \item XtPointer client\_data: Zeiger auf eine Struktur, die unter anderem die Knoteninformation des Wurzelknotens des betreffenden Fensters und einen Zeiger auf das Array der Toggle-Buttons enth"alt. \item XtPointer call\_data:   wird hier nicht ben"otigt.
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item --
+\end{itemize}
+
+\item[\tt PopdownNameShell]{\bf :\\}
+Callback-Funktion, die aufgerufen wird, wenn im Fenster der Liste der Sortennamen der Button 'Cancel' bet"atigt wird. Sie sorgt daf"ur, da"s dieses Fenster verschwindet, ohne da"s weitere Aktionen durchgef"uhrt werden. \\
+IN:
+\begin{itemize}
+   \item Widget w:      Id des Buttons 'Cancel'. \item XtPointer client\_data: Id des Shell-Widgets des Sortenlistenfensters. \item XtPointer call\_data:   wird hier nicht ben"otigt.
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item --
+\end{itemize}
+
+\item[\tt PopdownMask]{\bf :\\}
+Callback-Funktion, die aufgerufen wird, wenn im Fenster zur Manipulation der Attributmaske der Button 'Cancel' bet"atigt wird. Sie sorgt daf"ur, da"s dieses Fenster verschwindet, ohne da"s die aktuell g"ultige Attributmaske modifiziert wird. \\
+IN:
+\begin{itemize}
+   \item Widget w:      Id des Buttons 'Cancel' . \item XtPointer client\_data: Id des Shell-Widgets des Attributmaskenfensters. \item XtPointer call\_data:   wird hier nicht ben"otigt.
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item --
+\end{itemize}
+
+\item[\tt CopyAttrMask]{\bf :\\}
+Diese Funktion wird aufgerufen, wenn aus einem bestehenden Window der gesamte Baum oder ein Unterbaum in ein neues Window kopiert werden soll. Dann soll auch die im Ausgangs-Window g"ultige Attributmaske mit "ubernommen werden. Dazu kopiert die Funktion CopyAttrMask eine bestehende Attributmaske in eine identische Maske (jeweils als Zeiger auf die Struktur 'AttrMask'). \\
+IN:
+\begin{itemize}
+   \item AttrMask * attr\_mask: die zu kopierende Maske.
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item AttrMask *: Die kopierte Maske.
+\end{itemize}
+
+\item[\tt GetAttrMask]{\bf :\\}
+Diese Funktion wird nach Aufruf des Browsers benutzt, um f"ur das erste Window eine Attributmaske zu generieren. Dazu wird zuerst eine Liste aller Attributnamen erzeugt und schlie"slich alle Werte der Maske mit False belegt, da zu Beginn keine Attribute maskiert sein sollen. \\
+IN:
+\begin{itemize}
+   \item --
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item AttrMask *: Die generierte Maske.
+\end{itemize}
+
+\item[\tt DestroyAttrMask]{\bf :\\}
+Diese Funktion wird aufgerufen, wenn das Window eines Baums geschlossen wird. Dann wird auch die zugeh"orige Maske nicht mehr ben"otigt und der von ihr belegte Speicherplatz wird freigegeben. \\
+IN:
+\begin{itemize}
+   \item AttrMask * attr\_mask: Die zu zerst"orende Attributmaske.
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item --
+\end{itemize}
+
+\item[\tt ResetViewport]{\bf :\\}
+Callback-Funktion, die aufgerufen wird, wenn das Fenster der Attributmaske durch Bet"atigen der Button 'OK' oder 'Cancel' weggepoppt wird. Sie sorgt dann daf"ur, da"s der Ausschnitt, in dem die Attributnamen dargestellt werden, das Viewport-Widget, in den Ausgangszustand zur"uckgesetzt wird, d.h. da"s er beim n"achsten Aufpoppen des Fensters den Anfang der Liste der Attributnamen darstellt. \\
+IN:
+\begin{itemize}
+   \item Widget w:      Id des 'OK'- bzw. 'Cancel'-Buttons. \item XtPointer client\_data: Id des Viewport-Widgets. \item XtPointer call\_data:   wird hier nicht ben"otigt.
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item --
+\end{itemize}
+
+\item[\tt CreateGlobalMenu]{\bf :\\}
+Diese Funktion wird immer aufgerufen, wenn ein neues Window erzeugt wird. Sie sorgt haupts"achlich f"ur die Ausstattung eines Windows mit der globalen Men"uleiste. Dazu werden zun"achst die Men"u-Buttons in ein gemeinsames Form-Widget verpackt. An jeden Men"u-Button wird ein Popup-Men"u geh"angt, deren Eintr"age der Liste 'globalm', die zu Beginn dieses Files deklariert wurde, entnommen werden. Die einzelnen smeBSB-Widgets der Men"ueintr"age werden mit der entsprechenden Callback-Routine ausgestattet. Au"serdem erzeugt diese Funktion die Popup-Windows, in denen die Men"umaske ge"andert bzw. ein Sortenname ausgew"ahlt wird. \\
+IN:
+\begin{itemize}
+   \item Widget parent:   Id des Form-Widgets, das die Men"uleiste und den Viewport, der den Baum darstellt, enth"alt. \item MAX\_NODE * root: MAX\_NODE-Information des Wurzelknotens des zur Men"uleiste geh"orenden Baums. Sie wird zur "Ubergabe f"ur Callback-Listen ben"otigt. \item AttrMask * maske: Zeiger auf eine neu generierte, initialisierte Attributmaske, die f"ur das Popup-Window zur "Anderung der Attributmaske ben"otigt wird.
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item Widget: Id des Form-Widgets, das die Menu-Buttons enth"alt.
+\end{itemize}
+
+\item[\tt GetNodeId]{\bf :\\}
+Callback-Funktion, die aufgerufen wird, wenn ein bestimmter Knoten angeklickt wurde. Sie schreibt die MAX\_NODE-Adresse dieses Knotens in eine globale Variable. Diese Adresse wird ausgelesen, wenn eine Funktion aus dem Knotenmen"u ausgef"uhrt wird. Somit wird gew"ahrleistet, da"s diese Funktion auf dem zuletzt angeklickten, also dem richtigen, Knoten operiert. \\
+IN:
+\begin{itemize}
+   \item Widget w:      Id des angeklickten Node-Widgets. \item XtPointer client\_data: Die zum angeklickten Knoten\\
+ geh"orige MAX\_NODE-Adresse. \item XtPointer call\_data:   wird hier nicht ben"otigt.
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item --
+\end{itemize}
+
+\item[\tt NodeMenuNotify]{\bf :\\}
+Callback-Funktion, die aufgerufen wird, wenn aus dem Knotenmen"u ein Men"upunkt selektiert wird. Abh"angig vom Index des gew"ahlten Men"upunkts wird die entsprechende Funktion aufgerufen. \\
+IN:
+\begin{itemize}
+   \item Widget w:      Id des smeBSB-Widgets, das selektiert wurde. \item XtPointer client\_data: Index des gew"ahlten Men"ueintrags im Knotenmen"u. \item XtPointer call\_data:   wird hier nicht ben"otigt.
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item --
+\end{itemize}
+
+\item[\tt CreateNodeMenu]{\bf :\\}
+Diese Funktion h"angt die Popup-Shell des Knotenmen"us an den Viewport, der den Baum ausschnittsweise darstellt. In diese Shell werden die einelnen Eintr"age als semBSB-Widgets gepackt. Deren Titel werden der Liste 'nodem' entnommen, die zu Beginn dieses Files deklariert wurde. \\
+IN:
+\begin{itemize}
+   \item Widget parent: Id des Viewport-Widgets, das den Baum enth"alt.
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item --
+\end{itemize}
+\end{description}
+
+\section{Datentypen}
+
+\subsection{Struktur '\_GLMENTRIES\_' / Typ 'Glmentries'}
+
+Diese Struktur dient der Speicherung der Titel der Men"ueintr"age der globalen Men"us der Men"uleiste. Sie hat folgenden Aufbau:\\ 
+\\
+struct \_GLMENTRIES\_ \{\\
+\hspace*{1em}   char *   ename;\\
+\hspace*{1em}   char *   elabel;\\
+\hspace*{1em}   Boolean  npop;\\
+\hspace*{1em}   Cardinal mno;\\
+\} Glmentries;\\
+\\
+In 'ename' wird der Name gespeichert, den das entsprechende smeBSB-Widget erh"alt. In 'elabel' steht der Titel des entsprechenden Men"ueintrags, wie er sp"ater im Programm erscheint. In 'npop' steht der boolsche Wert, der bestimmt, ob nach Auswahl des Men"upunkts die Liste der Sortennamen erscheinen soll. Die in 'mno' gehaltene Zahl schlie"slich bestimmt, zum wievielten Men"u (von links nach rechts) in der Men"uleiste der betreffende Men"upunkt geh"oren soll. Unter dem Namen 'Glmentries' wird f"ur diese Struktur ein Typname definiert. Mit diesem Typnamen wird zu Beginn der Datei 'attr.c' ein Array "uber der Struktur '\_GLMENTRIES\_' definiert, in dem die Grundeinstellung f"ur die globalen Men"us gehalten wird. Eventuelle "Anderungen f"ur die Eintr"age der globalen Men"us sind dort vorzunehmen.
+
+\subsection{Struktur '\_NOMENTRIES\_' / Typ 'Nomentries'}
+
+Diese Struktur dient der Speicherung der Titel der Men"ueintr"age des Knotenen"us. Sie hat folgenden Aufbau:\\ 
+\\
+struct \_NOMENTRIES\_ \{\\
+\hspace*{1em}   char *  ename;\\
+\hspace*{1em}   char *  elabel;\\
+\hspace*{1em}   Boolean sectend;\\
+\} Nomentries;\\
+\\
+In 'ename' wird der Name gespeichert, den das entsprechende smeBSB-Widget erh"alt. In 'elabel' steht der Titel des entsprechenden Men"ueintrags, wie er sp"ater im Programm erscheint. In 'sectend' steht der boolsche Wert, der bestimmt, ob der aktuelle Men"ueintrag der letzte einer zusammengeh"orenden Gruppe ist, was bedeutet, da"s nach diesem Eintrag im Knotenmen"u eine Trennlinie gezogen wird. Unter dem Namen 'Nomentries' wird f"ur diese Struktur ein Typname definiert. Mit diesem Typnamen wird zu Beginn der Datei 'attr.c' ein Array "uber der Struktur '\_NOMENTRIES\_' definiert, in dem die Grundeinstellung f"ur das Knotenmen"u gehalten wird. Eventuelle "Anderungen f"ur die Eintr"age des Knotenmen"us sind dort vorzunehmen.
+
+\subsection{Struktur '\_ATTRMASK\_' / Typ 'AttrMask'}
+
+Diese Struktur dient dem Aufbau von Attributmasken. Sie hat folgenden Aufbau:\\
+\\
+struct \_ATTRMASK\_ \{\\
+\hspace*{1em}   Boolean masked;\\
+\} AttrMask;\\
+\\
+Attributmasken sind Arrays vom Typ 'AttrMask'. Die Laenge des Arrays wird dabei durch die Anzahl aller auftretenden Attribute bestimmt. Nimmt dabei 'masked' den Wert True an, bedeutet das, da"s das betreffende Attribut maskiert ist. Da"s dieser Typ dabei so umst"andlich definiert wurde (als 'struct' und nicht als 'Boolean'), liegt daran, da"s diese Struktur in der Arbeitsversion eine Komponente mehr besa"s, die aber dann nicht ben"otigt wurde. Einfachheitshalber wurde 'AttrMask' als Struktur belassen.
+
+\subsection{Struktur '\_CALLBACKSTRUCT\_' / Typ 'CallbackStruct'}
+
+Die Struktur hat folgenden Aufbau:\\
+\\
+struct \_CALLBACKSTRUCT\_ \{\\
+\hspace*{1em}   MAX\_NODE * node;\\
+\hspace*{1em}   Widget     mwidget;\\
+\hspace*{1em}   Widget     nwidget;\\
+\hspace*{1em}   Widget *   mask\_toggles;\\
+\} CallbackStruct;\\
+\\
+Diese Struktur dient dazu, um Callback-Funktionen alle ben"otigten Informationen zu "ubergeben. Die Callback-Funktion erh"alt dabei einen Zeiger auf die Struktur. Die einzelnen Komponenten sind so angelegt, da"s sie den maximalen Anforderungen des Programms gen"ugt, d.h. im Programm ist teilweise die "Ubergabe von zwei Widgets, einer Widget-List und eines MAX\_NODE's n"otig.
+
+\subsection{Struktur '\_CALLBACKNODES\_' / Typ 'CallbackNodes'}
+
+Die Struktur hat folgenden Aufbau:\\
+\\
+struct \_CALLBACKNODES\_ \{\\
+  MAX\_NODE * first\_node;\\
+  MAX\_NODE * second\_node;\\
+\} CallbackNodes;\\
+\\
+Die Struktur dient dazu, um der Callback-Funktion 'CopyAttributeTreeCallback' die ben"otigten beiden MAX\_NODE-Informationen zu "ubergeben.
+
+\end{document}

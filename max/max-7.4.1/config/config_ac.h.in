@@ -1,0 +1,34 @@
+/* config/config_ac.h.in.  Generated automatically from configure.in by autoheader.  */
+
+
+/* Define if your processor stores words with the most significant
+   byte first (like Motorola and SPARC, unlike Intel and VAX).  */
+#undef WORDS_BIGENDIAN
+
+/* build without MAX browser */
+#undef NO_BROWSER
+
+/* build with cycle allowed in attributes */
+#undef CYCLES_ALLOWED
+
+/* build for second bit set */
+#undef SECOND_BIT_SET
+
+/* build for little endian architecture */
+#undef LOW_ENDIAN
+
+/* Define if you have the <stdarg.h> header file.  */
+#undef HAVE_STDARG_H
+
+/* Define if you have the <stdio.h> header file.  */
+#undef HAVE_STDIO_H
+
+/* Define if you have the <stdlib.h> header file.  */
+#undef HAVE_STDLIB_H
+
+/* Define if you have the <string.h> header file.  */
+#undef HAVE_STRING_H
+
+/* Define if you have the <strings.h> header file.  */
+#undef HAVE_STRINGS_H
+

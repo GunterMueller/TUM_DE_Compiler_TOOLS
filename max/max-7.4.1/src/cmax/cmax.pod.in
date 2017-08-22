@@ -1,0 +1,61 @@
+
+=head1 NAME
+
+CMAX - MAX Constraint Preprocessor
+
+=head1 MAX VERSION
+
+@V@
+
+=head1 SYNOPSIS
+
+B<cmax>
+[B<-nocode>]
+[B<-verbosecode>]
+[B<-nosrcpos>]
+[B<-o> I<outputfile>]
+I<specfile>.cm
+
+=head1 DESCRIPTION
+
+CMAX is a preprocessor adding constraint satisfaction capabilities to the
+MAX system. The constraints provided by CMAX are suitable for solving
+data flow analysis or type analysis problems
+
+=head1 OPTIONS
+
+=over 4
+
+=item B<-nocode>
+
+This option suppresses code generation.
+
+=item B<-verbosecode>
+
+With this option status messages about constraint solving are issued
+by a compiler implemented with CMAX.
+
+=item B<-nosrcpos>
+
+This option supresses generation of source code position tags as supported
+by MAX Version 7.4.0 and above. Error messages issued by MAX will contain
+wrong information about the location of the errors.
+
+=item B<-o> I<outputfile>
+
+Specifies the file name of the generated MAX specification. The .m suffix
+is automatically appended.
+Without this option the filename stdmax_spec.m is used.
+
+=back
+
+=head1 COPYRIGHT
+
+ (C) 1996-1998 by
+                     Aurel Huber,
+                     Technische Universitaet Muenchen,
+                     Lehrstuhl II fuer Informatik
+                     (Prof. J. Eickel)
+
+=cut
+

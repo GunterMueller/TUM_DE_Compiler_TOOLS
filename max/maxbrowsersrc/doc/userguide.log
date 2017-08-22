@@ -1,0 +1,36 @@
+This is TeX, C Version 3.14t3 (format=lplain 94.9.27)  12 APR 1995 16:25
+**userguide.latex
+(userguide.latex
+LaTeX Version 2.09 <25 March 1992>
+(/usr/local/dist/DIR/TeX/lib/inputs/latex/article.sty
+Standard Document Style `article' <14 Jan 92>.
+(/usr/local/dist/DIR/TeX/lib/inputs/latex/art11.sty)
+\c@part=\count79
+\c@section=\count80
+\c@subsection=\count81
+\c@subsubsection=\count82
+\c@paragraph=\count83
+\c@subparagraph=\count84
+\c@figure=\count85
+\c@table=\count86
+)
+(/usr/local/dist/DIR/TeX/lib/inputs/latex/german.sty
+Document Style Option `german' Version 2.4a of 12 Apr 1992
+\U@D=\dimen99
+) (userguide.aux)
+[1
+
+] (userguide.toc [2])
+\tf@toc=\write3
+ [3] [4] [5] [6] [7] [8] [9] [10] [11] [12] [13]
+[14] [15] [16] (userguide.aux) ) 
+Here is how much of TeX's memory you used:
+ 407 strings out of 4279
+ 3769 string characters out of 50597
+ 37064 words of memory out of 700001
+ 2533 multiletter control sequences out of 9500
+ 12035 words of font info for 47 fonts, out of 72000 for 255
+ 14 hyphenation exceptions out of 1201
+ 16i,6n,15p,1196b,173s stack positions out of 300i,40n,60p,3000b,4000s
+
+Output written on userguide.dvi (16 pages, 44132 bytes).

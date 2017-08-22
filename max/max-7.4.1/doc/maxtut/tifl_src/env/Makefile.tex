@@ -1,0 +1,37 @@
+\section{Environment version}
+\subsection{Makefile}
+\begin{verbatim}
+# Makefile for generation of MAX analysers 
+
+# language dependent variables
+LANG=tifl
+
+# compiler dependent variables
+INCLUDES=
+CFLAGS= $(INCLUDES)
+CC=cc -Aa 
+
+$(LANG) : y.tab.o  max_std.o   $(LANG)_spec.o  $(LANG).o 
+	$(CC) $(CFLAGS) -o $(LANG) y.tab.o  max_std.o \
+			   $(LANG)_spec.o $(LANG).o 
+	cp $(LANG) ../bsp
+
+y.tab.o: y.tab.c  lex.yy.c 
+	$(CC) -g -c  y.tab.c
+
+y.tab.c: $(LANG)_pars.y  $(LANG)_spec.h
+	yacc $(LANG)_pars.y	
+
+lex.yy.c: $(LANG)_scan.l 
+	lex $(LANG)_scan.l 	
+
+$(LANG)_spec.o :  $(LANG)_spec.c
+	$(CC) $(CFLAGS) -c $(LANG)_spec.c
+
+$(LANG)_spec.c $(LANG)_spec.h :  $(LANG)_spec.m ../../MAX/src.5/max
+	../../MAX/src.5/max $(LANG)_spec.m
+
+$(LANG).o :  $(LANG).c  $(LANG)_spec.h 
+	$(CC) $(CFLAGS) -c $(LANG).c
+\end{verbatim}
+

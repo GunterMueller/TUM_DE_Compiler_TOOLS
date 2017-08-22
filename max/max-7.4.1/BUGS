@@ -1,0 +1,16 @@
+Known MAX Bugs
+==============
+
+Last update: 19 Mar 1998, Aurel Huber
+
+*** please remove entries when bugs have been fixed! ***
+
+* [A.Huber, 19 Mar 1998]
+  Runtime error messages display incorrect filenames
+  (source code position information from mpp and cmax is ignored)
+
+  Approach to solve this problem:
+    - edit file max_sgen.c
+    - create a macro FILE similar to the macro LINE
+    - replace occurences of '_m' with this macro
+

@@ -1,0 +1,104 @@
+##
+##  MPP Program Makefile 
+##
+@SET_MAKE@
+
+# -------------------------------------------------------------------
+# BUILD TOOLS
+# -------------------------------------------------------------------
+
+CP       = cp
+MV       = mv
+RM       = rm -f
+CHMOD    = chmod
+MKDIR    = ../../etc/mkinstalldirs
+STRIP    = strip
+
+CC       = @CC@
+AR       = @AR@
+RANLIB   = @RANLIB@
+DEFINES  = 
+DEBUG    = -g
+INCLUDES = -I../../config -I.
+CFLAGS   = @CFLAGS@ $(DEFINES) $(DEBUG) $(INCLUDES)
+LDFLAGS  =
+LEX      = @LEX@
+YACC     = @YACC@
+
+MAXOPTS  =
+MAX      = max
+
+PREFIX   = @prefix@
+
+# -------------------------------------------------------------------
+# DEFINITIONS
+# -------------------------------------------------------------------
+
+OBJS = \
+    mpp_main.o     \
+    mpp_cpplib.o   \
+    mpp_cppexp.o   \
+    mpp_cpphash.o  \
+    mpp_cppalloc.o \
+    mpp_cpperror.o \
+	mpp_vers.o
+
+# -------------------------------------------------------------------
+# DEFAULT TARGET
+# -------------------------------------------------------------------
+
+all: mpp
+
+# -------------------------------------------------------------------
+# MPP PROGRAM
+# -------------------------------------------------------------------
+
+mpp: $(OBJS)
+	$(CC) $(LDFLAGS) $(DEBUG) -o mpp $(OBJS)
+
+mpp_main.o: mpp_main.c
+	$(CC) $(CFLAGS) -c mpp_main.c
+
+mpp_cpplib.o: mpp_cpplib.c
+	$(CC) $(CFLAGS) -c mpp_cpplib.c
+
+mpp_cppexp.o: mpp_cppexp.c
+	$(CC) $(CFLAGS) -c mpp_cppexp.c
+
+mpp_cpphash.o: mpp_cpphash.c
+	$(CC) $(CFLAGS) -c mpp_cpphash.c
+
+mpp_cppalloc.o: mpp_cppalloc.c
+	$(CC) $(CFLAGS) -c mpp_cppalloc.c
+
+mpp_cpperror.o: mpp_cpperror.c
+	$(CC) $(CFLAGS) -c mpp_cpperror.c
+
+mpp_vers.o: mpp_vers.c
+	$(CC) $(CFLAGS) -c mpp_vers.c
+
+# -------------------------------------------------------------------
+# INSTALLATION
+# -------------------------------------------------------------------
+
+install: all
+	$(MKDIR) $(PREFIX)/lib 
+	$(CP) mpp $(PREFIX)/lib/mpp
+	$(CHMOD) a+rx $(PREFIX)/lib/mpp
+
+# -------------------------------------------------------------------
+# CLEANUP
+# -------------------------------------------------------------------
+
+clean:
+	$(RM) $(OBJS)
+	$(RM) mpp
+
+realclean: 
+	$(MAKE) clean
+
+distclean:
+	$(MAKE) realclean
+	rm -f Makefile
+
+##EOF##

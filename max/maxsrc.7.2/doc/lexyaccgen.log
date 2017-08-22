@@ -1,0 +1,117 @@
+This is TeX, C Version 3.14t3 (format=lplain 93.11.24)  27 JUN 1994 19:00
+**lexyaccgen.tex
+(lexyaccgen.tex
+LaTeX Version 2.09 <25 March 1992>
+(/usr/local/dist/DIR/TeX/lib/inputs/latex/article.sty
+Standard Document Style `article' <14 Jan 92>.
+(/usr/local/dist/DIR/TeX/lib/inputs/latex/art12.sty)
+\c@part=\count79
+\c@section=\count80
+\c@subsection=\count81
+\c@subsubsection=\count82
+\c@paragraph=\count83
+\c@subparagraph=\count84
+\c@figure=\count85
+\c@table=\count86
+)
+(/usr/local/dist/DIR/TeX/lib/inputs/latex/german.sty
+Document Style Option `german' Version 2.4a of 12 Apr 1992
+\U@D=\dimen99
+)
+(/usr/local/dist/DIR/TeX/lib/inputs/misc/a4.sty
+Style option `A4' 1.2a <30 Nov 90> (NP and JLB)
+English documentation   <26 Feb 90> (JLB)
+) (lexyaccgen.aux)
+(lexyaccgen.toc)
+\tf@toc=\write3
+ [1
+
+]
+Overfull \hbox (0.21307pt too wide) in paragraph at lines 51--54
+\cmr/m/n/12 schrie-ben; der Par-ser als YACC-Spezifikation in die Da-tei []\cmt
+t/m/n/12 <spec[]name>.y\cmr/m/n/12 ``. 
+
+\hbox(8.33331+2.66666)x382.56407, glue set - 1.0
+.\cmr/m/n/12 s
+.\cmr/m/n/12 c
+.\kern-0.32639
+.\cmr/m/n/12 h
+.\cmr/m/n/12 r
+.etc.
+
+
+Overfull \hbox (0.6pt too wide) in paragraph at lines 58--61
+[][]\cmr/m/n/12 Zur Spe-zi-fi-ka-ti-on der kon-kre-ten Syn-tax wer-den die in d
+ie MAX-Spezifikation
+
+\hbox(8.33331+2.33331)x382.56407, glue set - 1.0
+.\hbox(0.0+0.0)x0.0
+.\setlanguage1 (hyphenmin 2,2)
+.\cmr/m/n/12 Z
+.\cmr/m/n/12 u
+.\cmr/m/n/12 r
+.etc.
+
+
+Overfull \hbox (4.74626pt too wide) in paragraph at lines 69--76
+[][] 
+
+\hbox(32.19997+26.19997)x382.56407
+.\hbox(0.0+0.0)x0.0
+.\hbox(32.19997+26.19997)x387.31033
+..\mathon
+..\vbox(32.19997+26.19997)x387.31033
+...\hbox(10.14995+4.35004)x387.31033 []
+...\rule(0.4+0.0)x387.31033
+...\hbox(10.14995+4.35004)x387.31033 []
+...\glue(\lineskip) 0.0
+...\hbox(10.14995+4.35004)x387.31033 []
+...etc.
+..\mathoff
+.\penalty 10000
+.\glue(\parfillskip) 0.0 plus 1.0fil
+.\glue(\rightskip) 0.0
+
+[2]
+Overfull \hbox (4.49898pt too wide) in paragraph at lines 97--97
+[][]\cmr/bx/n/17 Quellprogrammeingabe in der ab-strak-ten Syn-
+
+\hbox(11.99998+3.35999)x411.93877, glue set - 1.0
+.\hbox(11.13599+0.0)x29.15997
+..\glue 0.0
+..\cmr/bx/n/17 2
+..\glue 19.43999
+.\setlanguage1 (hyphenmin 2,2)
+.\cmr/bx/n/17 Q
+.\cmr/bx/n/17 u
+.\cmr/bx/n/17 e
+.etc.
+
+[3]
+Overfull \hbox (12.77576pt too wide) in paragraph at lines 184--184
+[][]\cmr/bx/n/14 Zugeordnete ab-strak-te Syn-tax ei-ner MAX-Spezifikation 
+
+\hbox(9.99998+2.79999)x411.93877, glue set - 1.0
+.\hbox(9.27998+0.0)x36.89995
+..\glue 0.0
+..\cmr/bx/n/14 3
+..\cmr/bx/n/14 .
+..\cmr/bx/n/14 1
+..\glue 16.19998
+.\setlanguage1 (hyphenmin 2,2)
+.\cmr/bx/n/14 Z
+.\cmr/bx/n/14 u
+.\cmr/bx/n/14 g
+.etc.
+
+[4] [5] [6] [7] [8] [9] [10] (lexyaccgen.aux) ) 
+Here is how much of TeX's memory you used:
+ 408 strings out of 4279
+ 3852 string characters out of 50686
+ 33556 words of memory out of 700001
+ 2536 multiletter control sequences out of 9500
+ 10473 words of font info for 42 fonts, out of 72000 for 255
+ 14 hyphenation exceptions out of 607
+ 16i,8n,17p,244b,307s stack positions out of 300i,40n,60p,3000b,4000s
+
+Output written on lexyaccgen.dvi (10 pages, 23960 bytes).

@@ -1,0 +1,33 @@
+program oddeven
+begin
+   func odd(int i) : BOOL;
+   begin
+     if i = 0 then
+       call tunix;
+       j := 42;
+       return FALSE
+     else 
+       return even(i-1) 
+     end
+   end
+   ||
+   func even(int i) : BOOL;
+   begin
+     if i = 0 then
+       return TRUE
+     else 
+       return odd(i-1)
+     end
+   end
+   ||
+   var int j;
+   ;
+   proc tunix;
+   begin end
+
+   if odd(1000) then
+     write("so'n schmarrn",nl);
+   else
+     write("prima",nl);
+   fi
+end { program oddeven }

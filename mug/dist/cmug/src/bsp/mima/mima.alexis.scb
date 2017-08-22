@@ -1,0 +1,74 @@
+scanner name
+options
+  ignorecase minimize
+optionend
+
+include '/usr/proj/cmug/include/mugdefs.sci'
+
+lexmakros
+   string  = '''' (not(.''''.)| '''''')+ '''';
+makroend
+
+lexemes
+
+  ignore Ws+         -> { White Space }  ;
+digit+                ->  RetInt(2);
+':='                  ->  Code(3,1);
+','                   ->  Code(5,1);
+';'                   ->  Code(8,1);
+'<'                   ->  Code(10,1);
+'>'                   ->  Code(10,2);
+'<='                  ->  Code(10,3);
+'>='                  ->  Code(10,4);
+'(.'                  ->  Code(11,1);
+'['                   ->  Code(11,1);
+'.)'                  ->  Code(12,1);
+']'                   ->  Code(12,1);
+'='                   ->  Code(13,1);
+'+'                   ->  Code(14,1);
+'-'                   ->  Code(14,2);
+'*'                   ->  Code(15,1);
+'/'                   ->  Code(15,2);
+'('                   ->  Code(16,1);
+')'                   ->  Code(17,1);
+':'                   ->  Code(27,1);
+string                ->  RetStr(33);
+'begin'               ->  Code(4,1);
+'end'                 ->  Code(6,1);
+'integer'             ->  Code(7,1);
+'int'                 ->  Code(7,1);
+'boolean'             ->  Code(7,2);
+'bool'                ->  Code(7,2);
+'true'                ->  Code(9,1);
+'false'               ->  Code(9,2);
+'less'                ->  Code(10,1);
+'lt'                  ->  Code(10,1);
+'greater'             ->  Code(10,2);
+'gt'                  ->  Code(10,2);
+'le'                  ->  Code(10,3);
+'ge'                  ->  Code(10,4);
+'ne'                  ->  Code(10,5);
+'if'                  ->  Code(18,1);
+'then'                ->  Code(19,1);
+'else'                ->  Code(20,1);
+'fi'                  ->  Code(21,1);
+'while'               ->  Code(22,1);
+'do'                  ->  Code(23,1);
+'od'                  ->  Code(24,1);
+'const'               ->  Code(25,1);
+'leave'               ->  Code(26,1);
+'array'               ->  Code(28,1);
+'call'                ->  Code(29,1);
+'return'              ->  Code(30,1);
+'procedure'           ->  Code(31,1);
+'proc'                ->  Code(31,1);
+'var'                 ->  Code(32,1);
+'read'                ->  Code(34,1);
+'write'               ->  Code(35,1);
+'newline'             ->  Code(36,1);
+'procspec'            ->  Code(37,1);
+'spec'                ->  Code(37,1);
+'program'             ->  Code(38,1);
+'prog'                ->  Code(38,1);
+ident                 ->  RetId(1);
+lexemesend

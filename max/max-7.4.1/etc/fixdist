@@ -1,0 +1,198 @@
+#!/bin/sh
+#
+#   fixdist -- distribution package fixing tool
+#   Copyright (c) Nov 1994 Ralf S. Engelschall, <rse@en.muc.de>
+#
+#   Because this is a bootstrapping tool which has to run under
+#   a standard UNIX system without such fantastic tools like Perl
+#   this is a peace of ugly and masochistic Bourne-Shell code! :-(
+#
+#   It would be a little tiny script in Perl, wouldn't it?
+#
+
+indfile=README
+searchpath=".:..:`dirname $0`"
+flagfile=.fixed
+
+myname=`basename $0`
+mydir=`dirname $0`
+mydir=`cd $mydir; pwd`
+cffilepath="$mydir/$myname.cf"
+
+#   first test if we have the correct distribution path
+#
+distpath=''
+OIFS=$IFS IFS=":"
+for path in $searchpath; do
+    if [ -f $path/$indfile ]; then
+		distpath=$path
+		break
+	fi
+done
+IFS=$OIFS
+if [ ".$distpath" = . ]; then
+    echo "WHOA! Couldn't find distribution!"
+    echo -n "Where is it? "
+    read response
+    if [ ! -f $response/$indfile ]; then
+        distpath=$response
+    else
+        echo "Sorry, this is also wrong!"
+        exit 1
+    fi
+fi
+
+echo "Distribution tree located at $distpath"
+cd $distpath || echo "FAILED: cannot change to distribution dir"
+
+#   check for operation mode
+#
+case .$1 in
+    '.-t' ) mode=test  ;;
+    '.-u' ) mode=unfix ;;
+    '.'   ) mode=fix   ;;
+    *     ) echo "Usage: fixdist [-t] [-u]"; exit 1 ;;
+esac
+
+#   import config file
+#
+getcf () {
+    CF=`cat $cffilepath |\
+	sed -e 's|^#.*||g' | grep "^[^ ]" |\
+	awk 'BEGIN { }
+	{
+        frompath=$1;
+    	todir=".";
+    	tofile=$2;
+    	for (i=0; (p=index(tofile, "/")) != 0; ) {
+    		todir=todir "/" substr(tofile, 0, p-1);
+    		tofile=substr(tofile, p+1, length(tofile)-p);
+    		frompath="../" frompath;
+    		i=p;
+    	}
+        printf("%s:%s:%s:%s:%s&", $1, $2, todir, tofile, frompath)
+	}
+	END { }'`
+#    awk '{ printf("%s", substr($0, 1, length($0)-1)); }'`
+}
+
+#   expand one single action
+#
+getcfentry () {
+    eval `echo $1 | \
+        awk -F: '{ printf("ACTION_FROM=%s ACTION_TO=%s TODIR=%s TOFILE=%s FROMPATH=%s", $1, $2, $3, $4, $5) }'`
+}
+
+test_link () {
+    link=$1
+
+}
+
+#
+#   MAIN
+#
+case $mode in
+
+    #
+    #   TEST mode
+    #
+    test ) 
+        if [ -r $flagfile ]; then
+            echo "Distribution tree already fixed."
+			echo "Distribution tree fixed on `cat $flagfile`"
+            exit 0;
+		else
+			exit 1;
+        fi
+		;;
+
+    #
+    #   FIX mode
+    #
+    fix ) 
+        if [ -r $flagfile ]; then
+            echo "Distribution tree already fixed!"
+			echo "Distribution tree fixed on `cat $flagfile`"
+			echo "Use \`\`fixdist -u'' first"
+            exit 0;
+        fi
+
+        echo 'Fixing distribution tree to be correct...'
+
+        getcf
+		OIFS=$IFS IFS="&"
+		for action in $CF; do
+			if [ "x$action" = "x" ]; then
+				continue
+			fi
+            getcfentry $action
+			echo "  (ln) $ACTION_FROM -> $ACTION_TO"
+			(
+			    if [ ! -d $TODIR ]; then
+                    echo "        WARNING: target dir $TODIR not found!"
+                    continue;
+				fi
+				#echo "        cd $TODIR"
+				cd $TODIR
+
+                #if [ ! -r $FROMPATH ]; then
+                #    echo "        WARNING: source file $FROMPATH not found!"
+                #    continue;
+                #fi
+
+                if [ ".`find $TOFILE -print 2>/dev/null`" != . -a $? -eq 0 ]; then
+                #if [ -e $TOFILE ]; then
+                    echo "        WARNING: target link $TOFILE already exists!"
+                    echo "                 removing $TOFILE"
+                    rm -f $TOFILE
+                fi
+
+                #echo "        ln -s $FROMPATH $TOFILE"
+                ln -s $FROMPATH $TOFILE
+			)
+		done
+		IFS=$OIFS
+
+        date >$flagfile
+		echo "Done on `date`"
+        ;;
+
+    #
+    #   FIX mode
+    #
+    unfix )
+        if [ ! -r $flagfile ]; then
+            echo "Distribution tree still not fixed"
+            exit 0;
+        fi
+
+        echo 'Making vanilla distribution tree...'
+
+        getcf
+		OIFS=$IFS IFS="&"
+		for action in $CF; do
+			if [ "x$action" = "x" ]; then
+				continue
+			fi
+            getcfentry $action
+			echo "  (rm) $ACTION_FROM -> $ACTION_TO"
+			(
+                if [ ".`find $TODIR/$TOFILE -print 2>/dev/null`" = . -a $? -ne 0 ]; then
+                #if [ ! -e $TODIR/$TOFILE ]; then
+                    echo "        WARNING: target file $TODIR/$TOFILE not found!"
+                    continue
+                fi
+                #echo "        rm $TODIR/$TOFILE"
+                rm $TODIR/$TOFILE
+			)
+       done
+
+       rm -f $flagfile
+	   echo "Done."
+       ;;
+esac
+
+exit 0
+
+
+##EOF##

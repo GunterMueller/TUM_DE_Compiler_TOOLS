@@ -1,0 +1,29 @@
+Version history for Constraint MAX preprocessor
+===============================================
+
+Version 1.x.x: until Mar 1997
+  * obsolete version with user-unfriendly syntax and only partial
+    implementation
+
+Version 2.0.0: May 1997
+  * version with revised syntax and complete implementation
+
+Version 2.0.1: Nov 1997
+  * removed minor bugs
+  * implementation uses bootstrapping
+
+Version 2.1.0: Mar 1998
+  * added support for mpp preprocessor and integrated with MAX 7.3.x.
+  * CMAX is part of the MAX 7.4.0 distribution.
+  * as empty strings can now be concatenated in MAX the workaround
+    for that bug (using a function ES()) has been removed
+  * added comfortable syntax for constructing lists:
+    - [<ListSort> <expr1>,...,<expr2>] can now be used instead of
+      appback(...appback( <ListSort>(), <expr1> )...,<exprn>)
+    - <expr1> ++ ... ++ <exprn> can now be used instead of the old-fashioned
+      conc(<expr1>,...(conc(<exprn-1>, <exprn>)...)
+    - <expr1> @@ <expr2> can now be used instead of appback(<expr1>,<expr2>)
+    - <expr1> :: <expr2> can now be used instead of appfront(<expr1>,<expr2>) 
+
+
+ 

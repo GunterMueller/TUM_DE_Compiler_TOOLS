@@ -1,0 +1,89 @@
+\subsection{stack.c}
+\begin{verbatim}
+
+/*---------------------------------------------------------------------------
+
+  stack.c           
+                  
+  ---------------------------------------------------------------------------*/
+
+#define MAX_NUM_PAR 50
+#define MAX_DEPTH 28
+#define SP_INIT 0 
+
+ELEMENT stacks[MAX_NUM_PAR][MAX_DEPTH];
+int sp[MAX_NUM_PAR];
+
+/*  can be omitted, since ANSI C */
+void init_stacks()
+{
+ unsigned i;
+
+ for( i=0 ; i<= MAX_NUM_PAR; i++)
+    sp[i] = SP_INIT;
+
+}
+
+
+void pop_params( ELEMENT Parnode )
+{
+  while( Parnode != nil() )
+       {
+        sp[index(Parnode,_ParDecl_)]--;
+        Parnode = rbroth(Parnode);
+       }
+}
+
+
+void push_params( ELEMENT Parnode, ELEMENT Expnode )
+{
+  long indx;
+  ELEMENT n;
+  ELEMENT to_push[MAX_NUM_PAR];
+
+  n = Parnode;
+  while( n != nil() )
+       {
+        to_push[index( n, _ParDecl_ )] = eval( Expnode );
+        Expnode = rbroth( Expnode );
+        n = rbroth( n );
+       }
+
+  while( Parnode != nil() )
+       {
+        indx = index(Parnode, _ParDecl_);
+
+        if( sp[ indx ] > MAX_DEPTH )
+          {
+           printf("\n!!! RUNTIME error: stack overflow\n");
+           getchar();
+           return;
+          }
+
+         sp[ indx ]++;
+         stacks[ indx ][ sp[ indx ] ] = to_push[ index( Parnode, _ParDecl_ ) ];
+         Parnode = rbroth(Parnode);
+       }
+}
+
+   
+ELEMENT par_lookup( ELEMENT Parnode )
+{
+  long indx = index(Parnode, _ParDecl_);
+  return stacks[ indx ][ sp[ indx ] ];
+}
+
+
+ELEMENT eval_userfunc( ELEMENT Parnode, ELEMENT Expnode, ELEMENT Body )
+{
+   ELEMENT result;
+
+   push_params( Parnode, Expnode );
+   result = eval(Body);
+   pop_params( Parnode );
+
+   return result; 
+}
+
+\end{verbatim}
+

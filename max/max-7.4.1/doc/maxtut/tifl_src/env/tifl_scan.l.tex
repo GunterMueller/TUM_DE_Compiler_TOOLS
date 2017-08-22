@@ -1,0 +1,100 @@
+\subsection{tifl\_scan.l}
+\begin{verbatim}
+%{
+#define TABLENGTH 3
+
+static int   line   =  1 ;
+static int   column =  0 ;
+
+%}
+%%
+
+[ ]*               { column += yyleng; }
+\n                 { line++; column = 0; }
+\t                 { column += TABLENGTH; }
+"funct"            { column += yyleng;  return(funcsy); }
+"FUNCT"            { column += yyleng;  return(funcsy); }
+"if"               { column += yyleng;  yylval.l = itoe( line );return(ifsy); }
+"IF"               { column += yyleng;  yylval.l = itoe( line );return(ifsy); }
+"then"             { column += yyleng;  return(thensy); }
+"THEN"             { column += yyleng;  return(thensy); }
+"else"             { column += yyleng;  return(elsesy); }
+"ELSE"             { column += yyleng;  return(elsesy); }
+"fi"               { column += yyleng;  return(fisy); }
+"FI"               { column += yyleng;  return(fisy); }
+"in"               { column += yyleng;  return(insy); }
+"IN"               { column += yyleng;  return(insy); }
+"bool"             { column += yyleng;  return(booltyp); }
+"BOOL"             { column += yyleng;  return(booltyp); }
+"boolean"          { column += yyleng;  return(booltyp); }
+"BOOLEAN"          { column += yyleng;  return(booltyp); }
+"int"              { column += yyleng;  return(inttyp); }
+"INT"              { column += yyleng;  return(inttyp); }
+"integer"          { column += yyleng;  return(inttyp); }
+"INTEGER"          { column += yyleng;  return(inttyp); }
+
+","                { column += yyleng;  return(comma); }
+":"                { column += yyleng;  return(colon); }
+"("                { column += yyleng;  return(oparsy); }
+")"                { column += yyleng;  return(cparsy); }
+"="                { column += yyleng;  return(equal); }
+"&&"               { column += yyleng;  return(and); }
+"and"              { column += yyleng;  return(and); }
+"||"               { column += yyleng;  return(or); }
+"or"               { column += yyleng;  return(or); }
+"!"                { column += yyleng;  return(not); }
+"not"              { column += yyleng;  return(not); }
+"=="               { column += yyleng;  return(equ); }
+"equ"              { column += yyleng;  return(equ); }
+"#"                { column += yyleng;  return(ne); }
+"!="               { column += yyleng;  return(ne); }
+"ne"               { column += yyleng;  return(ne); }
+"+"                { column += yyleng;  return(add); }
+"add"              { column += yyleng;  return(add); }
+"-"                { column += yyleng;  return(sub); }
+"sub"              { column += yyleng;  return(sub); }
+"*"                { column += yyleng;  return(mult); }
+"mult"             { column += yyleng;  return(mult); }
+"/"                { column += yyleng;  return(dvd); }
+"div"              { column += yyleng;  return(dvd); }
+"<"                { column += yyleng;  return(lt); }
+"lt"               { column += yyleng;  return(lt); }
+">"                { column += yyleng;  return(gt); }
+"gt"               { column += yyleng;  return(gt); }
+"<="               { column += yyleng;  return(le); }
+"le"               { column += yyleng;  return(le); }
+">="               { column += yyleng;  return(ge); }
+"ge"               { column += yyleng;  return(ge); }
+"true"             { column += yyleng;  yylval.l = btoe(1);  return(boolconst); }
+"TRUE"             { column += yyleng;  yylval.l = btoe(1);  return(boolconst); }
+"false"            { column += yyleng;  yylval.l = btoe(0);  return(boolconst); }
+"FALSE"            { column += yyleng;  yylval.l = btoe(0);  return(boolconst); }
+[0-9][0-9]*        { column += yyleng;  yylval.l = itoe(atoi((char*)yytext));\
+                     return(intconst); }
+[a-zA-Z](([a-zA-Z0-9_]))*     { yylval.a.val = stoid(atoe((char*)yytext));
+                                yylval.a.ln  = itoe(line);
+                                column += yyleng;  
+                                return(ident); }
+"{"           {   char c1;
+                  column += yyleng;
+                  while( 1 ){
+                       c1 = input();
+                       if( c1 == '\0' ){
+                         unput(c1);
+                         fprintf(stderr,"input file ends with unterminated comment\n");
+                         break;
+                       }
+                       if( c1 == '}' ){
+                         column++;
+                         break;
+                       }
+                       if( c1 == '\n' ){
+                         line++; column = 0;
+                       } else {
+                               column++;
+                         }
+                  }
+              }
+
+\end{verbatim}
+

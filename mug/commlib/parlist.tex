@@ -1,0 +1,73 @@
+\documentstyle[12pt,a4wide,german]{article}
+\parindent0pt
+\parskip0.5em
+\newcommand{\fp}[1]{{\em$\langle\mbox{#1}\rangle$}}
+\newcommand{\var}[1]{{\tt\mbox{#1}}}
+\newcommand{\mac}[1]{{\bf\mbox{#1}}}
+
+\begin{document}
+
+\begin{titlepage}
+\title{Die parametrisierte C--DatenstrukturListe}
+\author{Ulrich Vollath\\Institut f"ur Informatik\\TU M"unchen}
+\date{\copyright 1991\\\today}
+\end{titlepage}
+\maketitle
+
+\section{Einbindung}
+Die Einbindung der parametrisierten Datenstruktur erfolgt durch
+die C--Pr"aprozessoranweisung \#include ''parlist.h''.
+Danach kann die Instantiierung von Listentypen 
+wie in Abschnitt \ref{instanz} beliebig
+oft erfolgen.
+
+\section{\label{instanz}Instantiierung}
+Die Instantiierung der Datenstruktur erfolgt mittels des Makro--Aufrufs:
+
+\mac{INSTANZ\_SLIST}(\fp{Listtyp},\fp{Basistyp},\fp{vergleich},
+\fp{abgleich},\fp{kopiere},\fp{abbruch})
+
+Dabei haben die formalen Parameter die folgende Bedeutung:
+
+\fp{Listtyp} ist der Name des durch die Instantiierung definierten Datentyps.
+\fp{Listtyp} mu"s also ein f"ur eine Typdefinition g"ultiger Bezeichner sein.
+
+\fp{Basistyp} ist der Basistyp, "uber dem der Listentyp definiert wird. Dieser 
+Typ muss an der Instantiierungsstelle definiert sein.
+
+
+\fp{vergleich} vergleicht zwei Variablen \var{ziel} und 
+\var{quelle} von Typ \fp{Basistyp} * bez"uglich der zu verwendenden Ordnung.
+Das Ergebnis ist:
+\begin{itemize}
+\item $< 0$, falls $*\var{ziel} < *\var{quelle}$
+\item $0$,  falls $*\var{ziel} = *\var{quelle}$
+\item $> 0$, falls $*\var{ziel} > *\var{quelle}$
+\end{itemize}
+
+\fp{abgleich} wird aufgerufen, wenn beim Eintrag bzw.\ Merge ein bereits
+vorhandener Eintrag erneut hinzugef"ugt werden soll.
+
+\fp{kopiere} entspricht der Zuweisung auf der Ebene des Typen \fp{Basistyp}.
+
+\fp{abbruch} wird ausgef"uhrt beim Vorliegen eines fatalen Fehlers beim
+Ausf"uhren einer Listenoperation, i.\ allg.\ bei Speichermangel etc.
+\fp{abbruch} kann z.\ B.\ zum (Teil--) Programmabbruch mit Fehlermeldung 
+"uber exit() oder longjmp() f"uhren. Es ist aber auch eine leere Anweisung
+m"oglich, die Listenoperation liefert dann einen Fehlerwert ab.
+
+
+\section{Verf"ugbare Operationen}
+
+\fp{Listtyp} enter\fp{Listtyp}(\fp{Listtyp} *liste,Basistyp *quelle)
+
+\fp{Listtyp} lookup\fp{Listtyp}(\fp{Listtyp} *liste,Basistyp *quelle)
+
+\fp{Listtyp} merge\fp{Listtyp}(\fp{Listtyp} *zielliste,\fp{Listtyp} quelliste)
+
+void freelis\fp{Listtyp}(\fp{Listtyp} lis)
+
+int init\fp{Listtyp}(void)
+
+\end{document}
+

@@ -1,0 +1,127 @@
+dnl
+dnl Process this file with autoconf to produce a configure script.
+dnl
+
+AC_PREREQ(2.0)dnl
+AC_REVISION($Revision: 1.1$)
+
+MAX_VERSION="`./etc/newvers -l c -D src/max/max_vers.c`"
+AC_SUBST(MAX_VERSION)
+echo "Configuring for MAX $MAX_VERSION"
+
+AC_INIT(INSTALL)
+AC_CONFIG_HEADER(config/config_ac.h)dnl
+AC_CONFIG_AUX_DIR(etc)
+AC_PREFIX_DEFAULT(/usr/local)
+
+AC_CONFIGURE_PART(FIXUP: Distribution Tree)
+AC_FIX_DIST_TREE
+
+AC_CONFIGURE_PART(CHECK: System Type)
+AC_CONFIG_PARAMS
+AC_CANONICAL_SYSTEM
+dnl AC_SUPPORTED_CANONICAL_SYSTEM
+AC_C_BIGENDIAN
+
+AC_CONFIGURE_PART(CHECK: MAX Build Options)
+
+AC_MSG_CHECKING([for MAX compile option: NO_BROWSER])
+AC_ARG_WITH(browser,dnl
+[  --with-browser          build with MAX Browser],
+msg=no
+,dnl
+msg=yes
+AC_DEFINE(NO_BROWSER)
+)dnl
+AC_MSG_RESULT([$msg])
+
+AC_MSG_CHECKING([for MAX compile option: CYCLES_ALLOWED])
+AC_ARG_WITH(cyclesallowed,dnl
+[  --with-cyclesallowed    build with cycles in attributes allowed],
+msg=yes
+AC_DEFINE(CYCLES_ALLOWED)
+,dnl
+msg=no
+)dnl
+AC_MSG_RESULT([$msg])
+
+AC_MSG_CHECKING([for MAX compile option: LOW_ENDIAN])
+if test $ac_cv_c_bigendian = yes; then
+    msg=no
+else
+    msg=yes
+    AC_DEFINE(LOW_ENDIAN)
+fi
+AC_MSG_RESULT([$msg])
+
+AC_MSG_CHECKING([for MAX compile option: SECOND_BIT_SET])
+case $host_os in
+    hpux* ) 
+        msg=yes
+        AC_DEFINE(SECOND_BIT_SET)
+        ;;
+    * )
+        msg=no
+        ;;
+esac
+AC_MSG_RESULT([$msg])
+
+AC_CONFIGURE_PART(CHECK: Build Utilities)
+AC_PROG_CC
+if test $CC = gcc; then
+	CFLAGS="$CFLAGS -fomit-frame-pointer -finline-functions"
+
+	# gcc on hpux requires a special option
+	# added by A. Huber on 30 Mar 1998
+
+	case $host_os in
+	hpux* )
+		CFLAGS="$CFLAGS -mmillicode-long-calls"
+		;;
+	* )
+		CFLAGS="$CFLAGS"
+		;;
+	esac 
+else
+	CFLAGS="$CFLAGS"
+fi
+AC_PROG_CPP
+
+AC_PROG_RANLIB
+AC_PROGRAM_CHECK(AR, ar, ar,)
+if test -z "$AR"; then
+    AC_ERROR([required program ``ar'' not found])
+fi
+AC_PROG_LEX
+AC_PROG_YACC
+AC_SET_MAKE
+AC_PROG_INSTALL
+INSTALL_DATA='${INSTALL} -m 644'
+INSTALL_PROGRAM="${INSTALL_PROGRAM} -m 755"
+
+AC_CONFIGURE_PART(CHECK: System Dependencies)
+AC_HAVE_HEADERS(stdio.h stdarg.h stdlib.h string.h strings.h)
+AC_PATH_X
+if test ".$no_x" = .yes; then
+   PATH_X_INC=
+   PATH_X_LIB=
+else
+   PATH_X_INC=$x_includes
+   PATH_X_LIB=$x_libraries
+fi
+AC_SUBST(PATH_X_INC)
+AC_SUBST(PATH_X_LIB)
+
+AC_CONFIGURE_PART(RESULT: Substituting Files)
+AC_OUTPUT(dnl
+Makefile dnl
+doc/Makefile dnl
+src/Makefile dnl
+src/max/Makefile dnl
+src/mpp/Makefile dnl
+src/bim/Makefile dnl
+src/cmax/Makefile dnl
+config/config_sc.h dnl
+,dnl
+)dnl
+

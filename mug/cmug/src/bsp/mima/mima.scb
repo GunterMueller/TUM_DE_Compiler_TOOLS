@@ -1,0 +1,63 @@
+#comments
+#specials
+ 1 50 identsy
+ 2 1 numbersy
+ 3 1 :=
+ 5 1 ,
+ 8 1 ;
+10 1 <
+10 2 >
+10 3 <=
+10 4 >=
+11 1 (.
+11 1 [
+12 1 .)
+12 1 ]
+13 1 =
+14 1 +
+14 2 -
+15 1 *
+15 2 /
+16 1 (
+17 1 )
+27 1 :
+33 1 stringsy
+#keywords
+ 4 1 begin
+ 6 1 end
+ 7 1 integer
+ 7 1 int
+ 7 2 boolean
+ 7 2 bool
+ 9 1 true
+ 9 2 false
+10 1 less
+10 1 lt
+10 2 greater
+10 2 gt
+10 3 le
+10 4 ge
+10 5 ne
+18 1 if
+19 1 then
+20 1 else
+21 1 fi
+22 1 while
+23 1 do
+24 1 od
+25 1 const
+26 1 leave
+28 1 array
+29 1 call
+30 1 return
+31 1 procedure
+31 1 proc
+32 1 var
+34 1 read
+35 1 write
+36 1 newline
+37 1 procspec
+37 1 spec
+38 1 program
+38 1 prog
+

@@ -1,0 +1,30 @@
+# Pfade fuer die Installation
+
+INSTALLBINDIR=$(INSTALLDIR)/bin
+INSTALLIBDIR=$(INSTALLDIR)/lib
+INSTALLINCDIR=$(INSTALLDIR)/inc
+
+#verwendete Kommandos
+CP        = cp
+RM        = rm -rf
+MAKE      = make
+CHMOD     = chmod
+YACC      = bison
+LEX       = flex
+MKDIR	  = mkdir
+AR	  = ar rc
+RANLIB	  = ranlib
+CC        = gcc
+
+#FLAGS
+INCLUDES        = -I$(HOMEDIR)/src/inc
+DEFINES         =
+#maxbrowse.a laeft auf SunOS4.1 nur mit -O Option beim gcc
+DEBUG           = -O
+CFLAGS		= $(DEFINES) $(DEBUG) $(INCLUDES)
+
+YACCFLAGS = -d
+LEXFLAGS  =
+
+#immer zu loeschende Muell-Dateien (relevant bei "make clean"
+RMFILES	= core *.o *.bak

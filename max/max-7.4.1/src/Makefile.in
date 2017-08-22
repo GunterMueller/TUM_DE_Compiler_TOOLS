@@ -1,0 +1,83 @@
+##
+##  src Makefile
+##
+
+# ------------------------------------------------
+#   THE SUBDIR MOVEMENT SUPPORT
+# ------------------------------------------------
+
+all:
+	@echo "==> max (make all)"
+	@cd max; make all
+	@echo "<== max"
+	@echo "==> mpp (make all)"
+	@cd mpp; make all
+	@echo "<== mpp"
+	@echo "==> bim (make all)"
+	@cd bim; make all
+	@echo "<== bim"
+	@echo "==> cmax (make all)"
+	@cd cmax; make all
+	@echo "<== cmax"
+
+clean:
+	@echo "==> max (make clean)"
+	@cd max; make clean
+	@echo "<== max"
+	@echo "==> mpp (make clean)"
+	@cd mpp; make clean
+	@echo "<== mpp"
+	@echo "==> bim (make clean)"
+	@cd bim; make clean
+	@echo "<== bim"
+	@echo "==> cmax (make clean)"
+	@cd cmax; make clean
+	@echo "<== cmax"
+
+realclean:
+	@echo "==> max (make realclean)"
+	@cd max; make realclean
+	@echo "<== max"
+	@echo "==> mpp (make realclean)"
+	@cd mpp; make realclean
+	@echo "<== mpp"
+	@echo "==> bim (make realclean)"
+	@cd bim; make realclean
+	@echo "<== bim"
+	@echo "==> cmax (make realclean)"
+	@cd cmax; make realclean
+	@echo "<== cmax"
+	rm -f config.cache
+	rm -f config.log
+	rm -f config.status
+
+distclean:
+	@echo "==> max (make distclean)"
+	@cd max; make distclean
+	@echo "<== max"
+	@echo "==> mpp (make distclean)"
+	@cd mpp; make distclean
+	@echo "<== mpp"
+	@echo "==> bim (make distclean)"
+	@cd bim; make distclean
+	@echo "<== bim"
+	@echo "==> cmax (make distclean)"
+	@cd cmax; make distclean
+	@echo "<== cmax"
+	rm -f Makefile
+
+install:
+	@echo "==> max (make install)"
+	@cd max; make install
+	@echo "<== max"
+	@echo "==> mpp (make install)"
+	@cd mpp; make install
+	@echo "<== mpp"
+	@echo "==> bim (make install)"
+	@cd bim; make install
+	@echo "<== bim"
+	@echo "==> cmax (make install)"
+	@cd cmax; make install
+	@echo "<== cmax"
+
+##EOF##

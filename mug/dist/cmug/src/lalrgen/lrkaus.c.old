@@ -1,0 +1,870 @@
+/*
+ * (c) copyright 1989,1991 by Technische Universitaet Muenchen, Germany
+ *
+ *      This product is part of CMUG
+ *      CMUG is a part of the compiler writing system
+ *      MUG (Modularer Uebersetzer-Generator, TU Muenchen)
+ *
+ * Permission to use, duplicate or disclose this software must be
+ * obtained in writing. Requests for such permissions may be sent to
+ *
+ *      Prof. Dr. J. Eickel
+ *      Institut fuer Informatik
+ *      Technische Universitaet Muenchen
+ *      Postfach  20 24 20
+ *      Arcisstr. 21
+ *      D-8000 Muenchen 2
+ *      Germany
+ *
+ * No version of this implementation may be used or distributed for gain,
+ * all listings must contain our copyright notice, and the headings
+ * produced by MUG-Modules must contain the text "MUG" and "TU - Muenchen".
+ */
+
+
+/* ********************************************************************** */
+/* LRKaus.c   :                                                           */
+/* LR(k)-Parser-Generator                                                 */
+/* Modul : Ausgabe der Uebergangsmatrix                                   */
+/* Aenderung : 08.07.89, Ausgabe als Binaertabelle                        */
+/* Aenderung : 01.07.89, ueberarbeitet wg. LRKsim                         */
+/* Aenderung : 24.06.89, Vorbereitungen fuer DEFAULT                      */
+/* Aenderung : 9.3.89 , Ausgabebeschleunigung durch fputs                 */
+/* erstellt  : 23.1.89                                                    */
+/* ********************************************************************** */
+#ifdef __STDC__
+#include <stddef.h>
+#include <stdlib.h>
+#endif
+#include <stdio.h>         /* Deklarationen fuer E/A etc         */
+#ifdef AMIGA
+#include <time.h>          /* Systemzeit                         */
+#include <string.h>        /* Operationen auf char *             */
+#else
+#include <sys/types.h>
+#include <time.h>          /* Systemzeit                         */
+#ifdef hpux
+#include <string.h>
+#else
+#include <strings.h>
+#endif
+#endif
+#include "defs.h"          /* diverse unspezifische Definitionen */
+#include "magics.h"        /* magische Woerter (Simsalabim)      */
+#include "checks.h"        /* Laufzeitueberpruefungen            */
+#include "site.h"          /* Maschinenabhaengige Deklarationen  */
+#include "lrkfiles.h"      /* Deklarationen Dateimodul           */
+#include "listen.h"        /* Deklarationen Listenverwaltung     */
+#include "grammar.h"       /* Datenstrukturen der Grammatik      */
+#include "lrkzust.h"       /* Deklarationen Zustandsmodul        */
+#include "lrkdec.h"        /* Deklarationen Dekodermodul         */
+#include "lrkmat.h"        /* Deklarationen Berechnungsmodul     */
+#include "lrkaus.h"        /* Deklarationen Ausgabemodul         */
+
+/* ----------------------------------------------------------------------- */
+/* #define INVLIST, wenn inverse Uebergangsliste (nonterminale Uebergaenge */
+/* bei Verwendung der -w Option ausgegeben werden sollen                   */
+/* ----------------------------------------------------------------------- */
+#undef INVLIST
+
+/* ========================================================================= */
+/* Programm-globale Variablen                                                */
+/* ========================================================================= */
+extern Grammar g;            /* bearbeitete Grammatik                        */
+extern NuebRec *nontinvuebs; /* Array der Zustaende zu Nonterminalen         */
+extern Zustnr  nextzustnr;   /* maximal zu vergebene Zustandsnummer + 1      */
+extern int  gargc;           /* Anzahl Komandozeilenargumente                */
+extern char **gargv;         /* Werte Komandozeilenargumente                 */
+int    sparueb;              /* Anzahl durch DEFAULT gesparte Uebergaenge    */
+
+/* ---------------------------------------------------- */
+/* moegliche Datentypen fuer die generierte Tabelle     */
+/* ---------------------------------------------------- */
+typedef int Tabtyp;
+#define uint8 0
+#define uint16  1
+#define uint32  2
+
+  /* Laengenangabe der Typen          */
+static Uint8 tlen[] = {sizeof(Uint8),sizeof(Uint16),sizeof(Uint32)};
+
+/* Ausgabe 1-Byte-Laengenangabe in eine Datei */
+#define PUTTYP(typ,file)         fwrite((char *)&tlen[typ],sizeof(Uint8),1,file);
+
+static Tabtyp termtyp;          /* Tabellentyp fuer Terminalzeichen        */
+static Tabtyp nonttyp;          /* Tabellentyp fuer Nonterminalzeichen     */
+static Tabtyp zusttyp;          /* Tabellentyp fuer Zustaende              */
+static Tabtyp prodtyp;          /* Tabellentyp fuer Produktionen           */
+static Tabtyp uebtyp;           /* Tabellentyp fuer Uebergaenge            */
+
+
+/* Ausgabe der jeweiligen Uebergaenge im gewuenschten Typen */
+static Uint32 shiftmsk[] = {0x80L,0x8000L,0x80000000L};
+static Uint32 redmsk[]   = {0xC0L,0xC000L,0xC0000000L};
+static Uint32 spontmsk[] = {0x40L,0x4000L,0x40000000L};
+
+#define PUTSHIFT(zust,typ,file)  puttab(shiftmsk[typ] | \
+                                        (Uint32)(zust),typ,file)
+#define PUTREDUCE(prod,typ,file) puttab(redmsk[typ] | \
+                                        (Uint32)(prod),typ,file)
+#define PUTSPONT(prod,typ,file)  puttab(spontmsk[typ] | \
+                                        (Uint32)(prod),typ,file)
+#define PUTERROR(typ,file)       puttab((Uint32)0,typ,file)
+
+#define PUTSHIFTRED(ueb,typ,file) {if (ZUSTNR(*UEBSZUST(ueb)) != UNDEFZUSTNR)\
+          PUTSHIFT(ZUSTNR(*UEBSZUST(ueb)),typ,file); else\
+          PUTREDUCE(prodNr(POSITEM(*FIRSTPOS(*UEBSZUST(ueb)))),typ,file);}
+
+
+/*====================================================================== */
+/* schnelle Ausgabe einer Hexadezimalzahl in die Ausgabedatei             */
+/*====================================================================== */
+static char hzif[] = "0123456789ABCDEF";      /* moegliche Ziffern          */
+static char zbuf[] = "          L";           /* reicht fuer jede long-Zahl */
+static char *zbufend = &zbuf[9];              /* letzte Ziffer im Puffer    */
+#ifdef __STDC__
+static void fputl(long unsigned int z, FILE *af)
+                            /* auszugebende Zahl                   */
+                            /* Ausgabedatei                        */
+#else
+static void fputl(z,af)
+ unsigned long z;           /* auszugebende Zahl                   */
+ FILE *af;                  /* Ausgabedatei                        */
+#endif
+ {
+  register unsigned long r; /* Rest der auszugebenden Zahl         */ 
+  register char *pz;        /* Zeiger auf Ziffer im Puffer         */
+  register char *hz;        /* Zeiger auf Ziffer in hzif           */
+
+  if (r = z)                /* Zahl ungleich 0                     */
+   {
+    hz = hzif;              /* Zeiger auf moegliche Ziffern        */
+    pz = zbufend;           /* Zeiger auf letzte Ziffer            */
+    while (r)               /* solange fuehrende Ziffern vorhanden */
+     {
+      *pz-- = hz[r & 15];   /* eine Ziffer ausgeben                */
+      r = r >> 4;           /* fuehrende Stellen berechnen         */
+     }
+    *pz-- = 'x';            /* "0x" vorne anfuegen                 */
+    *pz   = '0';
+    fputs(pz,af);           /* konstruierte Zahl ausgeben          */
+   }
+  else 
+    fputs("0x0L",af);       /* Null direkt ausgeben                */
+ } /* fputl */
+
+/*====================================================================== */
+/* Ausgabe eines Tabellenwertes in einer gegebenen Typlaenge              */
+/*====================================================================== */
+#ifdef __STDC__
+static void puttab(Uint32 wert, Tabtyp typ, FILE *af)
+                            /* auszugebender Wert                  */
+                            /* zu verwendender Typ                 */
+                            /* Ausgabedatei                        */
+#else
+static void puttab(wert,typ,af)
+ Uint32 wert;               /* auszugebender Wert                  */
+ Tabtyp typ;                /* zu verwendender Typ                 */
+ FILE *af;                  /* Ausgabedatei                        */
+#endif
+ {
+  Uint8  uint8buf;   /* Ausgabepuffer fuer Uint8            */
+  Uint16 uint16buf;  /* Ausgabepuffer fuer Uint16           */
+  Uint32 uint32buf;  /* Ausgabepuffer fuer Uint32           */
+
+  switch(typ)
+   {
+    case uint8:
+               uint8buf = (unsigned char)wert;         
+               fwrite((char *)&uint8buf,sizeof(Uint8),1,af);
+               break;
+    case uint16:
+               uint16buf = (unsigned short)wert;         
+               fwrite((char *)&uint16buf,sizeof(Uint16),1,af);
+               break;
+    case uint32:
+               uint32buf = (unsigned long)wert;         
+               fwrite((char *)&uint32buf,sizeof(Uint32),1,af);
+               break;
+    default:
+               break;
+   }
+ } /* puttab */
+
+/*====================================================================== */
+/* bestimmt einen fuer den gegebenen Bereich adaequaten Datentypen        */
+/* Ausgabe : Zeichenreihe fuer die gewaehlte C-Datenstruktur              */
+/*           und Laengegangabe in Bytes fuer den Interpreter              */
+/*====================================================================== */
+#ifdef __STDC__
+static Tabtyp getTyp(long unsigned int werte)
+                               /* Anzahl der Werte des Datentypen */
+#else
+static Tabtyp getTyp(werte)
+ unsigned long werte;          /* Anzahl der Werte des Datentypen */
+#endif
+ {
+  if (werte <= 256L)           /* 8 bit reichen                   */
+    return(uint8);
+  else if (werte <= 65536L)    /* nehmen wir halt 16 bit          */
+    return(uint16);
+  else 
+    return(uint32);            /* allen Prospekt, 32 bit noetig ! */
+ } /* getTyp */
+
+/*====================================================================== */
+/* Bestimmt die Datentypen in der generierten Tabelle und gibt sie aus    */ 
+/* Ausgabe jeweils ein typedef fuer den Datentyp und eine Zeichenreihe    */
+/* zur Ueberpruefung, ob der passende Interpreter gelinkt wurde           */
+/* sowie die verwendetet Bereiche des Datentyps                           */
+/*====================================================================== */
+#ifdef __STDC__
+static void writeTypen(FILE *af)
+{
+#else
+static void writeTypen(af)
+ FILE *af;
+ {
+#endif
+  Uint32 werte;                 /* Wertebereich Datentyp           */
+
+  /* ------------------------------------ */
+  /* Datentyp fuer Terminalzeichen : Term */
+  /* ------------------------------------ */
+  termtyp = getTyp((Uint32)(MAXT - MINT + 1));
+  PUTTYP(termtyp,af);
+  puttab((Uint32)(MAXT - MINT),termtyp,af);
+
+  /* --------------------------------------- */
+  /* Datentyp fuer Nonterminalzeichen : Nont */
+  /* --------------------------------------- */
+  nonttyp = getTyp((Uint32)(MAXN - MINN + 1));
+  PUTTYP(nonttyp,af);
+  puttab((Uint32)(MAXN - MINN),nonttyp,af);
+
+  /* --------------------------------------- */
+  /* Datentyp fuer Zustaende    : Zust       */
+  /* --------------------------------------- */
+  zusttyp = getTyp((Uint32)(nextzustnr));
+  PUTTYP(zusttyp,af);
+  puttab((Uint32)(nextzustnr-1),zusttyp,af);
+
+  /* ---------------------------------------------------------------- */
+  /* Datentyp fuer Produktionen    : Prod (einschliesslich UNDEFPROD) */
+  /* ---------------------------------------------------------------- */
+  prodtyp = getTyp((Uint32)(MAXP - MINP + 2));
+  PUTTYP(prodtyp,af);
+  puttab((Uint32)(MAXP - MINP),prodtyp,af);
+
+  /* ----------------------------------------- */
+  /* Datentyp fuer Uebergangsinformation : Ueb */
+  /* Platz fuer : Produktion oder Zustand und  */
+  /* 2 bit fuer Uebergangsarten                */
+  /* ----------------------------------------- */
+  if ( (werte = (Uint32)(MAXP - MINP + 2)) < (Uint32)nextzustnr)  
+    werte = (Uint32)nextzustnr;
+  uebtyp = getTyp(werte<<2);
+  PUTTYP(uebtyp,af);
+
+ } /* writeTypen */
+
+/*====================================================================== */
+/* Berechnen der Indices des Stringpools und Ausgabe                      */
+/*====================================================================== */
+#ifdef __STDC__
+static void writeStrings(FILE *af)
+{
+#else
+static void writeStrings(af)
+ FILE *af;
+ {
+#endif
+  Tabtyp strtyp;                 /* Typ fuer Stringindex         */
+  register Uint32 strind;        /* Index im strpool             */
+
+
+  /* ------------------------------------------------------------ */
+  /* terminale Stringtabelle ausgeben                             */
+  /* ------------------------------------------------------------ */
+  strind = 0;                    /* Startindex                    */
+  /* ------------------------------------------------------------ */
+  /* Gesamtlaenge der Tabelle bestimmen                           */
+  /* ------------------------------------------------------------ */
+  {
+    register Term t;
+    FOREACHTERM(t)
+     {
+      strind += strlen(TERMNAME(t));  /* Laenge String  */
+      strind++;                       /* + 0-Byte       */
+     }
+  }
+  strtyp = getTyp(strind);            /* Typen bestimmen */
+  PUTTYP(strtyp,af);                  /* und ausgeben    */
+  puttab((Uint32)(strind-1),strtyp,af);
+
+  strind = 0;                    /* Startindex                   */
+  /* ------------------------------------------------------------ */
+  /* Indices der Terminalsymbole ausgeben                         */
+  /* ------------------------------------------------------------ */
+  {
+    register Term t;
+    FOREACHTERM(t)
+     {
+      puttab(strind,strtyp,af);
+      strind += strlen(TERMNAME(t));  /* Laenge String  */
+      strind++;                       /* + 0-Byte       */
+     }
+  }
+  /* ------------------------------------------------------------ */
+  /* Namen der Terminalsymbole ausgeben                           */
+  /* ------------------------------------------------------------ */
+  {
+    register Term t;
+    FOREACHTERM(t)
+     {
+      fputs(TERMNAME(t),af);         /* String  */
+      putc('\0',af);                 /* beenden */
+     }
+  }
+
+  /* ------------------------------------------------------------ */
+  /* nonterminale Stringtabelle ausgeben                          */
+  /* ------------------------------------------------------------ */
+  strind = 0;                    /* Startindex                   */
+  /* ------------------------------------------------------------ */
+  /* Gesamtlaenge der Tabelle bestimmen                           */
+  /* ------------------------------------------------------------ */
+  {
+    register Nont n;
+    FOREACHNONT(n)
+     {
+      strind += strlen(NONTNAME(n));  /* Laenge String  */
+      strind++;                       /* + 0-Byte       */
+     }
+  }
+  strtyp = getTyp(strind);            /* Typen bestimmen */
+  PUTTYP(strtyp,af);                  /* und ausgeben    */
+  puttab((Uint32)(strind-1),strtyp,af);
+
+  strind = 0;                    /* Startindex                   */
+  /* ------------------------------------------------------------ */
+  /* Indices der Nontterminalsymbole ausgeben                     */
+  /* ------------------------------------------------------------ */
+  {
+    register Nont n;
+    FOREACHNONT(n)
+     {
+      puttab(strind,strtyp,af);
+      strind += strlen(NONTNAME(n));  /* Laenge String  */
+      strind++;                       /* + 0-Byte       */
+     }
+  }
+  /* ------------------------------------------------------------ */
+  /* Namen der Nonterminalsymbole ausgeben                        */
+  /* ------------------------------------------------------------ */
+  {
+    register Nont n;
+    FOREACHNONT(n)
+     {
+      fputs(NONTNAME(n),af);         /* String  */
+      putc('\0',af);                 /* beenden */
+     }
+  }
+
+ } /* writeStrings */
+
+/* ============================================================= */
+/* Ausgabe der Uebergaenge mit Terminalzeichen                   */
+/* ============================================================= */
+#ifdef __STDC__
+static void writeTermuebs(FILE *adatei)
+{
+#else
+static void writeTermuebs(adatei)
+ FILE *adatei;
+ {
+#endif
+  register Uint32 termind;  /* Index in Tabelle der terminalen Uebergaenge */
+  register Zustand zust;    /* betrachteter Zustand, aus dem Uebergang     */
+  Tabtyp   tindtyp;         /* Typ fuer Indices in Terminalueb-Tabelle     */
+  register Ueberg   ueb;    /* auszugebender Uebergang                     */
+
+ /* ------------------------------------------------------------ */
+ /* erster Durchlauf durch die terminalen Uebergaenge            */
+ /* Default's bestimmen (Strategie : first fit)                  */
+ /* ------------------------------------------------------------ */
+  termind = 0;                        /* erster vergebener Index            */
+  FOREACHLISTEL(firstZustand(),zust)  /* alle Zustaende bearbeiten          */
+    if (ZUSTNR(*zust) != UNDEFZUSTNR) /* Zustand wird tatsaechlich benutzt  */
+     {      
+      int     dueb;           /* DEFAULT-Uebergang vorhanden ?               */
+      Item    ditem;          /* Item zum DEFAULT-Uebergang                  */
+
+      TERMSTART(*zust) = termind; /* erstes Terminalzeichen                  */
+      dueb = FALSE;               /* noch keiner bekannt                     */
+      for (ueb = ZUSTTERMUEB(*zust);ueb != NULL;ueb = (Ueberg)LISTNEXT(*ueb))
+       {  /* alle terminalen Uebergaenge zu zust */
+        CHECKPT(ueb);
+        if (! dueb && UEBART(*ueb) == SPONTRED) /* Kandidat fuer DEFAULT      */
+         {
+          dueb  = TRUE;                     /* als DEFAULT verwenden          */
+          ditem = UEBRITEM(*ueb);           /* Item des Ueberganges merken    */ 
+          sparueb++;                        /* Statistik gesparte Uebergaenge */
+         }
+        else if (dueb && UEBART(*ueb) == SPONTRED &&
+                 UEBRITEM(*ueb) == ditem )  /* DEFAULT-Uebergang              */
+          sparueb++;                        /* Statistik gesparte Uebergaenge */
+        else /* Uebergang ist auszugeben */
+          termind++;                        /* naechster Tabellenindex        */
+       } /* alle terminalen Uebergaenge zu zust */
+      TERMENDE(*zust) = termind;          /* letzter vergebener Index       */
+      if (dueb) 
+        DEFAULT(*zust) = ditem;
+      else
+        DEFAULT(*zust) = UNDEFITEM;
+     } /* Zustand wird benutzt */
+  
+
+  tindtyp = getTyp(termind+1);          /* Typen bestimmen */
+  PUTTYP(tindtyp,adatei);               /* und ausgeben    */
+
+  puttab((Uint32)(termind-1),tindtyp,adatei);
+ /* ------------------------------------------------------------ */
+ /* Terminalsymbollisten ausgeben                                */
+ /* ------------------------------------------------------------ */
+  FOREACHLISTEL(firstZustand(),zust)  /* alle Zustaende bearbeiten           */
+    if (ZUSTNR(*zust) != UNDEFZUSTNR) /* Zustand wird tatsaechlich benutzt   */
+      for (ueb = ZUSTTERMUEB(*zust);ueb != NULL;ueb = (Ueberg)LISTNEXT(*ueb))
+       {  /* alle terminalen Uebergaenge zu zust */
+        CHECKPT(ueb);
+        if (UEBART(*ueb) != SPONTRED ||
+            UEBRITEM(*ueb) != DEFAULT(*zust) ) /* kein DEFAULT-Uebergang      */
+          puttab((Uint32)(UEBSYM(*ueb)-MINT),termtyp,adatei);
+       } /* alle terminalen Uebergaenge zu zust */
+
+ /* ------------------------------------------------------------ */
+ /* zweiter Durchlauf : codierte Uebergaenge ausgeben            */
+ /* ------------------------------------------------------------ */
+  FOREACHLISTEL(firstZustand(),zust)  /* alle Zustaende bearbeiten           */
+    if (ZUSTNR(*zust) != UNDEFZUSTNR) /* Zustand wird tatsaechlich benutzt   */
+     {      
+      for (ueb = ZUSTTERMUEB(*zust);ueb != NULL;ueb = (Ueberg)LISTNEXT(*ueb))
+       {  /* alle terminalen Uebergaenge zu zust */
+        CHECKPT(ueb);
+        if (UEBART(*ueb) != SPONTRED ||
+            UEBRITEM(*ueb) != DEFAULT(*zust) ) /* kein DEFAULT-Uebergang      */
+          if (UEBART(*ueb) == SHIFT)  
+            PUTSHIFTRED(*ueb,uebtyp,adatei)
+          else /* Spontred */
+            PUTSPONT(prodNr(UEBRITEM(*ueb)),uebtyp,adatei);
+       } /* alle terminalen Uebergaenge zu zust */
+     } /* Zustand wird benutzt */
+
+ /* ------------------------------------------------------------ */
+ /* dritter Durchlauf : Tabelle der Defaults ausgeben            */
+ /* ------------------------------------------------------------ */
+  FOREACHLISTEL(firstZustand(),zust)  /* alle Zustaende bearbeiten           */
+    if (ZUSTNR(*zust) != UNDEFZUSTNR) /* Zustand wird tatsaechlich benutzt   */
+      if (DEFAULT(*zust) != UNDEFITEM)
+        PUTSPONT(prodNr(DEFAULT(*zust)),uebtyp,adatei);
+      else
+        PUTERROR(uebtyp,adatei);
+
+ /* ------------------------------------------------------------ */
+ /* vierter Durchlauf : Indices ausgeben                        */
+ /* ------------------------------------------------------------ */
+  FOREACHLISTEL(firstZustand(),zust)  /* alle Zustaende bearbeiten           */
+    if (ZUSTNR(*zust) != UNDEFZUSTNR) /* Zustand wird tatsaechlich benutzt   */
+     {      
+      puttab((Uint32)(TERMSTART(*zust)),tindtyp,adatei);
+      puttab((Uint32)(TERMENDE(*zust)),tindtyp,adatei);
+     } /* Zustand wird benutzt */
+ } /* writeTermuebs */
+
+/* ============================================================= */
+/* Ausgabe der Uebergaenge mit Nonterminalzeichen                */
+/* ============================================================= */
+#ifdef __STDC__
+static void writeNontuebs(FILE *adatei)
+{
+#else
+static void writeNontuebs(adatei)
+ FILE *adatei;
+ {
+#endif
+  register Uint32  zustind; /* Index in Tabelle der nonterm. Uebergaenge   */
+  Tabtyp   nindtyp;         /* Typ fuer Indices in Nontermueb-Tabelle      */
+  register Ueberg  ueb;     /* auszugebender Uebergang                     */
+  register Nont    nont;
+
+ /* ------------------------------------------------------------ */
+ /* erster Durchlauf durch die nonterminalen Uebergaenge         */
+ /* Default's bestimmen (Strategie : first fit)                  */
+ /* Zustandslisten ausgeben                                      */
+ /* ------------------------------------------------------------ */
+  zustind = 0;
+  FOREACHNONT(nont)
+    /* if (nont != METAAXIOM) */ /* wird nie wirklich reduziert */
+     {
+      register Zustand dzust; /* Zustand, in den der Default-Uebergang shiftet */
+
+      CHECKPTN(nontinvuebs[nont-MINN]);
+      NONTINVVON(nont) = zustind;
+      if (NONTINVUEB(nont) != NULL) 
+       {
+        ueb = NONTINVUEB(nont);                   /* erster Uebergang         */
+        CHECKBED(UEBART(*ueb) == SHIFT); 
+        dzust = UEBSZUST(*ueb);                   /* als DEFAULT verwenden    */
+        while(ueb != NULL) 
+         { /* alle Uebergaenge mit diesem Nonterminal */
+          CHECKPT(ueb);
+          CHECKBED(UEBART(*ueb) == SHIFT);
+
+          if (UEBSZUST(*ueb) == dzust)            /* DEFAULT-Zustand          */
+            sparueb++;
+          else
+            zustind++;
+          CHECKPTN(NEXTNONT(*ueb));
+          ueb = NEXTNONT(*ueb);                   /* naechster Uebergang      */
+         } /* alle Uebergaenge mit diesem Nonterminal */
+       }   /* Uebergaenge vorhanden                   */
+      NONTINVBIS(nont) = zustind;
+     } /* FOREACHNONT */
+
+  nindtyp = getTyp(zustind+1);          /* Typen bestimmen */
+  PUTTYP(nindtyp,adatei);               /* und ausgeben    */
+
+  if (!zustind) /* Pseudoeintrag, um leere Tabelle zu vermeiden */
+   {
+    puttab((Uint32)0,nindtyp,adatei);   /* Laenge = 1 [0..0]    */
+    puttab((Uint32)0,zusttyp,adatei);   /* Pseudoeintrag        */
+   }
+  else
+   {
+    puttab((Uint32)(zustind-1),nindtyp,adatei);
+   /* ------------------------------------------------------------ */
+   /* Zustaende ausgeben                                           */
+   /* ------------------------------------------------------------ */
+    FOREACHNONT(nont)
+      /* if (nont != METAAXIOM)*/  /* wird nie wirklich reduziert */
+     {
+      register Zustand dzust; /* Zustand, in den der Default-Uebergang shiftet */
+ 
+      CHECKPTN(nontinvuebs[nont-MINN]);
+      if (NONTINVUEB(nont) != NULL) 
+       {
+        ueb = NONTINVUEB(nont);                   /* erster Uebergang         */
+        CHECKBED(UEBART(*ueb) == SHIFT); 
+        dzust = UEBSZUST(*ueb);                   /* als DEFAULT verwenden    */
+        while(ueb != NULL) 
+         { /* alle Uebergaenge mit diesem Nonterminal */
+          CHECKPT(ueb);
+          CHECKBED(UEBART(*ueb) == SHIFT);
+
+          if (UEBSZUST(*ueb) != dzust)            /* kein DEFAULT-Zustand     */
+            puttab(ZUSTNR(*UEBVON(*ueb)),zusttyp,adatei);
+          CHECKPTN(NEXTNONT(*ueb));
+          ueb = NEXTNONT(*ueb);                   /* naechster Uebergang      */
+         } /* alle Uebergaenge mit diesem Nonterminal */
+       }   /* Uebergaenge vorhanden                   */
+     } /* != METAAXIOM */
+   }
+
+ /* ------------------------------------------------------------ */
+ /* zweiter Durchlauf : codierte Uebergaenge ausgeben            */
+ /* ------------------------------------------------------------ */
+  FOREACHNONT(nont)
+    /*if (nont != METAAXIOM)*/  /* wird nie wirklich reduziert */
+   {
+    register Zustand dzust; /* Zustand, in den der Default-Uebergang shiftet */
+
+    CHECKPTN(nontinvuebs[nont-MINN]);
+    if (NONTINVUEB(nont) != NULL) 
+     {
+      ueb     = NONTINVUEB(nont);               /* erster Uebergang         */
+      CHECKBED(UEBART(*ueb) == SHIFT); 
+      dzust = UEBSZUST(*ueb);                   /* als DEFAULT verwenden    */
+      while(ueb != NULL) 
+       { /* alle Uebergaenge mit diesem Nonterminal */
+        CHECKPT(ueb);
+        CHECKPT(UEBVON(*ueb));
+        CHECKBED(UEBART(*ueb) == SHIFT);
+
+        if (UEBSZUST(*ueb) != dzust)       /* kein DEFAULT-Zustand          */
+          PUTSHIFTRED(*ueb,uebtyp,adatei);
+        CHECKPTN(NEXTNONT(*ueb));
+        ueb = NEXTNONT(*ueb);                   /* naechster Uebergang      */
+       } /* alle Uebergaenge mit diesem Nonterminal */
+     }   /* Uebergaenge vorhanden                   */
+   } /* != METAAXIOM */
+ /* ------------------------------------------------------------ */
+ /* dritter Durchlauf : Tabelle der Defaults ausgeben            */
+ /* ------------------------------------------------------------ */
+  FOREACHNONT(nont)
+  /* if (nont != METAAXIOM)*/  /* wird nie wirklich reduziert */
+   {
+    CHECKPTN(nontinvuebs[nont-MINN]);
+    if (NONTINVUEB(nont) == NULL) 
+      PUTERROR(uebtyp,adatei);
+    else
+      PUTSHIFTRED(*NONTINVUEB(nont),uebtyp,adatei); /* als DEFAULT verwenden    */
+   } /* != METAAXIOM */
+
+ /* ------------------------------------------------------------ */
+ /* vierter Durchlauf : Indices ausgeben                        */
+ /* ------------------------------------------------------------ */
+  FOREACHNONT(nont)
+   /* if (nont != METAAXIOM) */ /* wird nie wirklich reduziert */
+   {
+    puttab((Uint32)(NONTINVVON(nont)),nindtyp,adatei);
+    puttab((Uint32)(NONTINVBIS(nont)),nindtyp,adatei);
+   } /* != METAAXIOM */
+ } /* writeNontuebs */
+
+ /* ------------------------------------------------------------ */
+ /* linke Seiten und Laengen  der Produktionen ausgeben          */
+ /* ------------------------------------------------------------ */
+#ifdef __STDC__
+static void writeProds(FILE *adatei)
+{
+#else
+static void writeProds(adatei)
+ FILE *adatei;
+ {
+#endif
+  register Tabtyp plentyp;   /* Tabellentyp fuer Laengen rechter Seiten */
+  register Prod     p;
+  Uint32   maxplen; 
+  Uint32   plen; 
+
+  FOREACHPROD(p)
+    puttab((Uint32)(ITEMSYM(LHS(p))-MINN),nonttyp,adatei);
+
+  maxplen = 0;
+  FOREACHPROD(p)
+    if ((plen = ITEMLEN(LHS(p)) ) > maxplen)
+      maxplen = plen;
+
+  plentyp = getTyp(maxplen);
+  PUTTYP(plentyp,adatei);
+  FOREACHPROD(p)
+    puttab((Uint32)(ITEMLEN(LHS(p))),plentyp,adatei);
+
+ } /* writeProds */
+
+/*====================================================================== */
+/* Ausgabe der Uebergangsmatrix in die Datei adatei_name                  */
+/*   Rueckgabewert : TRUE, falls Ausgabe erfolgreich                      */
+/*                   FALSE, falls Fehler beim Ausgeben                    */
+/*====================================================================== */
+#ifdef __STDC__
+BOOL LRKmat_ausgabe(char *adatei_name)
+{
+#else
+BOOL LRKmat_ausgabe(adatei_name)
+ char *adatei_name;
+ {
+#endif
+  FILE     *adatei;        /* Handle fuer die Ausgabedatei                */
+  time_t   ausgzeit;       /* Uhrzeit der Ausgabe                         */
+
+  if ( (adatei = OpenFile(adatei_name,"w") ) == NULL)/* Datei oeffnen */
+   { /* Oeffnen nicht erfolgreich */
+    return(FALSE);
+   } 
+  
+ /* ------------------------------------------------------------ */
+ /* Kommentarzeile am Anfang ausgeben                            */
+ /* ------------------------------------------------------------ */
+  fputs(adatei_name,adatei);
+  fputs(" : LALR(1)-Mat ",adatei);
+  time(&ausgzeit);                             /* Interne Uhrzeit abspeichern */
+  fprintf(adatei," gen %.20s, ",ctime(&ausgzeit) );
+  {
+   int     arg;      
+
+   for (arg = 0; arg < gargc; arg++)
+    {
+     fputs(gargv[arg],adatei); 
+     putc(' ',adatei);
+    }
+  }
+  putc('\n',adatei);
+
+ /* ----------------------------------- */
+ /* Datentypen bestimmen und ausgeben   */
+ /* ----------------------------------- */
+  writeTypen(adatei);                 
+
+ /* ----------------------------------- */
+ /* terminale Uebergaenge ausgeben      */
+ /* ----------------------------------- */
+  writeTermuebs(adatei);
+
+ /* ----------------------------------- */
+ /* nonterminale Uebergaenge ausgeben   */
+ /* ----------------------------------- */
+  writeNontuebs(adatei);
+
+ /* ------------------------------------------------------------ */
+ /* Produktionen ausgeben                                        */
+ /* ------------------------------------------------------------ */
+  writeProds(adatei);
+
+ /* ------------------------------------------------------------ */
+ /* Strings fuer Terminale und Nonterminale ausgeben             */
+ /* ------------------------------------------------------------ */
+  writeStrings(adatei);
+
+  return(TRUE);
+ } /* LRKmat_ausgabe */
+
+/*====================================================================== */
+/* Ausgabe der Uebergangsmatrix in die Datei adatei_name                  */
+/*   Rueckgabewert : TRUE, falls Ausgabe erfolgreich                      */
+/*                   FALSE, falls Fehler beim Ausgeben                    */
+/*====================================================================== */
+#ifdef __STDC__
+BOOL LRKmat_ausgabe1(char *adatei_name)
+{
+#else
+BOOL LRKmat_ausgabe1(adatei_name)
+ char *adatei_name;
+ {
+#endif
+  FILE    *adatei;         /* Handle fuer die Ausgabedatei                */
+  Zustand zust;            /*Zustand, dessen Matrixzeile ausgegeben wird */
+  Ueberg  ueb;             /* auszugebender Uebergang                     */
+#ifdef INVLIST
+  Nont    nont;            /* Nonterminal in der inversen Liste           */
+#endif
+  time_t  ausgzeit;        /* Uhrzeit der Ausgabe                         */
+
+  if ( (adatei = OpenFile(adatei_name,"w") ) == NULL)/* Datei oeffnen */
+   { /* Oeffnen nicht erfolgreich */
+    return(FALSE);
+   } 
+  
+  fputs("Datei ",adatei);
+  fputs(adatei_name,adatei);
+  fputs(" : \n   Uebergangsmatrix fuer LALR(k)-Interpreter\n",adatei);
+  time(&ausgzeit);                             /* Interne Uhrzeit abspeichern */
+  fprintf(adatei,"   generiert : %.20s, Kommando :\n   ",ctime(&ausgzeit) );
+  {
+   int     arg;      
+
+   for (arg = 0; arg < gargc; arg++)
+    {
+     fputs(gargv[arg],adatei); 
+     putc(' ',adatei);
+    }
+  }
+  putc('\n',adatei);
+
+  FOREACHLISTEL(firstZustand(),zust)  /* alle Zustaende bearbeiten           */
+    if (ZUSTNR(*zust) != UNDEFZUSTNR) /* Zustand wird tatsaechlich benutzt   */
+     {      
+      int     dueb;           /* DEFAULT-Uebergang vorhanden                 */
+      Item    ditem;          /* Item zum DEFAULT-Uebergang                  */
+      Ueberg  next;           /* Nachfolger des auszugebenden Uebergangs     */
+      Position pos;           /* Position zum Uebergang                      */
+
+      fputs("--------------------------------------------------\n",adatei);
+      fprintf(adatei,"Zustand %ld :\n",(long)ZUSTNR(*zust));
+      FOREACHPOS(*zust,pos)
+       {
+        CHECKPT(pos);
+        fputs("  --> ",adatei);
+        fdecItem(adatei,POSITEM(*pos));
+        putc('\n',adatei);
+       }
+      /* ----------------------------------------- */
+      /* Nonterminale Uebergaenge ausgeben         */
+      /* ----------------------------------------- */
+      fputs("-- nonterminale Uebergaenge --\n",adatei);
+      for (ueb = ZUSTNONTUEB(*zust);ueb != NULL;ueb = next)
+       {
+        next = (Ueberg)LISTNEXT(*ueb);   /* naechster in der Liste           */
+        putc(' ',adatei);                /* kein Defaul bei Nonts            */
+        if (next != NULL && UEBSYM(*next) == UEBSYM(*ueb) )
+          putc('#',adatei);   /* Uebergangskonflikt */
+        else
+          putc(' ',adatei);   /* kein Konflikt      */
+        fdecUeb(adatei,ueb);  /* alle Uebergaenge   */
+       }
+      /* ----------------------------------------- */
+      /* terminale Uebergaenge ausgeben            */
+      /* ----------------------------------------- */
+      fputs("-- terminale Uebergaenge --\n",adatei);
+      /* ----------------------------------------- */
+      /* DEFAULT bestimmen (1.Bester)              */
+      /* ----------------------------------------- */
+      dueb = FALSE;  /* noch keiner gefunden */
+      for (ueb = ZUSTTERMUEB(*zust);ueb != NULL;ueb = (Ueberg)LISTNEXT(*ueb))
+       {
+        CHECKPT(ueb);
+        if (UEBART(*ueb) == SPONTRED)       /* Kandidat fuer DEFAULT          */
+         {
+          dueb  = TRUE;                     /* als DEFAULT verwenden          */
+          ditem = UEBRITEM(*ueb);           /* Item des Ueberganges merken    */ 
+          break;                            /* Suche beenden                  */
+         }
+       }
+      /* ----------------------------------------- */
+      /* Uebergaenge ausgeben, DEFAULT markieren   */
+      /* ----------------------------------------- */
+      for (ueb = ZUSTTERMUEB(*zust);ueb != NULL;ueb = next)
+       {
+        next = (Ueberg)LISTNEXT(*ueb);          /* naechster in der Liste     */
+        if (dueb && UEBART(*ueb) == SPONTRED &&
+            UEBRITEM(*ueb) == ditem )           /* DEFAULT-Uebergang          */
+          putc('!',adatei);                     /* als DEFAULT markieren      */
+        else if (UEBART(*ueb) == SPONTRED)      /* abgelehnter DEFAULT        */
+          putc('~',adatei);                     /* kein DEFAULT               */
+        else
+          putc(' ',adatei);                     /* kein Kanditat              */
+        if (next != NULL && UEBSYM(*next) == UEBSYM(*ueb) )
+          putc('#',adatei);                     /* Uebergangskonflikt         */
+        else
+          putc(' ',adatei);                     /* kein Konflikt              */
+        fdecUeb(adatei,ueb);                    /* Uebergang dekodieren       */
+       } /* for */
+     } /* Zustand wird benutzt */
+#ifdef INVLIST
+  fputs("-----------------\nInverse Liste der nonterminalen Uebergaenge :\n",
+        adatei);
+  FOREACHNONT(nont)
+    if (nont != METAAXIOM)  /* wird nie wirklich reduziert */
+     {
+      register Zustand dzust; /* Zustand, in den der Default-Uebergang shiftet */
+ 
+      fputs("....\n",adatei);
+      CHECKPTN(nontinvuebs[nont-MINN]);
+      if (NONTINVUEB(nont) == NULL) 
+        fprintf(adatei,"keine Uebergaenge mit %s\n",decSym(nont));
+      else
+       {
+        ueb     = NONTINVUEB(nont);               /* erster Uebergang         */
+        CHECKBED(UEBART(*ueb) == SHIFT); 
+        dzust = UEBSZUST(*ueb);                   /* als DEFAULT verwenden    */
+        while(ueb != NULL) 
+         { /* alle Uebergaenge mit diesem Nonterminal */
+          CHECKPT(ueb);
+          CHECKPT(UEBVON(*ueb));
+          CHECKBED(UEBART(*ueb) == SHIFT);
+
+          fprintf(adatei,"Zustand %ld :\n",(long)ZUSTNR(*UEBVON(*ueb)) );
+          if (UEBSZUST(*ueb) == dzust)            /* DEFAULT-Zustand          */
+            putc('!',adatei);                     /* als DEFAULT markieren    */
+          else
+            putc('~',adatei);                     /* kein DEFAULT             */
+          fdecUeb(adatei,ueb);                    /* Uebergang dekodieren     */
+          CHECKPTN(NEXTNONT(*ueb));
+          ueb = NEXTNONT(*ueb);                   /* naechster Uebergang      */
+         } /* alle Uebergaenge mit diesem Nonterminal */
+       }   /* Uebergaenge vorhanden                   */
+     } /* != METAAXIOM */
+#endif /* INVLIST */
+  return(TRUE);
+ } /* LRKmat_ausgabe1 */
+

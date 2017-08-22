@@ -1,0 +1,144 @@
+
+\section{Das Node Widget}
+
+\begin{description}
+
+\item[Name] 
+   {\bf:\\}
+   Node Widget --- Knoten des Attributbaumes der mit allen drei Maustasten 
+   bedient werden kann.
+
+\item[Synopsis]
+   {\bf:\\}
+   \begin{tabular}{ll}
+   {\bf Public Headers:} & {\it $<$Node.h$>$} \\
+   {\bf Private Header:} & {\it $<$NodeP.h$>$} \\
+   {\bf Class Name:} & Node \\
+   {\bf Class Pointer:} & {\tt nodeWidgetClass} \\
+   {\bf Instantiation:} & 
+		 {\tt widget = XtCreateWidget(name,nodeWidget,Class,...)}
+   \end{tabular}
+
+\item[Klassenhierarchie]
+   {\bf:\\}
+   Core$\rightarrow$ Composite$\rightarrow$ Node
+
+\item[Beschreibung]
+   {\bf:\\}
+   Das Node Widget ist ein reines Layout Widget und wurde zur 
+   einfacheren Handhabung der attributierten 
+   Knoten in einem Syntaxbaum entwickelt. Es unterst"utzt das Darstellen
+   von verschatteten Unterb"aumen und markierten Knoten,
+   sowie das Anzeigen bzw. Unterdr"ucken
+   der zum Knoten geh"orenden Attribute. Das Node Widget erwartet vom
+   Anwender ein Unterwidget, welches die darzustellenden Attribute enth"alt.
+   F"ur die Benutzerkommunikation wurde das Command Widget benutzt, wobei
+   die Translation Tabelle f"ur die Unterst"utzung aller drei Maustasten
+   erweitert wurde.
+
+\item[Resourcen]
+   {\bf:\\}
+   \begin{tabular}{l|l|l|p{3cm}}
+   Name({\tt XtN...}) & Typ & Default & Beschreibung \\ \hline
+   {\tt XtNcallback} & {\tt XtCallbackList} & {\tt NULL} & 
+   Callback f"ur Anklicken des Buttons. \\
+   {\tt XtNcommandButton} & {\tt Widget} & Widget ID &
+   Widget ID des Command Buttons. \\
+   {\tt XtNforeground} & {\tt Pixel} & {\tt XtDefaultForeground} &
+   Farbe des Vordergrundes. \\
+   {\tt XtNhiddenTree} & {\tt Boolean} & {\tt FALSE} & 
+   Gibt an ob der Knoten Wurzel eines verschatteten Unterbaums ist. \\
+   {\tt XtNhighlightWidth} & {\tt Dimension} & {\tt 2} &
+   Linienst"arke der Umrandung beim Hervorheben. \\
+   {\tt XtNlabel} & {\tt String} & ''Node`` &
+   Text im Button. \\
+   {\tt XtNlineWidth} & {\tt Dimension} & {\tt 1} &
+   Linienst"arke der Umrandung. \\
+   {\tt XtNmarked} & {\tt Boolean} & {\tt FALSE} &
+   Gibt an ob der Knoten als markiert dargestellt werden soll. \\
+   {\tt XtNshowAttributes} & {\tt Boolean} & {\tt FALSE} &
+   Gibt an ob das Attributwidget des Knotens angezeigt werden soll.
+   \end{tabular}
+
+\item[Layout]
+   {\bf:\\}
+   Ein Knoten wird immer durch einen Button dargestellt, der mit
+   allen drei Maustasten bedient werden kann.
+   Das Layout des Node Widgets kann aber auch durch die Werte der Resourcen 
+   {\tt XtNhiddenTree}, {\tt XtNmarked} und {\tt XtNshow\-Attributes}
+   ver"andert werden.
+   Wenn ein Wert mittels {\tt XtSetValue()} gesetzt wurde, 
+   wird automatisch ein Update der Widgetdarstellung durchgef"uhrt.
+
+   Die Belegungen haben folgende Auswirkungen auf die Darstellung:
+   \begin{description}
+   \item[{\tt XtNhiddenTree}:]
+      Falls {\tt XtNhiddenTree} mit dem {\tt TRUE} belegt wurde, 
+      wird der Knoten unten um ein Dreieck erweitert.
+   \item[{\tt XtNmarked}:]
+      Falls {\tt XtNmarked} mit dem Wert {\tt TRUE} belegt wurde,
+      wird der Button markiert -- d.h. Fordergrund- und Hintergrundfarbe
+      wird vertauscht -- dargestellt.
+   \item[{\tt XtNshowAttributes}:]
+      Falls {\tt XtNshowAttributes} mit dem Wert {\tt TRUE} belegt wurde,
+      wird oberhalb des Buttons das vom Anwender bereitgestellte
+      Attributwidget angezeigt. 
+      {\bf Achtung:} {\tt XtNshowAttributes} darf nicht mit {\tt TRUE} 
+      belegt werden, wenn noch kein Attributwidget als ''Child``
+      des Node Widgets generiert wurde.
+   \end{description}
+
+\item[Translations und Actions]
+   {\bf:\\}
+   Das Node Widget selber besitzt keine eigene Translation Table.
+
+   Die folgende Tabelle beschreibt die Translation Table des Command Buttons:
+
+   \begin{tabular}{ll} 
+   {\tt $<$Btn1Down$>$} & {\tt : set()} \\
+   {\tt $<$Btn1Up$>$} & {\tt : notifyNode(1) unset()} \\
+   {\tt $<$Btn2Down$>$} & {\tt : set()} \\
+   {\tt $<$Btn2Up$>$} & {\tt : notifyNode(2) unset()} \\
+   {\tt $<$Btn3Down$>$} & {\tt : set()} \\
+   {\tt $<$Btn3Up$>$} & {\tt : notifyNode(3) unset()} \\
+   {\tt $<$EnterWindow$>$} & {\tt : highlightNode() highlight()} \\
+   {\tt $<$LeaveWindow$>$} & {\tt : unhighlightNode() reset()}
+   \end{tabular}
+
+   Um die Translation Table zu ver"andern mu"s mittels {\tt XtGetValue()}
+   die Widget ID des Command Buttons aus der Resource {\tt XtNcommandButton}
+   ausgelesen werden. Danach kann dann die Translation Table in "ublicher
+   Art und Weise mit der ID des Command Buttons ver"andert werden.
+   Die Funktionen {\tt set()}, {\tt unset()}, {\tt highlight()} und 
+   {\tt reset()} wurden vom Command Widget "ubernommen. 
+   Hinzugekommen sind die Funktionen {\tt notifyNode()}, 
+   {\tt highlightNode()} und {\tt unhighlightNode()}.
+   Folgende Tabelle beschreibt ihre Wirkung:
+
+   \begin{description}
+   \item[{\tt notifyNode()}:]
+      F"uhrt die in der Callback Liste {\tt XtNcallback} eingeh"angten
+      Funktionen aus, wobei der Wert des Arguments {\tt call\_data}
+      der Integerwert des Parameters der Funktion {\tt notifyNode()}
+      ist.
+   \item[{\tt highlightNode()}:]
+      Sorgt f"ur ein Neuzeichnen des Node Widgets, wobei die Linienst"arke
+      durch den Wert in {\tt XtNhighlightWidth} bestimmt wird.
+   \item[{\tt unhighlightNode()}:]
+      Sorgt f"ur ein Neuzeichnen des Node Widgets, wobei die Linienst"arke
+      durch den Wert in {\tt XtNlineWidth} bestimmt wird.
+   \end{description}
+
+\item[Callback Parameter]
+   {\bf:\\}
+   Das Node Widget unterst"utzt nur die unter {\tt XtNcallback} 
+   eingehaengten Callback Funktionen. Bei unver"anderter Translation Tabelle
+   wird dem {\tt call\_data} Argument die Nummer der jeweiligen Maustaste
+   als Integerwert "ubergeben.
+   Auf den Wert kann mittels
+
+   {\tt int botton\_number = (int) call\_data;}
+
+   zugegriffen werden.
+\end{description}
+

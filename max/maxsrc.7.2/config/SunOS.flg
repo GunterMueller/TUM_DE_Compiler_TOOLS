@@ -1,0 +1,13 @@
+
+#verwendete Kommandos
+CP     = cp
+RM     = rm -rf
+MAKE   = make
+CHMOD  = chmod
+
+#C-Compiler
+CC              = gcc
+INCLUDES        =
+DEFINES         = -DSUNOS4 -DNO_BROWSER -DEXIT_SUCCESS=0 -DEXIT_FAILURE=1
+DEBUG           = 
+CFLAGS		= $(DEFINES) $(DEBUG) $(INCLUDES)

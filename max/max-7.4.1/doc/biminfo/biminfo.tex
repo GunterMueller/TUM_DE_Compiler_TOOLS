@@ -1,0 +1,58 @@
+
+\documentstyle[a4,german,11pt]{article}
+
+\germanTeX
+
+\pagestyle{plain}
+
+\begin{document}
+
+\title{
+Fortgeschrittenenpraktikum\\
+\vspace*{1em}
+{\em maxbrowse} -\\
+Ein flexibler Browser f"ur das MAX-System}
+
+\author{
+  Andreas Graf
+\and
+  Boris Reichel
+\and
+  Stefan Duschl}
+
+\maketitle
+
+{\bf Aufgabenstellung:} F"ur das compilererzeugende System MAX ist
+ein graphischer Browser zu entwerfen und zu implementieren, der
+es erm"oglicht, attributierte Parseb"aume hypertextartig zu betrachten.\\[0.5cm]
+
+
+{\bf Problematik:} Die auftretenden Schwierigkeiten sind:
+\begin{itemize}
+	\item Zur Visualisierung kann nur beschr"ankt auf existierende
+		Widget-klassen zur"uckgegriffen werden,
+	\item Zur Laufzeit des Zielcompilers werden f"ur die Visualisierung
+	     Informationen ben"otigt, die nicht mehr explizit zur Verf"ugung
+		stehen,
+	\item Attribute eines Knotens k"onnen Terme sein. Diese Terme werden
+		wiederum als B"aume dargestellt. Die genaue Struktur eines
+		derartigen Baums steht erst nach der Phase der Attributauswertung
+		fest.
+\end{itemize}\par
+
+{\bf L"osungsansatz:} Die einzelnen Punkte wurden mit folgenden Ans"atzen gel"ost:
+\begin{itemize}
+	\item Neue Widgetklassen mit den f"ur den Browser n"otigen Eigenschaften
+		wurden implementiert.
+	\item Bei der Erzeugung des Zielcompilers werden die ben"otigten Informationen
+		in den Quellcode des Zielcompilers aufgenommen und stehen somit
+		permanent zur Verf"ugung.
+	\item Bei Erzeugung des Baumes wird die Struktur der Termattribute mit Hilfe
+		eines Parsers analysiert und mit Hilfe der gewonnenen Informationen
+		der zu visualisierende Unterbaum erzeugt.
+\end{itemize}\par
+\end{document}
+
+
+
+

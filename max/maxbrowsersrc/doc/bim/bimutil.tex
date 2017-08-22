@@ -1,0 +1,147 @@
+\section{Funktionsbeschreibung des Moduls {\tt bim\_util.c}}
+
+\begin{description}
+
+\item[\tt Bim\_IsOfSort
+]{\bf :\\}
+Stellt fest, ob ein Browserknoten von einer bestimmten Sorte
+ ist. Dazu wird der Sortenname des Knotens mit dem Parameter verglichen.
+ Stimmen diese nicht "uberein, so werden die Sortennamen der Eltern
+ verglichen.
+ \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE * : Browserknoten, dessen Sorte "uberpr"uft werden soll.
+char * name: Sortenname, auf den "uberpr"uft werden soll.
+
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item int:	1 - Ist von dieser Sorte  \\
+0 - Nicht von dieser Sorte
+
+\end{itemize}
+\item[\tt Bim\_CopyMaxTree\_Do
+]{\bf :\\}
+Kopiert einen Browserbaum.
+  \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE * tree: Baum der kopiert werden soll.
+\item MAX\_NODE * parent: Knoten, den der neue Baum als Vater erhalten
+soll.
+
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item MAX\_NODE * : Kopie des Baumes unter * tree, mit * parent als
+Vater.
+
+\end{itemize}
+
+\item[\tt sort\_sort\_names
+]{\bf :\\}
+Sortiert eine Liste von Strings alphabetisch. Die Liste muss
+ mit einem NULL-Pointer abgeschlossen sein.
+  \\
+IN:
+\begin{itemize}
+   \item char * list\_of\_sorts[ ] : Liste von Strings
+
+\end{itemize}
+\item[\tt Bim\_NumberOfSorts
+]{\bf :\\}
+Ermittelt die Anzahl der Sorten in der Grammatik
+  \\
+\item[\tt Bim\_NumberOfAttributes
+]{\bf :\\}
+Ermittelt die Anzahl der Attribute in der Grammatik
+  \\
+OUT:
+\begin{itemize}
+   \item int : Anzahl der Attribute
+
+\end{itemize}
+
+\item[\tt Bim\_ListOfAttributes
+]{\bf :\\}
+Gibt die sortierte Liste aller Attribute zur"uck.
+  \\
+OUT:
+\begin{itemize}
+   \item char **: Liste der Attributnamen
+
+\end{itemize}
+
+\item[\tt Bim\_ListOfSorts
+]{\bf :\\}
+Gibt die sortierte Liste aller Sortennamen zur"uck.
+  \\
+OUT:
+\begin{itemize}
+   \item char **: Liste der Sortennamen
+
+\end{itemize}
+
+\item[\tt Bim\_UpdateAttributes
+]{\bf :\\}
+Stellt beim ersten Erzeugen des Browserbaums die richtigen
+ Knotenverweise her. Dazu wird die Tabelle der MAX-Knoten/Browser-Knoten
+ Abbildungen herangezogen.
+  \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE * tree: Zu durchlaufender Baum
+\item MAX\_NODE * root: obsolet
+
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item MAX\_NODE * : Wie Eingabe * tree.
+
+\end{itemize}
+
+\item[\tt ClearOriginNode
+]{\bf :\\}
+Setzt in einem Baum den Wert von origin auf NULL. Dies ist
+ vor dem Anpassen der Attribute nach Kopieren des Baums
+ notwendig.
+  \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE * tree: Baum
+
+\end{itemize}
+\item[\tt Bim\_UpdateAttributesOnCopy
+]{\bf :\\}
+Nach dem Kopieren die Knotenverweise des Baums anpassen. Dazu
+ wird das Element {\tt origin} ben"otigt, da\3 beim Kopieren gesetzt
+ wurde.
+  \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE * tree: Baum
+
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item MAX\_NODE *: Wie Eingabe
+
+\end{itemize}
+
+\item[\tt Bim\_CopyMaxTree
+]{\bf :\\}
+Kopiere einen Browserbaum. Setze dazu im Ursprungsbaum alle
+ {\tt orogin\_node} auf NULL, kopiere und korrigiere die Attributverweise
+  \\
+IN:
+\begin{itemize}
+   \item MAX\_NODE * tree: Zeiger auf Baum
+
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item MAX\_NODE *: neuer Baum.
+
+\end{itemize}
+\end{description}

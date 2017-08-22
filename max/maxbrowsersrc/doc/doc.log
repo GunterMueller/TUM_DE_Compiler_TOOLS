@@ -1,0 +1,1034 @@
+This is TeX, C Version 3.14t3 (format=lplain 94.9.27)  12 APR 1995 11:33
+**doc
+(doc.tex
+LaTeX Version 2.09 <25 March 1992>
+(/usr/local/dist/DIR/TeX/lib/inputs/latex/article.sty
+Standard Document Style `article' <14 Jan 92>.
+(/usr/local/dist/DIR/TeX/lib/inputs/latex/art11.sty)
+\c@part=\count79
+\c@section=\count80
+\c@subsection=\count81
+\c@subsubsection=\count82
+\c@paragraph=\count83
+\c@subparagraph=\count84
+\c@figure=\count85
+\c@table=\count86
+)
+(/usr/local/dist/DIR/TeX/lib/inputs/misc/a4.sty
+Style option `A4' 1.2a <30 Nov 90> (NP and JLB)
+English documentation   <26 Feb 90> (JLB)
+)
+(/usr/local/dist/DIR/TeX/lib/inputs/latex/german.sty
+Document Style Option `german' Version 2.4a of 12 Apr 1992
+\U@D=\dimen99
+)
+(/usr/local/dist/DIR/TeX/lib/inputs/texps/psfig.tex
+\psfc@a=\count87
+\psfc@b=\count88
+\psfc@c=\count89
+\psfc@d=\count90
+\psfc@e=\count91
+\psfc@f=\count92
+\psfc@g=\count93
+\psfc@h=\count94
+\psfc@i=\count95
+\psfc@j=\count96
+\psscale@count=\count97
+\psfigtoks@=\toks16
+\psfig@dimen=\dimen100
+\@unused=\write3
+
+psfig/tex 1.4 / TeXPS
+\ps@stream=\read1
+)
+No file doc.aux.
+[1
+
+]
+No file doc.toc.
+\tf@toc=\write4
+[2] (Node/Node.tex
+Overfull \hbox (50.56104pt too wide) in paragraph at lines 12--21
+[] 
+
+\hbox(36.73747+31.26248)x348.42871
+.\hbox(36.73747+31.26248)x398.98975
+..\mathon
+..\vbox(36.73747+31.26248)x398.98975
+...\hbox(9.51996+4.08003)x398.98975 []
+...\glue(\lineskip) 0.0
+...\hbox(9.51996+4.08003)x398.98975 []
+...\glue(\lineskip) 0.0
+...\hbox(9.51996+4.08003)x398.98975 []
+...etc.
+..\mathoff
+.\penalty 10000
+.\glue(\parfillskip) 0.0 plus 1.0fil
+.\glue(\rightskip) 0.0
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 44--45
+[][]\cmr/m/n/11 Callback
+
+\hbox(7.60416+0.0)x85.35826
+.\hbox(0.0+0.0)x0.0
+.\setlanguage1 (hyphenmin 2,2)
+.\cmr/m/n/11 C
+.\cmr/m/n/11 a
+.\cmr/m/n/11 l
+.etc.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 46--47
+[][]\cmr/m/n/11 Widget
+
+\hbox(7.60416+2.12917)x85.35826
+.\hbox(0.0+0.0)x0.0
+.\setlanguage1 (hyphenmin 2,2)
+.\cmr/m/n/11 W
+.\cmr/m/n/11 i
+.\cmr/m/n/11 d
+.etc.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 48--49
+[][]\cmr/m/n/11 Farbe des
+
+\hbox(7.60416+0.0)x85.35826, glue set 21.47166
+.\hbox(0.0+0.0)x0.0
+.\setlanguage1 (hyphenmin 2,2)
+.\cmr/m/n/11 F
+.\kern-0.91252
+.\cmr/m/n/11 a
+.etc.
+
+
+Underfull \hbox (badness 1694) in paragraph at lines 50--51
+[][]\cmr/m/n/11 Gibt an ob der
+
+\hbox(7.60416+0.0)x85.35826, glue set 2.57109
+.\hbox(0.0+0.0)x0.0
+.\setlanguage1 (hyphenmin 2,2)
+.\cmr/m/n/11 G
+.\cmr/m/n/11 i
+.\cmr/m/n/11 b
+.etc.
+
+
+Underfull \hbox (badness 7869) in paragraph at lines 52--53
+[][]\cmr/m/n/11 Linienst[]arke der
+
+\hbox(7.60416+0.47694)x85.35826, glue set 4.28827
+.\hbox(0.0+0.0)x0.0
+.\setlanguage1 (hyphenmin 2,2)
+.\cmr/m/n/11 L
+.\cmr/m/n/11 i
+.\cmr/m/n/11 n
+.etc.
+
+
+Underfull \hbox (badness 7869) in paragraph at lines 56--57
+[][]\cmr/m/n/11 Linienst[]arke der
+
+\hbox(7.60416+0.47694)x85.35826, glue set 4.28827
+.\hbox(0.0+0.0)x0.0
+.\setlanguage1 (hyphenmin 2,2)
+.\cmr/m/n/11 L
+.\cmr/m/n/11 i
+.\cmr/m/n/11 n
+.etc.
+
+
+Underfull \hbox (badness 1694) in paragraph at lines 58--59
+[][]\cmr/m/n/11 Gibt an ob der
+
+\hbox(7.60416+0.0)x85.35826, glue set 2.57109
+.\hbox(0.0+0.0)x0.0
+.\setlanguage1 (hyphenmin 2,2)
+.\cmr/m/n/11 G
+.\cmr/m/n/11 i
+.\cmr/m/n/11 b
+.etc.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 58--59
+\cmr/m/n/11 kiert dar-ge-stellt
+
+\hbox(7.60416+2.12917)x85.35826, glue set 5.20493
+.\cmr/m/n/11 k
+.\cmr/m/n/11 i
+.\cmr/m/n/11 e
+.\cmr/m/n/11 r
+.\cmr/m/n/11 t
+.etc.
+
+
+Underfull \hbox (badness 1472) in paragraph at lines 60--61
+[][]\cmr/m/n/11 Gibt an ob das
+
+\hbox(7.60416+0.0)x85.35826, glue set 2.45442
+.\hbox(0.0+0.0)x0.0
+.\setlanguage1 (hyphenmin 2,2)
+.\cmr/m/n/11 G
+.\cmr/m/n/11 i
+.\cmr/m/n/11 b
+.etc.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 60--61
+\cmr/m/n/11 At-tri-but-wid-get
+
+\hbox(7.60416+2.12917)x85.35826
+.\cmr/m/n/11 A
+.\kern-0.30418
+.\cmr/m/n/11 t
+.\discretionary
+..\cmr/m/n/11 -
+.\cmr/m/n/11 t
+.etc.
+
+
+Overfull \hbox (72.36394pt too wide) in paragraph at lines 40--62
+[] 
+
+\hbox(186.53749+181.06252)x348.42871
+.\hbox(186.53749+181.06252)x420.79265
+..\mathon
+..\vbox(186.53749+181.06252)x420.79265
+...\hbox(9.51996+4.08003)x420.79265 []
+...\rule(0.4+0.0)x420.79265
+...\hbox(9.51996+31.28004)x420.79265 []
+...\glue(\lineskip) 0.0
+...\hbox(9.51996+31.28004)x420.79265 []
+...etc.
+..\mathoff
+.\penalty 10000
+.\glue(\parfillskip) 0.0 plus 1.0fil
+.\glue(\rightskip) 0.0
+
+[3
+
+]
+Overfull \hbox (15.8701pt too wide) in paragraph at lines 64--72
+\cmtt/m/n/11 XtNshow-Attributes \cmr/m/n/11 ver[]andert wer-den. Wenn ein Wert 
+mit-tels \cmtt/m/n/11 XtSetValue()
+
+\hbox(7.60416+0.91246)x348.42871, glue set - 1.0
+.\cmtt/m/n/11 X
+.\cmtt/m/n/11 t
+.\cmtt/m/n/11 N
+.\cmtt/m/n/11 s
+.\cmtt/m/n/11 h
+.etc.
+
+[4]) [5] (browser/browser.tex
+Overfull \hbox (93.86037pt too wide) in paragraph at lines 59--62
+[] [][]\cmr/m/n/11 ist der Xt-Kontext der Ap-pli-ka-ti-on. Er wird mit-tels \cm
+tt/m/n/11 XtCreateApplicationContext()
+
+\hbox(7.60416+2.43333)x348.42871, glue set - 1.0
+.\hbox(0.0+0.0)x0.0
+.\glue 0.0
+.\hbox(6.06165+2.43333)x39.72588
+..\glue -27.37506
+..\glue 0.0
+..\glue -5.475
+..\hbox(6.06165+2.43333)x67.10094
+...\glue 5.475
+...\cmtt/m/n/11 a
+...\cmtt/m/n/11 p
+...\cmtt/m/n/11 p
+...\kern 0.6898
+...etc.
+..\glue 5.475
+.\penalty 0
+.\setlanguage1 (hyphenmin 2,2)
+.etc.
+
+[6
+
+
+]
+Overfull \hbox (57.11548pt too wide) in paragraph at lines 77--80
+[] [][]\cmr/m/n/11 ist das Wid-get, wel-ches den View-port enth[]alt. Es wird m
+it-tels \cmtt/m/n/11 XtVaCreateWidget
+
+\hbox(7.60416+2.43333)x348.42871, glue set - 1.0
+.\hbox(0.0+0.0)x0.0
+.\glue 0.0
+.\hbox(6.69167+2.43333)x24.08945
+..\glue -27.37506
+..\glue 0.0
+..\glue -5.475
+..\hbox(6.69167+2.43333)x51.46451
+...\glue 5.475
+...\cmtt/m/n/11 v
+...\cmtt/m/n/11 i
+...\cmtt/m/n/11 e
+...\cmtt/m/n/11 w
+...etc.
+..\glue 5.475
+.\penalty 0
+.\setlanguage1 (hyphenmin 2,2)
+.etc.
+
+
+Overfull \hbox (23.99199pt too wide) in paragraph at lines 89--92
+[] [][]\cmr/m/n/11 ist das Wid-get, wel-ches den Baum dar-stellt. Es wird mit-t
+els \cmtt/m/n/11 XtVaCreateWidget
+
+\hbox(7.60416+2.43333)x348.42871, glue set - 1.0
+.\hbox(0.0+0.0)x0.0
+.\glue 0.0
+.\hbox(6.06165+0.0)x1.0947
+..\glue -27.37506
+..\glue 0.0
+..\glue -5.475
+..\hbox(6.06165+0.0)x28.46976
+...\glue 5.475
+...\cmtt/m/n/11 t
+...\cmtt/m/n/11 r
+...\cmtt/m/n/11 e
+...\cmtt/m/n/11 e
+..\glue 5.475
+.\penalty 0
+.\setlanguage1 (hyphenmin 2,2)
+.etc.
+
+
+Overfull \hbox (3.308pt too wide) in paragraph at lines 100--103
+\cmr/m/n/11 tur. Er wird von den Funk-tio-nen \cmtt/m/n/11 CreateXCONTEXT() \cm
+r/m/n/11 oder \cmtt/m/n/11 CopyXCONTEXT()
+
+\hbox(7.60416+2.43333)x348.42871, glue set - 1.0
+.\cmr/m/n/11 t
+.\cmr/m/n/11 u
+.\cmr/m/n/11 r
+.\cmr/m/n/11 .
+.\glue 3.65 plus 1.825 minus 1.21666
+.etc.
+
+[7]) [8] (browser/tprint.tex
+Overfull \hbox (0.60295pt too wide) in paragraph at lines 39--42
+\cmr/m/n/11 De-stroyX-CON-TEXT() gibt den durch einen X-Kontext be-leg-ten Spei
+cher-
+
+\hbox(8.2125+2.73749)x348.42871, glue set - 1.0
+.\cmr/m/n/11 D
+.\cmr/m/n/11 e
+.\discretionary
+..\cmr/m/n/11 -
+.\cmr/m/n/11 s
+.\cmr/m/n/11 t
+.etc.
+
+[9
+
+
+]
+Overfull \hbox (12.283pt too wide) in paragraph at lines 86--87
+[] [][]\cmr/m/n/11 Widget In-sert-No-de-Wid-get() gibt das neu er-zeug-te No-de
+ Wid-get zur[]uck. 
+
+\hbox(8.2125+2.73749)x324.33868, glue set - 1.0
+.\hbox(0.0+0.0)x0.0
+.\glue 0.0
+.\hbox(4.86667+0.0)x0.0
+..\glue 0.0
+..\glue -18.61502
+..\glue -5.475
+..\hbox(4.86667+0.0)x18.61502, glue set 18.61502fil
+...\glue 0.0 plus 1.0fil minus 1.0fil
+...\hbox(4.86667+0.0)x0.0, glue set - 5.475fil []
+..\glue 5.475
+.\penalty 0
+.\setlanguage1 (hyphenmin 2,2)
+.etc.
+
+[10] [11]
+Overfull \hbox (5.71176pt too wide) in paragraph at lines 160--161
+\cmr/m/n/11 even-tu-ell ge-fun-de-nen Kno-ten. Bei er-folg-lo-ser-Su-che wird N
+ULL zur[]uck-
+
+\hbox(7.60416+2.12917)x324.33868, glue set - 1.0
+.\cmr/m/n/11 e
+.\cmr/m/n/11 v
+.\kern-0.30418
+.\cmr/m/n/11 e
+.\discretionary replacing 2
+..\cmr/m/n/11 n
+..\cmr/m/n/11 -
+.etc.
+
+[12] [13]
+Overfull \hbox (3.26628pt too wide) in paragraph at lines 208--209
+[] [][]\cmr/m/n/11 MAX[]NODE *Find-Next-No-d-e-Postor-der() lie-fert den Poin-t
+er auf einen
+
+\hbox(8.2125+2.73749)x324.33868, glue set - 1.0
+.\hbox(0.0+0.0)x0.0
+.\glue 0.0
+.\hbox(4.86667+0.0)x0.0
+..\glue 0.0
+..\glue -18.61502
+..\glue -5.475
+..\hbox(4.86667+0.0)x18.61502, glue set 18.61502fil
+...\glue 0.0 plus 1.0fil minus 1.0fil
+...\hbox(4.86667+0.0)x0.0, glue set - 5.475fil []
+..\glue 5.475
+.\penalty 0
+.\setlanguage1 (hyphenmin 2,2)
+.etc.
+
+
+Overfull \hbox (8.1451pt too wide) in paragraph at lines 208--209
+\cmr/m/n/11 even-tu-ell ge-fun-de-nen Kno-ten. Bei er-folg-lo-ser Su-che wird N
+ULL zur[]uck-
+
+\hbox(7.60416+2.12917)x324.33868, glue set - 1.0
+.\cmr/m/n/11 e
+.\cmr/m/n/11 v
+.\kern-0.30418
+.\cmr/m/n/11 e
+.\discretionary replacing 2
+..\cmr/m/n/11 n
+..\cmr/m/n/11 -
+.etc.
+
+
+Overfull \hbox (3.81378pt too wide) in paragraph at lines 220--221
+[] [][]\cmr/m/n/11 MAX[]NODE *Find-Pre-vious-No-d-e-Postor-der-Sub-tree() lie-f
+ert den Poin-
+
+\hbox(8.2125+2.73749)x324.33868, glue set - 1.0
+.\hbox(0.0+0.0)x0.0
+.\glue 0.0
+.\hbox(4.86667+0.0)x0.0
+..\glue 0.0
+..\glue -18.61502
+..\glue -5.475
+..\hbox(4.86667+0.0)x18.61502, glue set 18.61502fil
+...\glue 0.0 plus 1.0fil minus 1.0fil
+...\hbox(4.86667+0.0)x0.0, glue set - 5.475fil []
+..\glue 5.475
+.\penalty 0
+.\setlanguage1 (hyphenmin 2,2)
+.etc.
+
+[14] [15] [16] [17]
+Overfull \hbox (6.22887pt too wide) in paragraph at lines 394--397
+\cmr/m/n/11 Hi-deSub-tree() be-wirkt das Ver-schat-ten des zu ei-nem MAX Kno-te
+n geh[]oren-
+
+\hbox(8.2125+2.73749)x348.42871, glue set - 1.0
+.\cmr/m/n/11 H
+.\cmr/m/n/11 i
+.\discretionary
+..\cmr/m/n/11 -
+.\cmr/m/n/11 d
+.\cmr/m/n/11 e
+.etc.
+
+[18] [19]
+Overfull \hbox (2.7462pt too wide) in paragraph at lines 474--477
+\cmr/m/n/11 Go-to-Next-No-d-e-Postor-der() be-wirkt einen Sprung zum n[]achsten
+ MAX Kno-
+
+\hbox(8.2125+2.73749)x348.42871, glue set - 1.0
+.\cmr/m/n/11 G
+.\cmr/m/n/11 o
+.\discretionary
+..\cmr/m/n/11 -
+.\cmr/m/n/11 t
+.\cmr/m/n/11 o
+.etc.
+
+
+Overfull \hbox (5.9551pt too wide) in paragraph at lines 490--493
+\cmr/m/n/11 kier-ten MAX Kno-ten h[]angen-den Un-terb[]aume. Es wer-den auch Un
+-terb[]aume
+
+\hbox(7.60416+2.12917)x348.42871, glue set - 1.0
+.\cmr/m/n/11 k
+.\cmr/m/n/11 i
+.\cmr/m/n/11 e
+.\cmr/m/n/11 r
+.\discretionary
+..\cmr/m/n/11 -
+.etc.
+
+[20] [21] [22] [23] [24]
+Underfull \hbox (badness 10000) in paragraph at lines 676--679
+
+
+\hbox(0.0+0.0)x348.42871
+.\penalty -10000
+.\glue(\rightskip) 0.0
+
+[25]) [26] (widgethierarchie/widget.tex
+psfig: searching widgethierarchie/figures/widgeth.eps for bounding box
+psfig: including widgethierarchie/figures/widgeth.eps 
+
+Overfull \hbox (44.76747pt too wide) in paragraph at lines 20--22
+ [] 
+
+\hbox(325.215+0.0)x375.80377
+.\glue(\leftskip) 0.0 plus 1.0fil
+.\vbox(325.215+0.0)x420.57124
+..\special{dvitps: Include0 "psfig.pro"}
+..\special{dvitps: Literal "27562557 21313290 0 0 27562557 21313290 startTexFig
+ \ETC.}
+..\special{dvitps: Include1 "widgethierarchie/figures/widgeth.eps"}
+..\special{dvitps: Literal "endTexFig  " }
+..\vbox(325.215+0.0)x420.57124, glue set 325.215fil
+...\hbox(0.0+0.0)x420.57124
+...\glue 0.0 plus 1.0fil minus 1.0fil
+.\penalty 10000
+.\glue(\parfillskip) 0.0
+.\glue(\rightskip) 0.0 plus 1.0fil
+
+psfig: searching widgethierarchie/figures/AttributList.eps for bounding box
+psfig: including widgethierarchie/figures/AttributList.eps 
+psfig: searching widgethierarchie/figures/GlobalMenu.eps for bounding box
+psfig: including widgethierarchie/figures/GlobalMenu.eps 
+
+Overfull \hbox (78.89497pt too wide) in paragraph at lines 36--38
+ [] 
+
+\hbox(545.03624+0.0)x375.80377
+.\glue(\leftskip) 0.0 plus 1.0fil
+.\vbox(545.03624+0.0)x454.69875
+..\special{dvitps: Include0 "psfig.pro"}
+..\special{dvitps: Literal "29799137 35719495 0 0 29799137 35719495 startTexFig
+ \ETC.}
+..\special{dvitps: Include1 "widgethierarchie/figures/GlobalMenu.eps"}
+..\special{dvitps: Literal "endTexFig  " }
+..\vbox(545.03624+0.0)x454.69875, glue set 545.03624fil
+...\hbox(0.0+0.0)x454.69875
+...\glue 0.0 plus 1.0fil minus 1.0fil
+.\penalty 10000
+.\glue(\parfillskip) 0.0
+.\glue(\rightskip) 0.0 plus 1.0fil
+
+psfig: searching widgethierarchie/figures/NodeMenu.eps for bounding box
+psfig: including widgethierarchie/figures/NodeMenu.eps 
+
+Overfull \hbox (30.71497pt too wide) in paragraph at lines 44--46
+ [] 
+
+\hbox(542.025+0.0)x375.80377
+.\glue(\leftskip) 0.0 plus 1.0fil
+.\vbox(542.025+0.0)x406.51874
+..\special{dvitps: Include0 "psfig.pro"}
+..\special{dvitps: Literal "26641612 35522150 0 0 26641612 35522150 startTexFig
+ \ETC.}
+..\special{dvitps: Include1 "widgethierarchie/figures/NodeMenu.eps"}
+..\special{dvitps: Literal "endTexFig  " }
+..\vbox(542.025+0.0)x406.51874, glue set 542.025fil
+...\hbox(0.0+0.0)x406.51874
+...\glue 0.0 plus 1.0fil minus 1.0fil
+.\penalty 10000
+.\glue(\parfillskip) 0.0
+.\glue(\rightskip) 0.0 plus 1.0fil
+
+psfig: searching widgethierarchie/figures/MaskWindow.eps for bounding box
+psfig: including widgethierarchie/figures/MaskWindow.eps 
+LaTeX Warning: Float larger than \textheight on input line 56.
+psfig: searching widgethierarchie/figures/SortListWindow.eps for bounding box
+psfig: including widgethierarchie/figures/SortListWindow.eps 
+) [27
+
+
+] [28] [29] [30] [31] [32] (bim/algdatst.tex
+psfig: searching bim/bim_use.eps for bounding box
+psfig: including bim/bim_use.eps 
+
+Overfull \hbox (0.87654pt too wide) in paragraph at lines 2--19
+\cmr/m/n/11 dung \cmtt/m/n/11 .g \cmr/m/n/11 aus-ge-ge-ben. Hier st[]unden sie 
+theo-re-tisch dem Ziel-sy-stem zur Verf[]ugung.
+
+\hbox(7.60416+2.43333)x375.80377, glue set - 1.0
+.\cmr/m/n/11 d
+.\cmr/m/n/11 u
+.\cmr/m/n/11 n
+.\cmr/m/n/11 g
+.\glue 3.65 plus 1.825 minus 1.21666
+.etc.
+
+
+Overfull \hbox (23.1826pt too wide) in paragraph at lines 21--21
+[][]\cmr/bx/n/14 Algorithmen und Da-ten-struk-tu-ren des MAX-Browser
+
+\hbox(9.99998+2.79999)x375.80377, glue set - 1.0
+.\hbox(9.27998+0.0)x24.29997
+..\glue 0.0
+..\cmr/bx/n/14 6
+..\glue 16.19998
+.\setlanguage1 (hyphenmin 2,2)
+.\cmr/bx/n/14 A
+.\cmr/bx/n/14 l
+.\cmr/bx/n/14 g
+.etc.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 22--26
+
+
+\hbox(0.0+0.0)x375.80377
+.\glue(\rightskip) 0.0
+
+[33
+
+
+]
+Overfull \hbox (55.34781pt too wide) in paragraph at lines 54--54
+[]   []\cmtt/m/n/11 long attr_value;        /* Value of the attribute, has to b
+e interpreted[] 
+
+\hbox(7.60416+2.43333)x375.80377
+.\hbox(0.0+0.0)x0.0
+.\penalty 10000
+.\glue 5.74869
+.\penalty 10000
+.\glue 5.74869
+.etc.
+
+[34]
+Overfull \hbox (72.59387pt too wide) in paragraph at lines 81--81
+[]   []\cmtt/m/n/11 char ** parent_sorts;   /* NULL-pointer terminated array of
+ parent sorts */[] 
+
+\hbox(7.60416+2.43333)x375.80377
+.\hbox(0.0+0.0)x0.0
+.\penalty 10000
+.\glue 5.74869
+.\penalty 10000
+.\glue 5.74869
+.etc.
+
+
+Overfull \hbox (61.0965pt too wide) in paragraph at lines 81--81
+[]   []\cmtt/m/n/11 int no_of_attributes;   /* Number of attributes that are de
+fined for this[] 
+
+\hbox(7.60416+1.52081)x375.80377
+.\hbox(0.0+0.0)x0.0
+.\penalty 10000
+.\glue 5.74869
+.\penalty 10000
+.\glue 5.74869
+.etc.
+
+
+Overfull \hbox (17.5816pt too wide) in paragraph at lines 111--113
+[] [][]\cmr/m/n/11 origin[]node: Wird beim Ko-pie-ren ei-nes Bau-mes ben[]otigt
+, sie-he auch bim[]util.c 
+
+\hbox(7.60416+2.12917)x348.42871, glue set - 1.0
+.\hbox(0.0+0.0)x0.0
+.\glue 0.0
+.\hbox(4.86667+0.0)x0.0
+..\glue 0.0
+..\glue -21.90005
+..\glue -5.475
+..\hbox(4.86667+0.0)x21.90005, glue set 21.90005fil
+...\glue 0.0 plus 1.0fil minus 1.0fil
+...\hbox(4.86667+0.0)x0.0, glue set - 5.475fil []
+..\glue 5.475
+.\penalty 0
+.\setlanguage1 (hyphenmin 2,2)
+.etc.
+
+[35]
+Underfull \hbox (badness 10000) in paragraph at lines 122--127
+
+
+\hbox(0.0+0.0)x375.80377
+.\glue(\rightskip) 0.0
+
+
+Overfull \hbox (2.91977pt too wide) in paragraph at lines 150--153
+\cmtt/m/n/11 MAX[]NODE * bim[]tree( ELEMENT n, MAX[]NODE * parent, MAX[]NODE * 
+broth
+
+\hbox(7.60416+2.43333)x375.80377
+.\cmtt/m/n/11 M
+.\cmtt/m/n/11 A
+.\cmtt/m/n/11 X
+.\kern 0.6898
+.\vbox(0.4+0.0)x3.44925
+..\rule(0.4+0.0)x3.44925
+.etc.
+
+
+Overfull \hbox (7.47598pt too wide) in paragraph at lines 165--170
+[][]\cmr/m/n/11 Um einen MAX-Baum zu vi-sua-li-sie-ren, ben[]otigt man die Rou-
+ti-ne \cmtt/m/n/11 Bim[]Viewer\cmr/m/n/11 .
+
+\hbox(7.60416+2.12917)x375.80377, glue set - 1.0
+.\hbox(0.0+0.0)x17.0
+.\setlanguage1 (hyphenmin 2,2)
+.\cmr/m/n/11 U
+.\cmr/m/n/11 m
+.\glue 3.65 plus 1.825 minus 1.21666
+.etc.
+
+[36]
+Overfull \hbox (25.82082pt too wide) in paragraph at lines 178--188
+\cmtt/m/n/11 term, long left[]side )\cmr/m/n/11 . Hier-bei ist \cmtt/m/n/11 ter
+m \cmr/m/n/11 der um-zu-wan-deln-de Term und \cmtt/m/n/11 left[]side
+
+\hbox(7.60416+2.43333)x375.80377, glue set - 1.0
+.\cmtt/m/n/11 t
+.\cmtt/m/n/11 e
+.\cmtt/m/n/11 r
+.\cmtt/m/n/11 m
+.\cmtt/m/n/11 ,
+.etc.
+
+
+Overfull \hbox (1.12383pt too wide) in paragraph at lines 178--188
+\cmr/m/n/11 und \cmtt/m/n/11 parse[]tuple[]prod\cmr/m/n/11 . Die-se bau-en je-w
+eils re-kur-siv die ben[]otig-ten Un-terb[]aume
+
+\hbox(7.60416+2.43333)x375.80377, glue set - 1.0
+.\cmr/m/n/11 u
+.\cmr/m/n/11 n
+.\cmr/m/n/11 d
+.\glue 3.65 plus 1.825 minus 1.21666
+.\cmtt/m/n/11 p
+.etc.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 190--193
+
+
+\hbox(0.0+0.0)x375.80377
+.\glue(\rightskip) 0.0
+
+
+Overfull \hbox (7.08144pt too wide) in paragraph at lines 197--199
+[] [][]\cmr/m/n/11 Die Li-ste der Sor-ten-na-men. Ein \cmtt/m/n/11 NULL\cmr/m/n
+/11 -Pointer ter-mi-nier-tes Ar-ray von String-
+
+\hbox(7.60416+2.12917)x348.42871, glue set - 1.0
+.\hbox(0.0+0.0)x0.0
+.\glue 0.0
+.\hbox(4.86667+0.0)x0.0
+..\glue 0.0
+..\glue -21.90005
+..\glue -5.475
+..\hbox(4.86667+0.0)x21.90005, glue set 21.90005fil
+...\glue 0.0 plus 1.0fil minus 1.0fil
+...\hbox(4.86667+0.0)x0.0, glue set - 5.475fil []
+..\glue 5.475
+.\penalty 0
+.\setlanguage1 (hyphenmin 2,2)
+.etc.
+
+
+Overfull \hbox (30.0177pt too wide) in paragraph at lines 204--207
+[] [][]\cmr/m/n/11 Attributfunktionen. F[]ur je-de Sor-te exi-si-tiert ei-ne Fu
+nk-ti-on \cmtt/m/n/11 attributes[]\cmr/m/sl/11 SORTE\cmr/m/n/11 ,
+
+\hbox(7.60416+2.12917)x348.42871, glue set - 1.0
+.\hbox(0.0+0.0)x0.0
+.\glue 0.0
+.\hbox(4.86667+0.0)x0.0
+..\glue 0.0
+..\glue -21.90005
+..\glue -5.475
+..\hbox(4.86667+0.0)x21.90005, glue set 21.90005fil
+...\glue 0.0 plus 1.0fil minus 1.0fil
+...\hbox(4.86667+0.0)x0.0, glue set - 5.475fil []
+..\glue 5.475
+.\penalty 0
+.\setlanguage1 (hyphenmin 2,2)
+.etc.
+
+[37]) [38] (bim/bimsem.tex
+Underfull \hbox (badness 10000) in paragraph at lines 76--81
+
+
+\hbox(0.0+0.0)x348.42871
+.\glue(\rightskip) 0.0
+
+[39
+
+
+]) [40] (bim/bimcode.tex [41
+
+
+]
+Underfull \hbox (badness 10000) in paragraph at lines 86--90
+
+
+\hbox(0.0+0.0)x348.42871
+.\glue(\rightskip) 0.0
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 90--94
+
+
+\hbox(0.0+0.0)x348.42871
+.\glue(\rightskip) 0.0
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 94--99
+
+
+\hbox(0.0+0.0)x348.42871
+.\glue(\rightskip) 0.0
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 99--103
+
+
+\hbox(0.0+0.0)x348.42871
+.\glue(\rightskip) 0.0
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 103--107
+
+
+\hbox(0.0+0.0)x348.42871
+.\glue(\rightskip) 0.0
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 107--111
+
+
+\hbox(0.0+0.0)x348.42871
+.\glue(\rightskip) 0.0
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 111--115
+
+
+\hbox(0.0+0.0)x348.42871
+.\glue(\rightskip) 0.0
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 115--119
+
+
+\hbox(0.0+0.0)x348.42871
+.\glue(\rightskip) 0.0
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 119--123
+
+
+\hbox(0.0+0.0)x348.42871
+.\glue(\rightskip) 0.0
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 123--127
+
+
+\hbox(0.0+0.0)x348.42871
+.\glue(\rightskip) 0.0
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 127--132
+
+
+\hbox(0.0+0.0)x348.42871
+.\glue(\rightskip) 0.0
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 132--135
+
+
+\hbox(0.0+0.0)x348.42871
+.\glue(\rightskip) 0.0
+
+[42]) [43] (bim/bimutil.tex
+Underfull \hbox (badness 10000) in paragraph at lines 53--57
+
+
+\hbox(0.0+0.0)x348.42871
+.\glue(\rightskip) 0.0
+
+[44
+
+
+]
+Overfull \hbox (15.11343pt too wide) in paragraph at lines 133--138
+\cmr/m/n/11 Ko-pie-re einen Brow-ser-baum. Set-ze da-zu im Ur-sprungs-baum al-l
+e \cmtt/m/n/11 orogin[]node
+
+\hbox(7.60416+2.43333)x348.42871, glue set - 1.0
+.\cmr/m/n/11 K
+.\cmr/m/n/11 o
+.\discretionary
+..\cmr/m/n/11 -
+.\cmr/m/n/11 p
+.\cmr/m/n/11 i
+.etc.
+
+) [45] (bim/maxmodif.tex
+Overfull \hbox (9.3583pt too wide) in paragraph at lines 22--22
+[]   []\cmtt/m/n/11 fprintf(stdout,"max: Can't open file %s for output\n",filen
+ame);[] 
+
+\hbox(7.60416+2.43333)x375.80377
+.\hbox(0.0+0.0)x0.0
+.\penalty 10000
+.\glue 5.74869
+.\penalty 10000
+.\glue 5.74869
+.etc.
+
+
+Overfull \hbox (3.60962pt too wide) in paragraph at lines 22--22
+[]  []\cmtt/m/n/11 fprintf(stdout,"max: Can't open file %s for output\n",filena
+me);[] 
+
+\hbox(7.60416+2.43333)x375.80377
+.\hbox(0.0+0.0)x0.0
+.\penalty 10000
+.\glue 5.74869
+.\penalty 10000
+.\glue 5.74869
+.etc.
+
+
+Overfull \hbox (26.60437pt too wide) in paragraph at lines 22--22
+[][]\cmtt/m/n/11 fprintf(stdout,"     ( syntax tree has %d nodes )\n", number(_
+Node) );[] 
+
+\hbox(7.60416+2.43333)x375.80377
+.\hbox(0.0+0.0)x0.0
+.\setlanguage1 (hyphenmin 2,2)
+.\cmtt/m/n/11 f
+.\cmtt/m/n/11 p
+.\cmtt/m/n/11 r
+.etc.
+
+
+Overfull \hbox (43.85043pt too wide) in paragraph at lines 37--37
+[] [][]\cmtt/m/n/11 if(  init_max( elem )  ){ /* now the syntax structure can b
+e accessed  */[] 
+
+\hbox(7.60416+2.43333)x375.80377
+.\hbox(0.0+0.0)x0.0
+.\glue 0.0
+.\hbox(0.0+0.0)x0.0
+..\glue 0.0
+..\glue 0.0
+..\glue -5.475
+..\hbox(0.0+0.0)x0.0
+..\glue 5.475
+.\penalty 0
+.\setlanguage1 (hyphenmin 2,2)
+.etc.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 38--40
+
+
+\hbox(0.0+0.0)x375.80377
+.\glue(\rightskip) 0.0
+
+
+Overfull \hbox (56.38364pt too wide) in paragraph at lines 41--42
+[] [][]\cmr/m/n/11 Erweitern der In-clu-des: \cmtt/m/n/11 -I/usr/local/X11R5/in
+clude -I[INSTALLATION]/src/inc 
+
+\hbox(7.60416+0.91246)x348.42871, glue set - 1.0
+.\hbox(0.0+0.0)x0.0
+.\glue 0.0
+.\hbox(4.86667+0.0)x0.0
+..\glue 0.0
+..\glue -21.90005
+..\glue -5.475
+..\hbox(4.86667+0.0)x21.90005, glue set 21.90005fil
+...\glue 0.0 plus 1.0fil minus 1.0fil
+...\hbox(4.86667+0.0)x0.0, glue set - 5.475fil []
+..\glue 5.475
+.\penalty 0
+.\setlanguage1 (hyphenmin 2,2)
+.etc.
+
+[46
+
+
+]
+Overfull \hbox (262.30057pt too wide) in paragraph at lines 116--116
+[][]\cmtt/m/n/11 tst : 42.o y.tab.o  max_std.o  max_spec.o  max_extrn.o  max_sg
+en.o  max_hgen.o  max_ggen.o  max.o zeitmessung.o[] 
+
+\hbox(6.69167+2.43333)x375.80377
+.\hbox(0.0+0.0)x0.0
+.\setlanguage1 (hyphenmin 2,2)
+.\cmtt/m/n/11 t
+.\cmtt/m/n/11 s
+.\cmtt/m/n/11 t
+.etc.
+
+
+Overfull \hbox (66.84518pt too wide) in paragraph at lines 116--116
+[]        []\cmtt/m/n/11 $(CC) $(CFLAGS) -o tst  y.tab.o  max_std.o  max_spec.o
+  max_extrn.o \[] 
+
+\hbox(7.60416+2.43333)x375.80377
+.\hbox(0.0+0.0)x0.0
+.\penalty 10000
+.\glue 5.74869
+.\penalty 10000
+.\glue 5.74869
+.etc.
+
+
+Overfull \hbox (38.10175pt too wide) in paragraph at lines 116--116
+[]        []\cmtt/m/n/11 max_sgen.o    max_ggen.o  max_hgen.o  max.o zeitmessun
+g.o 42.o \[] 
+
+\hbox(7.60416+2.43333)x375.80377
+.\hbox(0.0+0.0)x0.0
+.\penalty 10000
+.\glue 5.74869
+.\penalty 10000
+.\glue 5.74869
+.etc.
+
+[47]
+Overfull \hbox (20.85568pt too wide) in paragraph at lines 116--116
+[]        []\cmtt/m/n/11 gcc $(INCLUDES) -g -I/usr/local/X11R5/include -c 42.c 
+-o 42.o[] 
+
+\hbox(7.60416+2.43333)x375.80377
+.\hbox(0.0+0.0)x0.0
+.\penalty 10000
+.\glue 5.74869
+.\penalty 10000
+.\glue 5.74869
+.etc.
+
+
+Overfull \hbox (15.107pt too wide) in paragraph at lines 116--116
+[]        []\cmtt/m/n/11 rm -rf *.o y.tab.c lex.yy.c core tst constgen max_spec
+.[cgh][] 
+
+\hbox(7.60416+2.43333)x375.80377
+.\hbox(0.0+0.0)x0.0
+.\penalty 10000
+.\glue 5.74869
+.\penalty 10000
+.\glue 5.74869
+.etc.
+
+) [48] (doc.aux (Node/Node.aux) (browser/browser.aux) (browser/tprint.aux)
+(widgethierarchie/widget.aux) (bim/algdatst.aux) (bim/bimsem.aux)
+(bim/bimcode.aux) (bim/bimutil.aux) (bim/maxmodif.aux)) ) 
+Here is how much of TeX's memory you used:
+ 722 strings out of 4279
+ 6476 string characters out of 50597
+ 37544 words of memory out of 700001
+ 2672 multiletter control sequences out of 9500
+ 12547 words of font info for 50 fonts, out of 72000 for 255
+ 14 hyphenation exceptions out of 1201
+ 17i,9n,17p,295b,253s stack positions out of 300i,40n,60p,3000b,4000s
+
+Output written on doc.dvi (48 pages, 86828 bytes).

@@ -1,0 +1,45 @@
+program testindex { Sortieren mit Bubblesort }
+                  { Programm mit indiziertem Feldindex }
+begin
+   array 10 int a, b;
+   int i;
+   bool tausch;
+   
+   proc swap(var int a, b);
+   begin
+     int h;
+     h := a;
+     a := b;
+     b := h
+   end;
+
+   i := 0;
+   tausch := true;
+   write(' Bitte 11 Feldelemente eingeben ');
+   while i<=10 do
+      b[i] := i;
+      read( a[i] );
+      i := i+1
+   od;
+
+   while tausch do
+     i := 0;
+     tausch := false;
+     while i<10 do
+       if a[b[i]] > a[b[i+1]] then
+         call swap(b[i], b[i+1]);
+         tausch := true
+       fi;
+       i := i+1
+     od
+   od;
+
+   i := 0;
+   while i<=10 do
+     write (a[b[i]]);
+     i := i+1
+   od;
+   write(newline)
+ 
+end
+

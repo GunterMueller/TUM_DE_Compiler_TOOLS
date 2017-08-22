@@ -1,0 +1,968 @@
+
+\documentstyle[german,12pt,a4]{article}
+\pagestyle{headings}
+
+\begin{document}
+\parskip 0.5em
+\parindent 0pt
+
+{\LARGE\bf\centerline{Kurze Beschreibung der MAX-Quellen}}
+
+In Abschnitt~1 werden die neuen Attribute in der MAX-Spezifikation einschlie"slich
+der in C implementierten externen Funktionen und Attribute beschrieben.
+Abschnitt~2 behandelt die Codegenerierung der dynamischen Semantik.
+In Abschnitt~3 wird die Realisierung der Frontendgenerierung beschrieben.
+Schlie"slich beschreibt Abschnitt~4 die Ver"anderungen, die an der Codegenerierung
+durchgef"uhrt wurden.
+
+
+\bigskip (Roland Merk, 01.07.94)
+\tableofcontents
+
+\newpage
+\section{Die MAX-Spezifikation in max\_spec.m}
+
+
+\subsection{Neue MAX-Sorten}
+
+{\tt FuncList} und {\tt AttrList} wurden zu\\
+{\tt FuAtList * FctOrAtt\\
+     FctOrAtt = Function | Attribute}\\
+zusammengefa"st.
+
+
+{\tt Expr} wurde um {\tt DynUndef} erg"anzt (das entspricht den "`??"').
+{\tt ApplyEntity} wurde um {\tt DynFunc} und {\tt DynSemInput} erg"anzt.
+
+
+\subsubsection{Neue Sorten f"ur die Abh"angigkeitsanalyse}
+
+\begin{verbatim}
+Value    = OrValue | FList | FClosure | FValue
+OrValue  * Value
+FList    * Value
+FClosure ( Value )
+
+FValue   = DefId@ | TWfath | TWson | TWrbroth | TWlbroth | RelevAcc
+TWson    ( Int )
+TWfath   ()
+TWrbroth ()
+TWlbroth ()
+RelevAcc ( Int )
+
+
+FctOrAtt          = Function | Attribute
+FctOrAttDecl      = Function | Attribute | FuncDecl | AttrDecl
+OrderTup          = Int
+
+ApplList          * FuncAppl@
+BinOp             = Or | And | Impl
+
+FuAtListInfo      * FuAtNodeList
+FuAtNodeList      * FctOrAtt@
+
+AllNodes          ()
+DefIdNodeInfo     = DefIdNodeList | AllNodes
+
+IntResExpr        = ComposedExpr | FuncAppl | ApplyEntity | Condition
+IntResOrName      = IntResExpr | Name
+IntResList        * IntResOrName@
+IntList           * Int
+RefList           * Reference
+\end{verbatim}
+
+\subsubsection{Neue Sorten f"ur die Frontendgenerierung}
+\begin{verbatim}
+ProdNodeList * Production@
+IdentList    * Ident
+CharList     * Char
+
+Rside        = SortId | String | Parsnr | Parsline | Parscol | Parspos
+Parsnr       ( Int )
+Parsline     ()
+Parscol      ()
+Parspos      ()
+RsideInfo    * Rside
+RsideList    * RsideInfo
+
+Lside        = Parsrule | Parsaddrule | Parsno | Parsaux |
+               Parsleft | Parsright | Parsprio | Int
+LsideList    * Lside
+
+Parsprio     ()
+Parsrule     ( StringList )
+Parsaddrule  ( StringList )
+Parsno       ()
+Parsleft     ()
+Parsright    ()
+Parsaux      ()
+
+LPinfoListlist * LPinfolist
+LPinfolist     * LPinfo
+LPinfo         = ParsStern | ParsPlus
+ParsStern      ( String )
+ParsPlus       ( String )
+
+IdentTripel    ( Ident Ident Ident )
+StringList     * String
+CPinfo         ( StringList SortId StringList )
+CPinfoList     * CPinfo
+CPinfoListlist * CPinfoList
+\end{verbatim}
+
+\subsubsection{Neue Sorten f"ur die dynamische Semantik}
+
+\begin{verbatim}
+DynFunc        ( DefId  SortIdList  NameList  SortId  Expr )
+
+RuleList       * Rule
+Rule           = IfRule | CaseRule
+IfRule         ( Formula  UpdateList  UpdateList )
+
+CaseRule       ( Expr  CaseIsList  UpdateList )
+CaseIsList     * CaseIs
+CaseIs         ( CaseConst UpdateList )
+CaseConst      = Char | Int | SortConst
+
+UpdateList     * UpdateOrRule
+UpdateOrRule   = Update  |  Rule
+Update         ( FuncAppl  Expr )
+
+UListNodeList  * UpdateList@
+
+DynUndef       ()
+DynSemInput    ( DefId  SortIdList  SortId )
+
+CaseTripel     ( DefIdNodeList DefIdNodeList UpdateList@ )
+CaseTripelList * CaseTripel
+\end{verbatim}
+
+\subsection{Neue Attribute f"ur die Frontendgenerierung}
+
+{\tt
+\begin{itemize}
+\item ATT parscode     ( Production@ ) Lside
+\item ATT LPsepsymbols ( ListProd@   ) LPinfolist
+\item ATT TPconcrSyntax( TupelProd@  ) RsideList
+\item ATT CPrsideinfo  ( ClassProd@  ) CPinfo
+\item {\rm dazwischen Behandlung der Deklarationen (i.w.\ unver"andert)}
+\item ATT ExchangeTripel( TupelProd@ ) IdentTripel {\rm (braucht "`decl"')}
+\item ATT ExtraRule( Production@ ) Element  (Ident {\rm oder} ClassProd@)
+\end{itemize}
+}
+
+Die Implementierung dieser Attribute befindet sich in der Datei {\tt max\_ygen.c}.
+Beschreibung siehe dort (Abschnitt \ref{frontendgen}).
+
+\subsection{Diverse Funktionen und Attribute der alten Version}
+
+Hier folgt die Attributierung f"ur Sammeln der Grundsorten bei Klassenproduktionen,
+Bereichs"uberpr"ufung der angewandten Bezeichner und Bestimmung ihrer Bindungsstellen
+sowie die gesamte Behandlung der Patterns.
+
+\subsection{Funktionen zum Aufbau der Value-Terme}
+
+{\tt
+\begin{itemize}
+\item FCT TW\_identabb() Value
+\item FCT TW\_emptyset() Value
+\item FCT TW\_or( Value, Value ) Value
+\item FCT TW\_stern( Value ) Value
+\item FCT TW\_conc( Value, Value ) Value
+\end{itemize}
+}
+
+\subsection{Aufsammeln der FuncAppl@ in den R"umpfen von Funktionen und Attributen}
+
+{\tt
+\begin{itemize}
+\item {\rm diverse Hilfsfunktionen f"ur die bottom-up--Aufsammlung}
+\item ATT appl\_list( FctOrAtt@ ) ApplList
+\end{itemize}
+}
+
+"`appl\_list"' wird in "`eval\_groupnr"' (in der Hilfsfunktion "`enter\_dep\_matrix"')
+bei der Einteilung in Auswertungsgruppen verwendet.
+
+
+\subsection{Analyse der zyklischen Abh"angigkeiten der Funktionen und Attribute}
+
+Die folgenden Attribute sind alle in der Datei "`max\_extrn.c"' in C implementiert.
+Jede Liste von Funktionen und Attributen wird in m"oglichst kleine Gruppen
+partitioniert und sortiert.
+
+\begin{itemize}
+\item {\tt ATT eval\_groupnr ( FctOrAtt@ ) Int}\\
+gibt an, in welcher Auswertungsgruppe eine Funktion oder ein Attribut ist.
+\item {\tt ATT eval\_prev\_grnum( FuAtList@ ) Int}\\
+gibt die Nummer der letzten Auswertungsgruppe der letzten {\tt FuAtList} an.
+
+\item {\tt ATT group\_index   ( FctOrAtt@ ) Int}\\
+gibt die lfd.\ Nummer innerhalb einer Auswertungsgruppe an.
+
+\item {\tt ATT eval\_group    ( FctOrAtt@ ) FuAtNodeList}\\
+gibt die gesamte Auswertungsgruppe (incl.\ enthaltener Funktionen) an.
+
+\item {\tt ATT attr\_list\_groups( FuAtList@ ) FuAtListInfo}\\
+gibt die Liste aller Auswertungsgruppen der "`FuAtList"' an.
+
+\end{itemize}
+
+Die Funktion "`init\_eval\_groupnr"' initialisiert
+"`eval\_groupnr"' und "`eval\_prev\_grnum"'.
+
+\paragraph{Vorgehensweise}
+
+Der Aufrufgraph innerhalb der Gruppe und die H"ullenbildung
+wird mit einer Adjazenzmatrix und dem Warshall-Algorithmus (f"ur short-Objekte)
+implementiert.
+Die Hilfsfunktion "`enter\_dep\_matrix"' tr"agt alle Aufrufe im Rumpf einer
+Funktion in die Matrix ein. Die Hilfsfunktion "`calc\_order"' teilt die
+Gruppennummern zu.
+
+
+Die Funktion "`init\_group\_index"' initialisiert unter Verwendung obiger Information
+die Attribute "`group\_index"', "`eval\_group"' und "`attr\_list\_groups"'.
+
+
+
+\subsection{Aufbau der Value-Terme}
+
+\begin{itemize}
+\item diverse Hilfsfunktionen
+\item {\tt ATT appl\_value( FuncAppl@ ) Value}\\
+liefert den Beitrag eines Funktionsaufrufs zum Value-Term
+\item {\tt ATT nodepar\_expr( FuncAppl@ ) Expr@}\\
+liefert den ersten knotenwertigen Parameter
+\item {\tt ATT valueterm( Expr@ ) Value}\\
+gesamter Value-Term einer Expression
+\end{itemize}
+
+
+\subsection{Elimination der Rekursion}
+
+Hier wird mit Value-Termen innerhalb der Auswertungsgruppen gerechnet
+(vgl.\ Direct Dependence Automaton).
+
+\begin{itemize}
+\item {\tt FCT init\_matrix( Int ) Reference}\\
+Speicherreservierung f"ur eine Matrix der doppelten (!) Gr"o"se wie angegeben.
+Die Eintr"age werden mit {\tt TW\_emptyset()} vorbesetzt.
+
+\item {\tt FCT enter\_attribute( Int, FctOrAtt@, Reference, Int ) Reference}\\
+"`f"ullt"' die Matrix gem"a"s des Rumpfes der Funktion oder des Attributs
+mit Value-Termen, die nur noch aus elementaren Baumlauffunktionen bestehen.
+
+\item {\tt FCT warshall\_value( Reference, Int ) Reference}\\
+Warshall-Algorithmus f"ur die H"ullenbildung im Automaten. Die letzten
+drei Funktionen sind in {\tt max\_extrn.c} implementiert.
+
+\item {\tt FCT enter\_attrgroup( Int, FuAtNodeList, Reference ) Reference}
+\item {\tt FCT enter\_attrgroup\_list( Int, FuAtListInfo, RefList ) RefList}
+\item {\tt ATT attr\_list\_matlist( FuAtList@ ) RefList}\\
+
+Diese drei Hilfsfunktionen k"ummern sich um das Eintragen der Value-Terme der
+Funktions- und Attributr"umpfe in die Matrix und um das Entrekursivieren mit dem
+Warshall-Algorithmus (f"ur jede Auswertungsgruppe).
+
+\item {\tt FCT mat\_lookup( Reference, Int, Int, FctOrAtt@ ) Value}\\
+externe Hilfsfunktion f"ur den Matrixzugriff.
+
+\item {\tt ATT result\_value( FctOrAtt@ N ) Value}\\
+liefert den abgesch"atzten Wert des Rumpfes der Funktion
+oder des Attributs. Es kommen nur noch elementare Baumlauffunktionen vor.
+\end{itemize}
+
+
+
+\subsection{Vereinfachung der Value-Terme auf eine Normalform}
+
+Soweit es sich mit relativ wenig Aufwand machen l"a"st, werden die Value-Terme
+vereinfacht. F"ur die Abh"angigkeitsanalyse werden die Laufzeitwerte der
+{\tt FuncAppl@} ben"otigt, die durch Zugriff auf {\tt result\_value} hier eingehen.
+
+\paragraph{Hilfsfunktionen}
+
+{\tt
+\begin{itemize}
+\item FCT simplify\_closure( Value ) Value
+\item PRD simplification[ Value, FValue ]
+\item FCT normal\_tw( FList, Value, FValue ) FList
+\item FCT normal\_stern( FList, FClosure ) Value
+\item FCT normalform( FList, Value, FuAtList@ ) Value
+\end{itemize}
+}
+
+\subsubsection*{Laufzeitwert des ersten knotenwertigen Parameters eines Funktionsaufrufs}
+
+Dieser Wert wird durch folgenden Aufruf erhalten (wird sp"ater beim Attribut
+{\tt appl\_order} benutzt). Dabei soll N der {\tt FuncAppl@} des Aufrufs sein.
+
+Bei einem Attributzugriff gibt dieser Wert an, auf welche Baumknoten zugegriffen
+werden kann.
+
+\begin{verbatim}
+normalform( FList(),
+            valueterm(nodepar_expr(N)),
+            fath(encl_fctoratt(N))      )
+\end{verbatim}
+
+
+\subsection{Abbildung der Value-Terme auf Baumordnungen}
+
+\subsubsection*{Ordnungen f"ur elementare Funktionen}
+
+{\tt
+\begin{tabular}{lllll}
+$\bullet$ & FCT Ord\_fath()    & OrderTup : & 35  & // AA BB = 0x23\\
+$\bullet$ & FCT Ord\_son()     & OrderTup : & 50  & // BB AA = 0x32\\
+$\bullet$ & FCT Ord\_rbroth()  & OrderTup : & 16  & // AB 00 = 0x10\\
+$\bullet$ & FCT Ord\_lbroth()  & OrderTup : &  1  & // 00 AB = 0x01\\
+$\bullet$ & FCT Ord\_ident()   & OrderTup : &204  & // ID ID = 0xCC\\
+$\bullet$ & FCT Ord\_neutral() & OrderTup : & 17  & // AB AB = 0x11\\
+$\bullet$ & FCT Ord\_nothing() & OrderTup : &136  & // NO NO = 0x88\\
+\end{tabular}
+}
+
+\paragraph{Bedeutung der {\tt OrderTup}}
+
+\begin{itemize}
+\item "`Sechzehnerstelle"' (hexadezimal) :\\
+Strategie, falls die {\it Points} vorw"arts durchlaufen werden
+\item "`Einerstelle"' :\\
+Strategie, falls die {\it Points} r"uckw"arts durchlaufen werden
+\item F"ur beide F"alle gilt : ist "`8"' gesetzt (d.h.\ {\tt 0x80} bzw.\ {\tt 0x08}),
+dann ist evtl.\ ein Zugriff am selben Baumknoten m"oglich.
+\end{itemize}
+
+\begin{itemize}
+\item {\tt NO = 0}: keine Strategie m"oglich
+\item {\tt AB = 1}
+\item {\tt AA = 2}
+\item {\tt BB = 3}
+\item {\tt ID = 4}
+\item {\tt BA = 5} : geben die M"oglichkeiten an, welchen {\it Points}
+das gerade berechnete bzw.\ dazu ben"otigte Attribut f"ur einen erfolgreichen
+Durchlauf zugeordnet werden k"onnen.
+\end{itemize}
+
+\paragraph{Verkn"upfungen der Baumordnungen}
+{\tt
+\begin{itemize}
+\item FCT OrdOp\_or( OrderTup, OrderTup ) OrderTup
+\item FCT OrdOp\_conc( OrderTup, OrderTup ) OrderTup
+\item FCT OrdOp\_closure( OrderTup ) OrderTup
+\end{itemize}
+}
+
+\paragraph{Restliche Funktionen}
+
+\begin{itemize}
+\item {\tt FCT val\_order( Value ) OrderTup}\\
+Hauptfunktion, die die Abbildung {\tt Value} $\to$ {\tt OrderTup} induktiv
+"uber den Termaufbau jedes Value-Terms in Normalform durchf"uhrt.
+
+\item {\tt FCT encl\_fctoratt( Node ) FctOrAtt@}\\
+liefert den umschlie"senden {\tt FctOrAtt@}
+
+\item {\tt PRD is\_relev\_att\_access[ FuncAppl@ ]}\\
+testet, ob ein Attributzugriff in derselben Auswertungsgruppe
+erfolgen kann (evtl.\ indirekt "uber andere Funktionen).
+
+
+\item {\tt ATT appl\_order( FuncAppl@ ) OrderTup}\\
+liefert die m"oglichen Baumdurchlaufordnungen, bei denen jeder Attributzugriff
+immer gutgeht, d.h.\ jede ben"otigte Instanz wurde schon fr"uher w"ahrend
+des Durchlaufs berechnet.
+
+\item {\tt FCT filter\_relev\_acc( ApplList ) ApplList}\\
+filtert diejenigen {\tt FuncAppl@} heraus, die die m"oglichen
+Baumdurchlaufstrategien echt einschr"anken.
+
+\item {\tt ATT appl\_relacc\_list( FctOrAtt@ ) ApplList}\\
+liefert zum jedem Attribut und zu jeder Funktion eine Liste von {\tt FuncAppl@},
+die die m"oglichen Baumdurchlaufstrategien echt einschr"anken.
+\end{itemize}
+
+
+
+
+\subsection{Auswahl der Strategien f"ur die Auswertungsgruppen}
+
+Bis auf {\tt ATT maybe\_wait} sind alle Attribute und Pr"adikate
+dieses Abschnitts in {\tt max\_extrn.c} implementiert.
+
+\paragraph{Beachte}: Alle folgenden Attribute werden f"ur Funktionen und Attribute
+ausgewertet. Das liegt daran, da"s die rekursive Verschr"ankung von Funktionen
+und Attribute erlaubt ist. Dabei wird bei jeder Funktion der erste knotenwertige
+Parameter ausgezeichnet.
+
+Bei der Strategieberechnung wird jede Funktion wie ein Attribut behandelt.
+Erst sp"ater bei der Codegenerierung der Attributauswertung werden die Funktionen
+wieder unterdr"uckt.
+
+\begin{itemize}
+\item {\tt ATT eval\_finegroup( FctOrAtt@ ) Int}\\
+gibt die Nummer der Feingruppe innerhalb der aktuellen Auswertungsgruppe an.
+
+\item {\tt ATT eval\_aftbef   ( FctOrAtt@ ) Int}\\
+gibt an, welchem {\it Point} das Attribut zugeordnet wird.
+
+\item {\tt ATT eval\_strategy ( FctOrAtt@ ) Int}\\
+gibt die ausgew"ahlte Durchlaufstrategie an (siehe unten).
+
+\item {\tt ATT eval\_sortlist ( FctOrAtt@ ) DefIdNodeInfo}\\
+gibt an, aus welchen Grundsorten der Definitionsbereich des Attributes besteht.
+
+\item {\tt ATT attr\_list\_info( FuAtList@  ) FuAtListInfo}\\
+enth"alt eine Liste der Attributauswertungsgruppen.
+
+\item {\tt PRD maybe\_same\_node[ OrderTup ]}
+\item {\tt PRD no\_strategy\_found[ FctOrAtt@ ]}\\
+geben an, ob ein Zugriff am selben Knoten m"oglich ist bzw.\ ob keine Durchlaufstrategie
+gefunden wurde.
+
+\item {\tt ATT maybe\_wait( FuncAppl@ ) Bool}\\
+gibt an, ob beim Zugriff auf eine Attributinstanz ein Warten auf
+die Wertberechnung m"oglich ist.
+
+\end{itemize}
+
+\subsubsection{Strategieberechnung}
+
+Jede Auswertungsgruppe bekommt eine Auswertungsstrategie zugeordnet.
+Bei der Initialisierung von {\tt ATT  attr\_list\_info}
+wird als Seiteneffekt die Strategie berechnet.
+
+Im allgemeinen ist die Strategie innerhalb jeder Gruppe gleich,
+jedoch kann es Ausnahmen geben,
+falls die Gruppe in weitere Feingruppen unterteilt ist,
+die beide Auswertungsvarianten (sowohl mit als auch ohne Wartelisten) verlangen.
+
+Die Strategie wird als {\tt Int} implementiert, wo die einzelnen Bits folgende
+Bedeutung haben :
+
+\begin{itemize}
+
+\item 0 = keine Strategie gefunden
+\item 1 = Aufz"ahlung mit Heap (schlie"st 2 aus)
+\item 2 = direkte Aufz"ahlung (schlie"st 1 aus)
+
+\item 4 = partielle Auswertung
+
+\item 8 = Aufz"ahlung der {\it Points} r"uckw"arts
+
+\item 16 = FCT und ATT kommen in der Gruppe gemischt vor
+
+\item 32 = eine Warteliste ist notwendig
+\end{itemize}
+
+\subsection{Vorbereitung der Codegenerierung}
+
+
+\begin{itemize}
+\item {\tt FCT aux\_itoa( Int ) String}\\
+Umwandlung vom Integer in String (in {\tt max\_extrn.c}).
+
+\item {\tt ATT cgen\_name( IntResOrName@ ) String}\\
+Bezeichnername eines Zwischenergebnisses im generierten Code.
+
+\item {\tt PRD is\_intres[ Node ]}\\
+gibt an, ob einem Baumknoten ein Zwischenergebnis zugeordnet wird.
+
+\item {\tt FCT  list\_intresexprs( Node ) IntResList}
+\item {\tt FCT  intresexprs( Node ) IntResList}\\
+Hilfsfunktionen zum Aufsammeln der Zwischenergebnisse, die im generierten
+Code im Funktionsterm vorkommen werden.
+\end{itemize}
+
+
+
+\subsection{Bestimmung der Zwischenergebnisse}
+
+Alle diese Attribute sammeln die Zwischenergebnisse f"ur die {\tt Expr@} auf.
+
+{\tt
+\begin{itemize}
+\item ATT  sces\_appl  ( ApplyEntity@ ) IntResList 
+\item ATT  sces1\_cond ( Condition@   ) IntResList 
+\item ATT  sces2\_cond ( Condition@   ) IntResList 
+\item ATT  sces1\_let  ( LetExpr@     ) IntResList 
+\item ATT  sces2\_let  ( LetExpr@     ) IntResList 
+\item ATT  sces\_if    ( IfExpr@      ) IntResList 
+\item ATT  sces1\_fcase( FormulaCase@ ) IntResList 
+\item ATT  sces2\_fcase( FormulaCase@ ) IntResList 
+\item ATT  sces\_pcase ( PatternCase@ ) IntResList 
+\item ATT  sces\_attacc( FuncAppl@    ) IntResList 
+\end{itemize}
+}
+
+\subsection{Aufsammeln der Zwischenergebnisse}
+
+
+\begin{itemize}
+\item {\tt FCT encl\_part\_intres( Node ) Node}\\
+liefert das umschlie"sende Zwischenergebnis im Syntaxbaum.
+
+\item {\tt FCT aux\_var\_need( Int, FctOrAtt@ ) IntResList}\\
+
+
+\item {\tt FCT aux\_intres\_left( IntResExpr@, Int, IntResList ) IntResList}
+\item {\tt FCT aux\_intres\_right( Point, Point, Point, IntResList, Int ) IntResList}
+\item {\tt ATT lokvar\_need( FctOrAtt@ ) IntResList}\\
+Hilfsfunktionen zum Aufsammeln der Zwischenergebnisse, die bei der partiellen
+Auswertung gespeichert werden m"ussen.
+
+\item {\tt FCT intres\_union( IntResList, IntResList, IntResList ) IntResList}\\
+Vereinigung dreier Mengen von Zwischenergebnissen (in {\tt max\_extrn.c})
+
+\item {\tt ATT intres\_collect( IntResExpr@ ) IntResList}\\
+ergibt f"ur jedes Zwischenergebnis die Liste von Zwischenergebnissen,
+die f"ur seine Berechnung ben"otigt werden.
+Dieses Attribut wird bei der Codegenerierung (Datei {\tt max\_sgen.c}) verwendet.
+\end{itemize}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section{Dynamische Semantik in max\_dgen.c}
+
+\begin{itemize}
+\item {\tt void gen\_dynhash()}\\
+erzeugt Code f"ur die gesamte Verwaltung der Hashtabelle.
+
+\item {\tt ELEMENT DNL\_insert( ELEMENT, ELEMENT )}\\
+Hilfsfunktion zum Einf"ugen von {\tt DefId@} in eine Liste.
+
+\item {\tt long case\_elem( ELEMENT, ELEMENT )}\\
+Hilfsfunktion, die testet, ob ein Element als Subterm
+in einem anderen vorkommt.
+
+\item {\tt long contains\_term( ELEMENT )}\\
+testet, ob {\tt Term} in einer Liste von {\tt DefId@} vorkommt.
+
+\item {\tt void gen\_guards\_case( ELEMENT, int )}\\
+erzeugt das "`case"'-Konstrukt f"ur die Updates.
+
+\item {\tt void gen\_guards\_UR( ELEMENT, int )}\\
+erzeugt Code f"ur eine (allgemeine) Update-Regel.
+
+\item {\tt void gen\_guards\_UL( ELEMENT, int )}\\
+erzeugt Code f"ur eine Update-Liste.
+
+\item {\tt void gen\_dynadr( ELEMENT )}\\
+erzeugt eine Funktion, die die Adresse eines Elements ermittelt (f"ur
+die linke Seite der Updates notwendig).
+
+\item {\tt void gen\_dyndata( void )}\\
+erzeugt alle globalen Variablen, die f"ur die dynamische Semantik
+gebraucht werden (ausgenommen der Hashtabelle).
+
+\item {\tt void aux\_prt\_lokvar( ELEMENT, int )}
+\item {\tt int genc\_dynfct\_aux( ELEMENT, int )}\\
+erzeugen alle Hilfsvariablen, die im Rumpf der Initialisierung
+einer dynamischen Funktion ben"otigt werden.
+
+\item {\tt void gen\_init\_dynsem()}\\
+erzeugt Code f"ur die Initialisierung aller dynamischen Gr"o"sen.
+
+\item {\tt void dyn\_defines( FILE * )}\\
+erzeugt alle {\tt \#define}'s, die f"ur den Zugriff auf die dynamischen
+Gr"o"sen ben"otigt werden.
+
+\item {\tt void dynsem\_gen( FILE * )}\\
+steuert die gesamte Ausgabe des Codes f"ur die dynamische Semantik.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section{Frontendgenerierung in max\_ygen.c}
+\label{frontendgen}
+
+{\tt int get\_hosttype()}\\
+pr"uft die Environmentvariablen "`{\tt HOST}"' und "`{\tt HOSTTYPE}"'.
+Dadurch werden bei der Makefile-generierung, die auch hier eingegliedert ist,
+die richtigen Kommandos f"ur den C-Compiler eingesetzt und das
+"`SECONDBITSET"'-Symbol bei HP-Rechnern definiert.
+
+\subsection{Notwendige Seiteneffekte beim Parsen}
+
+Die Funktionen
+{\tt mxy\_enterlp}, {\tt mxy\_entercp} und {\tt mxy\_entertp}\\
+werden beim Baumaufbau verwendet. Sie tragen die notwendige Information
+f"ur die konkrete Syntax als Seiteneffekt in untenstehende Listen ein.
+Das Ergebnis des Parsens ist immer der abstrakte Syntaxbaum sowie
+diese sechs Listen.
+
+\begin{verbatim}
+static ELEMENT LPcodes = LsideList(),  /* Init vor dem Parsen */
+               TPcodes = LsideList(),
+               CPcodes = LsideList();
+
+static ELEMENT LPrside = LPinfoListlist(),
+               TPrside = RsideList(),
+               CPrside = CPinfoListlist();
+\end{verbatim}
+
+\subsection{Bereitstellung der konkreten Syntax in Attributen}
+
+\begin{itemize}
+\item {\tt ELEMENT parscode( Production@ )}\\
+enth"alt die entsprechenden Subterme von
+{\tt LPcodes}, {\tt TPcodes} und {\tt CPcodes}.
+
+\item {\tt ELEMENT LPsepsymbols( ListProd@ )}\\
+enth"alt die Trennsymbole der Listenproduktionen ({\tt LPrside}).
+
+\item {\tt ELEMENT TPconcrSyntax( TupelProd@ )}\\
+enth"alt die konkrete Syntax von Tupelproduktionen ({\tt TPrside}).
+
+\item {\tt ELEMENT CPrsideinfo( ClassProd@ )}\\
+enth"alt die konkrete Syntax von Klassenproduktionen ({\tt CPrside}).
+
+\item {\tt ELEMENT ExchangeTripel( TupelProd@ )}\\
+gibt Abweichungen bei {\tt \#prio}-Produktionen an, welche Sorten
+beim Parsen durch andere ersetzt werden m"ussen.
+
+\item {\tt ELEMENT ExtraRule( Production@ )}\\
+gibt an, ob bei {\tt \#prio}-Produktionen zus"atzliche Kettenproduktionen
+ausgegeben werden m"ussen.
+\end{itemize}
+
+
+\subsection{Initialisierung von Sortenmengen}
+
+\begin{itemize}
+\item {\tt long elem( ELEMENT, ELEMENT )}\\
+testet, ob ein Element als Subterm in einem anderen vorkommt.
+
+\item {\tt void grsym\_in\_parstree( ELEMENT )}\\
+sucht alle von einer gegebenen Sorte abh"angigen Sorten (die
+tiefer im Syntaxbaum vorkommen k"onnen).
+
+\item {\tt void init\_grammarsymbols( void )}
+sucht alle Sorten, die beim Parsen auftreten k"onnen (mit der Hilfsfunktion
+"`{\tt grsym\_in\_parstree}"').
+\end{itemize}
+
+\subsection{Aufsammeln von Symbolen}
+
+In folgenden globalen Variablen werden die notwendigen Symbole aufgesammelt.
+\begin{verbatim}
+static ELEMENT SemTokenList, TokenList, CharList,
+               PreDeclProdList, ReachableProdList;
+\end{verbatim}
+
+\begin{itemize}
+\item {\tt SemTokenList}: semantisch relevante Token (mit {\tt \#mark} markiert),
+bei denen Zeile und Spalte in den Syntaxbaum aufgenommen werden.
+\item {\tt TokenList}: andere Token (L"ange $>1$).
+\item {\tt CharList}: Token der L"ange 1.
+\item {\tt PreDeclProdList}: vordefinierte Sorten, die im Syntaxbaum vorkommen k"onnen.
+\item {\tt ReachableProdList}: andere erreichbare Sorten, die im Syntaxbaum vorkommen k"onnen.
+\end{itemize}
+
+\paragraph{Bemerkung:}
+f"ur Strings mit einer L"ange $>1$ mu"s im YACC-File ein eigenes
+Token reserviert werden, bei L"ange $1$ kann der String als Character
+verwaltet werden.
+
+\begin{itemize}
+\item {\tt void addstring( char *, int )}\\
+f"ugt einen String zur Tokenliste hinzu.
+
+\item {\tt void addtoken( char * )}\\
+Bei Produktionen mit {\tt \#yacc} und {\tt \#yaccadd} werden alle in
+der YACC-Regel vorkommende Strings (in einfachen Hochkomma) erkannt.
+
+\item {\tt void init\_aux\_lists( void )}\\
+k"ummert sich um das Aufsammeln aller notwendigen Symbole (wird von
+{\tt parser\_gen} aufgerufen).
+\end{itemize}
+
+\subsection{Scannergenerierung}
+
+\begin{itemize}
+\item {\tt void lexprintf( char * )}\\
+k"ummert sich um die Ausgabe eines Tokens in das LEX-File.
+Dabei werden f"uhrende Backslashes herausgefiltert.
+
+Beispiel: \verb|"--"[-]*| mu"s als \verb|"\\\"--\"[-]*"| eingegeben werden.
+
+\item {\tt void mxy\_lexgen( void )}\\
+steuert die Ausgabe des gesamten Scanners.
+\end{itemize}
+
+\subsection{Parsergenerierung}
+
+\begin{itemize}
+\item {\tt void yacctoken\_print( FILE *, int ) }
+\item {\tt void yacctoken\_semprint( FILE *, int )}
+\item {\tt void yaccnont\_print( FILE *, char *, char *, int, int )}\\
+Ausgabe von YACC-Definitionen ({\tt \%token} bzw.\ {\tt \%type})
+f"ur Token und Nonterminale.
+
+\item {\tt void mxy\_yaccrule( ELEMENT, FILE * )}\\
+Ausgabe der mit {\tt \#yacc} und {\tt \#yaccadd} definierten YACC-Regeln.
+
+\item {\tt int print\_string( ELEMENT )}\\
+Hilfsfunktion zur Ausgabe eines Strings als Character bzw.\ Token.
+
+\item {\tt void additional\_rule( ELEMENT )}\\
+Ausgabe einer zus"atzlich notwendigen YACC-Regel (bei {\tt \#prio}-Produktionen).
+
+\item {\tt void LPout( ELEMENT )}\\
+Ausgabe der Regeln f"ur eine gesamte Listenproduktion.
+
+\item {\tt void CPout( ELEMENT )}\\
+Ausgabe der Regeln f"ur eine gesamte Klassenproduktion.
+
+\item {\tt int isnorekpos( int, ELEMENT, ELEMENT, ELEMENT )}\\
+pr"uft, ob bei einer {\tt \#prio}-Produktion die Gesamtsorte rekursiv
+verwendet wird.
+
+\item {\tt void TPout( ELEMENT )}
+Ausgabe der Regeln f"ur eine gesamte Tupelproduktion.
+
+\item {\tt void mxy\_yaccgen( char * )}\\
+steuert die Ausgabe des gesamten Parsers.
+
+\item {\tt void parser\_gen( FILE *, FILE *, int, char * )}\\
+erzeugt den Scanner und den Parser als LEX- bzw.\ YACC-File.
+\end{itemize}
+
+\subsection{Generierung von Rahmenprogramm und Makefile}
+
+\begin{itemize}
+\item {\tt void frame\_gen( FILE *, char * )}\\
+erzeugt das Hauptprogramm der Anwendung.
+
+\item {\tt void makefile\_gen( FILE *, char * )}\\
+erzeugt ein Makefile.
+
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section{Codegenerierung in max\_sgen.c}
+
+
+\subsection{Besonderheiten bei der Funktion prt\_stdpart}
+
+
+\paragraph{M"ogliche Attributauswertungsfunktionen}
+
+\begin{enumerate}
+\item Auswertungsfunktion und Wartelistenelement bei partieller Auswertung
+
+{\tt typedef void (*EVALFCT)( ELEMENT, ELEMENT, int, ELEMENT * );}
+
+\begin{verbatim}
+typedef struct AttInstElem{
+  EVALFCT attevalfct;
+  ELEMENT  attnode;
+  struct AttInstElem *rest;
+
+  int state;
+  ELEMENT intres_array[ <maxsize> ];
+  /* fehlt, wenn keine Zwischenergebnisse ben"otigt werden */
+
+} *AttInstSq;
+
+
+static ELEMENT *insAttInst( EVALFCT attevalfct, ELEMENT attnode,
+        int state, AttInstSq* undefatt, long undefattix ) { ... }
+\end{verbatim}
+
+Falls keine Zwischenergebnisse ben"otigt werden, wird die Funktion als {\tt void}
+deklariert (wie ohne partielle Auswertung).
+
+Falls Zwischenergebnisse ben"otigt werden, zeigt der R"uckgabepointer auf
+das {\tt intres\_array} im Wartelistenelement, wo die Zwischenergebnisse
+eingetragen werden k"onnen.
+
+\item Auswertungsfunktion und Wartelistenelement ohne partieller Auswertung
+
+{\tt typedef void (*EVALFCT1)( ELEMENT );}
+
+\begin{verbatim}
+typedef struct AttInstElem{
+  EVALFCT attevalfct;
+  ELEMENT  attnode;
+  struct AttInstElem *rest;
+} *AttInstSq;
+
+static void insAttInst( EVALFCT attevalfct, ELEMENT attnode,
+	AttInstSq* undefatt, long undefattix ) { ... }
+\end{verbatim}
+
+\end{enumerate}
+
+\paragraph{Bemerkung}: in der {\tt struct AttInstElem} steht immer {\tt EVALFCT},
+da beide Varianten ({\tt EVALFCT} und {\tt EVALFCT1}) auch gemischt vorkommen k"onnen.
+Dies ist der Fall, wenn Funktionen und Attribute gegenseitig rekursiv verwendet werden.
+
+\subsubsection*{Unver"anderte Funktionen}
+
+{\tt prt\_listtoelemtab,
+prt\_classtosorttab,
+init\_supsorts,\\
+prt\_supsorttab {\rm und}
+prt\_indexingtabs
+}
+
+\paragraph{Die Funktion {\tt prt\_heap\_fcts}} gibt Code f"ur die Heapverwaltung aus.
+
+
+\paragraph{Die Funktion {\tt prt\_stack\_fcts}} gibt Code f"ur den Kellerautomat aus,
+der die Knoten f"ur den R"uckw"artsdurchlauf indiziert.
+
+\paragraph{Funktionen f"ur die Extern Pattern Class:}
+{\tt genc\_pat\_<diverse>(...)}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Funktionen f"ur die Codegenerierung der Funktions- und Attributr"umpfe}
+
+\begin{itemize}
+\item {\tt static void genc\_addpar( ELEMENT, ELEMENT )}\\
+gibt evtl.\ zus"atzliche Parameter aus, wenn Funktionen und Attribute
+rekursiv verschr"ankt sind.
+
+\item {\tt void  genc\_list( ELEMENT )}\\
+gibt eine Parameterliste aus.
+
+\item {\tt void  genc\_top( ELEMENT )}\\
+gibt Code f"ur eine Expression oder Formula aus.
+
+\item {\tt void  genc\_att\_seq( ELEMENT, int )}\\
+gibt Code f"ur einen Attributzugriff oder Funktionsaufruf aus.
+
+\item {\tt void  genc\_subces( ELEMENT, int )}
+\item {\tt genc\_intres( ELEMENT, int )}\\
+geben Code f"ur die Berechnung eines Zwischenergebnisses aus.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Codegenerierung f"ur die Conditions}
+
+\begin{itemize}
+\item {\tt void genc\_cnd\_itl( ELEMENT, ELEMENT, char*, int )}\\
+\item {\tt void genc\_cnd\_pat( ELEMENT, ELEMENT, char*, int )}
+\end{itemize}
+
+\subsection{Generierung der lokalen Variablen}
+
+\begin{itemize}
+\item {\tt void genc\_cnd\_aux( ELEMENT )}
+\item {\tt void genc\_att\_aux( ELEMENT )}
+\item {\tt void aux\_prt\_lokvar( ELEMENT, int )}
+\item {\tt int  genc\_fct\_aux( ELEMENT, int )}\\
+geben alle in den R"umpfen ben"otigten lokalen Variablen aus.
+
+\item {\tt int  genc\_att\_aux\_case( ELEMENT tn, int count )}\\
+erzeugt die Verzweigung f"ur das Fortsetzen der partiellen Auswertung.
+
+\item {\tt void  prt\_propagation( char *, int, int ) }\\
+erzeugt Code f"ur das Abarbeiten der Warteliste.
+\end{itemize}
+
+\subsection{Ausgabe der globalen Deklarationen und R"umpfe}
+
+Funktion : {\tt void  prt\_globdecls( int maxwaitpar )}
+
+Dabei wird folgendes erzeugt :
+\begin{itemize}
+\item Deklarationen f"ur die externen Funktionen, Attribute und Pr"adikate
+\item Deklarationen f"ur die (in MAX definierten) Funktionen und Attribute
+\item Zugriffsfunktionen f"ur die Attribute
+
+\item R"umpfe der Funktionen\\
+Die Parameter werden noch um ({\tt EVALFCT mxw\_evf,ELEMENT mxw\_par})
+erg"anzt, falls Funktionen und Attribute verschr"ankt sind und
+eine Warteliste notwendig ist.
+
+\item R"umpfe der Pr"adikate
+
+\item R"umpfe der Attributauswertungsfunktionen\\
+
+\begin{itemize}
+\item Ohne Warteliste :\\
+die Auswertungsfunktion kann einfach aufgerufen werden.
+\item Mit Warteliste, ohne partielle Auswertung :\\
+die Auswertungsfunktion kann einfach aufgerufen werden, am Ende wird
+jedoch {\tt prt\_propagation} aufgerufen.
+\item
+Mit Warteliste und partieller Auswertung:\\
+Der bisherige Auswertungszustand mu"s wiederhergestellt werden, dann wird die
+Auswertung fortgesetzt. Am Ende wird {\tt prt\_propagation} aufgerufen.
+\end{itemize}
+
+\item Auswertungsprozeduren der Conditions
+\end{itemize}
+
+
+\subsection{Sonstige Funktionen}
+
+\begin{itemize}
+\item {\tt void reserv\_attvalue( ELEMENT, int )}\\
+Hilfsfunktion, die den Speicher f"ur die Attributwerte und Wartelisten
+"ubernimmt.
+
+\item {\tt ELEMENT Defidnode\_insert( ELEMENT, ELEMENT )} und\\
+\item {\tt ELEMENT Defidnodelist\_union( ELEMENT, ELEMENT )}\\
+Hilfsfunktionen f"ur die Verwaltung von Mengen von {\tt DefId@}.
+
+\item {\tt void prt\_evalset( ELEMENT, ELEMENT, int )}\\
+erzeugt die partielle Auswertung einer Feingruppe (nur am selben Knoten).
+
+\item {\tt long mxz\_elem( ELEMENT, ELEMENT )}\\
+Teilmengenfunktion f"ur die Sorte {\tt DefIdNodeInfo}.
+
+\item {\tt void prt\_init\_heap( ELEMENT, int, int, int, char *, char * )} und\\
+\item {\tt void prt\_choose\_heap( ELEMENT, ELEMENT, int, int, int, char *, char *, int )}\\
+k"ummern sich um die Aufz"ahlung mehrerer Grundsorten mit dem Heap.
+
+
+\item {\tt void prt\_finegroupeval( ELEMENT, ELEMENT, int )}\\
+Hilfsfunktion f"ur {\tt prt\_choose\_heap}, die die Auswertung einer Feingruppe
+"ubernimmt.
+
+\item {\tt void prt\_groupeval( ELEMENT, int )}:\\
+erzeugt eine Auswertungsstrategie, bei der mehrere Grundsorten zusammengemischt
+werden m"ussen (ruft {\tt prt\_init\_heap} und {\tt prt\_choose\_heap} auf).
+
+\end{itemize}
+
+\subsection{Steuerung der gesamten Attributauswertung}
+
+Die Funktion {\tt void prt\_strucconstr( ELEMENT )}
+steuert die gesamte Attributauswertung und den Test aller Conditions.
+
+\subsection{Hilfsfunktionen}
+
+\begin{itemize}
+\item {\tt long  init\_endofpredef( void )}
+
+\item {\tt ELEMENT intlist\_insert( ELEMENT, int )}
+\end{itemize}
+
+\subsection{Aufruf der gesamten Codegenerierung}
+
+Die Funktion {\tt void  source\_gen( FILE *, char * )}
+steuert die gesamte Codegenerierung.
+Zus"atzlich werden folgende Gr"o"sen berechnet :
+
+\begin{itemize}
+\item Berechnung von {\tt maxwaitpar}, das die maximale Anzahl der Zwischenergebnisse
+der Auswertungsfunktionen angibt (bei einer Unterbrechung der partiellen Ausw.).
+
+\item Berechnung der Heapgr"o"se f"ur die Aufz"ahlung der Klassensorten
+\item Berechnung der maximal notwendigen Stackgr"o"se f"ur den Kellerautomat, der
+die Knoten f"ur den R"uckw"artsdurchlauf indiziert.
+\end{itemize}
+
+
+
+\end{document}

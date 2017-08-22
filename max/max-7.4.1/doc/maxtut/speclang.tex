@@ -1,0 +1,373 @@
+
+\chapter{The MAX Specification Language}
+The MAX system provides its own specification language. This chapter gives an introduction to the use and features of this language. It uses TIFL, a TIny Functional Language, as running example. TIFL allows the (nested) declaration of functions and their application (we will describe it in greater detail later on).\\
+A specification according to the MAX system consists of two main parts:
+\begin{itemize}
+\item The definition of the abstract syntax (cf. section 2.1)
+\item A sequence of specification elements:
+
+  \begin{itemize}
+  \item Attribute definitions (cf. section 2.3.4)\\
+(more generally: a set of mutual recursive attribute definitions)
+  \item Function and predicate definitions (cf. section 2.3.5)\\
+(more generally: a set of mutual recursive function/predicate definitions)  
+  \item Context Condition declarations (cf. section 2.3.6)
+
+  \end{itemize}
+
+\end{itemize}
+\noindent
+A specification element may only use those attributes, functions and predicates being declared before it in the sequence.\\
+
+\section{Context-Free Syntax}
+
+In contrast to many older attribute grammar systems, the MAX system is
+based on abstract syntax instead of concrete syntax. The user has to
+specify concrete syntax and the transformation from concrete into
+abstract syntax by other tools. This modularization allows more 
+flexibility (e.g. MAX can be used as well to attribute any trees 
+constructed in C programs) and makes it possible to get rid of all
+parsing influenced grammar overhead: The abstract syntax can be taylored
+to the needs of attribution and later tasks of language processing.
+\noindent
+The interface between the parser and the MAX system is described by the 
+abstract synax; i.e. the parser provides for each program being correct
+with respect to the concrete syntax (defined by scanner and parser 
+specifications) an abstract syntax term (referred to 
+throughout this report as the "program term"). The attribution phase
+produced from a specification gets this order-sorted term as input.
+
+\subsection{How to Define Abstract Syntax}
+
+The abstract syntax defines a data type of order-sorted terms (see 
+below). In the following, we give the abstract syntax of our 
+example language TIFL:
+\begin{verbatim}
+Program      (  Exp  )
+Exp          =  LetExp  |  Int  |  Bool  |  CondExp  |  FctAppl  |  UsedId
+LetExp       (  FctDeclList  Exp  )
+FctDeclList  *  FctDecl
+FctDecl      (  Type  DeclId  ParDeclList  Body  )
+Type         =  Boolean  |  Integer
+Boolean      ()
+Integer      ()
+ParDeclList  *  ParDecl
+ParDecl      (  Type  DeclId  )
+Body         =  Exp  |  PredeclBody
+PredeclBody  () 
+CondExp      (  Exp  Exp  Exp  )
+FctAppl      (  UsedId  ExpList  )
+ExpList      *  Exp
+UsedId       (  Ident  LineNo  )
+DeclId       (  Ident  LineNo  )
+
+
+Decl         =  FctDecl |  ParDecl
+Scope        =  FctDecl |  LetExp
+LineNo       =  Int
+\end{verbatim}
+  
+\noindent
+Three kinds of productions are used:
+\begin{itemize}
+\item tuple  ( denoted by  "(" ... ")" )
+\item list  ( denoted by  "* ..." )
+\item class   ( denoted by  " ... $\mid$ ... " ) 
+\end{itemize}
+productions.
+Each production defines one sort, denoted by the name on the left-hand side of the production. Tuple productions are denoted by enclosing the right-hand side in parentheses. What might be perhaps a bit unusual, is that we use the same name for the tuple sort and the corresponding constructor function. List productions are denoted by an $\ast$ - symbol. Lists are constructed using empty list constructors (e.g. the empty formal parameters declaration list is denoted by ParDeclList()) and predefined polymorphic functions (cf. section 3.2). The class productions can be understood as defining a sort that is the "union" of the subsorts on the left-hand side. The sorts Int, Bool, Ident are predefined.\\
+A TIFL program is just an expression. An expression is either a LetExp ( declaration(s) of one or more functions followed by an expression, in which these functions can be used ), a constant,
+a conditional expression (IF ... THEN ... ELSE ... FI), a function application or simply the value of a parameter. There are two types in TIFL, "Integer"
+and "Boolean". The following example computes the sum of 1 and 2:
+\begin{verbatim}
+/* declaration of function "sum"
+   taking two integer parameters and yielding an integer */
+
+funct sum = (integer a, integer b) : integer
+
+      a + b
+in
+
+/* "in" indicates the end of the declarations;
+   now sum is called with parameters "1","2"  */
+
+sum(1,2)
+\end{verbatim}
+The "+" operation and some other arithmetic and boolean operations are 
+predefined.
+
+\subsection{How to Handle MAX Terms}
+
+In addition to the sorts of the abstract syntax, there can be auxiliary sort definitions (e.g the sort "Scope" or the sort to describe
+environments as shown in section 3.4.1). In general, we call the
+elements of the user--defined sorts {\em MAX terms} throughout this 
+report.
+\noindent
+Mainly, there are two kinds of functions to manipulate MAX terms:
+the constructors for user-defined tuple and list terms and the 
+predefined functions such as the polymorphic list handling or the various
+conversion functions constituting the interface of MAX to C. These 
+two families of functions together with the MAX terms form the data 
+type of order-sorted terms. In the following, we first give a few 
+lines from the 
+parser specification (in YACC-style) and then the abstract syntax
+term of 
+the "sum" example to illustrate the handling of MAX terms. 
+\noindent
+The YACC--example shows how terms
+are constructed using the constructors \verb/FctAppl/, \verb/UsedId/,
+the empty list constructor \verb/ExpList/, and the some predefined
+functions:
+
+\begin{verbatim}
+funcappl  :
+      ident oparsy cparsy
+      {  $$  =  FctAppl( UsedId( $1.val,  $1.ln ),  ExpList() ); }
+;
+funcappl  :
+      ident oparsy actparlist cparsy
+      {  $$  =  FctAppl( UsedId( $1.val,  $1.ln ),  $3 ); }
+;
+actparlist :
+      expr
+      {  $$  =  appback( ExpList(),  $1 ); }
+;
+actparlist : 
+      actparlist comma expr
+      {  $$  =  appback( $1,  $3 ); }
+;
+relation :
+      sexpr equ sexpr
+      {  $$  =  FctAppl( UsedId( stoid(atoe( "equ" )),  itoe( line )),
+                          appback( appback( ExpList(),  $1 ),  $3 ) ); }
+
+\end{verbatim}
+The above lines are taken from the YACC-specification for TIFL and show how the
+abstract syntax term for a function application is constructed.
+If the actual parameter list is empty, the constructor FctAppl is 
+applied to the UsedId (the identifier and line number is returned by 
+the scanner) and an empty expression list, denoted by the empty list
+constructor of sort ExprList. The following rules show how the actual
+parameter list is constructed in case it is not empty. Since most of the 
+used functions are self-explanatory, we give only 
+their functionality and a short description:
+
+
+\begin{verbatim} 
+appback(List,Elem):List      /* appends Elem at the end of List */
+itoe(long):Int               /* converts C-int to MAX-Int */
+atoe(char*):String           /* converts C-string to MAX-String */
+stoid(String):Ident          /* converts String to Ident (within MAX) */
+
+\end{verbatim}	      
+
+\pagebreak
+\noindent
+The abstract syntax term of the "sum" example looks like this:
+\begin{verbatim}
+               LetExp(
+                      FctDeclList(
+                           FctDecl( Integer(),
+                                    DeclId("sum",1),
+                                    ParDeclList(
+                                         ParDecl( Integer(),
+                                                  DeclId("a",1)
+                                                ),
+                                         ParDecl( Integer(),
+                                                  DeclId("b",1)
+                                                ) 
+                                               ),
+                                    FctAppl( UsedId("add",2),
+                                             ExpList( 
+                                                UsedId("a",2),
+                                                UsedId("b",2)
+                                                    )
+                                           ) 
+                                  )
+                                 ), 
+                          FctAppl( UsedId("sum",4),
+                                   ExpList(
+                                      1,
+                                      2
+                                          )
+                                 )
+                      )
+
+\end{verbatim}
+To get the program term, we embed the terms corresponding to 
+user programs into a standard environment that contains definitions
+for the predeclared operations of TIFL such as "+".
+
+\section{From Terms to Trees}
+\medskip
+If we only have the order-sorted term representation of programs, we cannot express global relations between distant parts of a program, as e.g. the function that yields for each occurrence of an identifier the corresponding declaration. To overcome this problem, we enrich each program term by the set of its occurrences or, as we call it, its nodes. The union of the set of the MAX terms and the set of the occurrences together with an extra element "nil" (to make functions total) forms the {\em "MAX universe"}. The MAX system maps a given program in term representation into the following syntax tree representation:
+\begin{itemize}
+\item the set of its nodes;
+\item functions yielding the father of a node (fath), the ith son (son), the left and right brother (lbroth,rbroth), and a constant yielding the root; in cases where these functions are not defined they yield nil();
+\item a function term yielding for each node the corresponding order-sorted term; in particular, term applied to a leaf node provides the terminal value of the leaf (Ident,Int,...).
+\end{itemize}
+In the following, the term "syntax tree" always refers to this representation. The sorting on nodes can be imported from the corresponding terms: for example, let n be a node such that the corresponding term is of sort FctDeclList; then we say n is of node sort FctDeclList@.\\
+As the construction of the described syntax tree representation does not need any information except the abstract syntax, it has no counterpart in the specification.
+\\
+
+\psfig{figure=treepic.eps}
+
+%-----------------------------------------------------------------------------
+\section{Attributes, Functions and Context Conditions}
+
+So far, we have the syntax tree representation of a given input program. To perform tasks like semantical analysis (e.g. checking context conditions) and the preparation for code generation, the MAX system provides an applicative specification language. \\  
+This section gives a general introduction to this specification language. We start by presenting the basic concepts of formulae, expressions and patterns and then proceed with attributes, functions (and predicates) and context conditions.
+\subsection{Formulae}
+A formula consists of either of the following:
+\begin{itemize}
+\item predicate application
+\item formula "or" formula (denoted "\&\&")
+\item formula "and" formula (denoted "$\mid$$\mid$")
+\item formula "$\Rightarrow$" formula (denoted "-$\rangle$")
+\item "not" formula (denoted "!")
+\end{itemize}
+
+\subsection{Expressions}
+An expression consists of either of the following:
+\begin{itemize}
+\item constant
+\item name
+\item function application
+\item If-expression: the skeleton:\\
+                IF \{formula/pattern : expression\} *\\
+                ELSE expression 
+\item Let-expression (names the value of expression\_1 by "name", then evaluates expression\_2):\\
+                     LET name == expression\_1 :\\
+                     expression\_2
+\item String-expression (concatenate a given list of strings)
+\end{itemize}
+
+
+\subsection{Patterns}
+
+Patterns are used for two different tasks: in context conditions, they
+allow to quantify over variables matching a pattern of the syntax tree;
+in conditional expressions, they express the condition that a given
+set of identifiers matches a pattern. In addition to that,
+they provide a binding mechanism for identifiers to node occurrences. 
+A pattern can consist of three classes of items:
+\begin{itemize}
+\item identifiers (each binding a node occurrence to a name by its position)
+\item asterisks "$\ast$" (each representing zero or more node occurrences at its position)
+\item underscores "\_" (each representing exactly one node occurrence at its position)
+\end{itemize}
+
+\noindent
+Of course, a pattern can contain subpatterns to bind e.g. several node occurrences of the first son of the bound node.
+%---------------------------------------------------------------------------------------------------------------------
+\subsection{Attributes}
+The skeleton of an attribute definition looks like this:
+\begin{verbatim}
+ATT name ( parameter ) result_type :
+    expression
+\end{verbatim}
+where there is exactly one parameter of a node sort.
+\noindent
+From an abstract point of view, an attribute is just a unary function having a node sort as domain. But, as node sorts are finite, we can use specialized implementation techniques to handle attributes, namely compute all the attribute values once and store them for later use. Besides this, we keep the differences between attributes and functions as small as possible. This is as well documented by the syntax: the head of an attribute declaration looks like the head of a function declaration (especially, inherited and synthesized attributes are not distinguished), and an attribute application is denoted like a function application (but can be denoted using the usual dotted notation, too : e.g. "ID.decl" instead of "decl(ID)").\\
+Here are three attribute declarations; the first one provides for each node the enclosing scope by stepping upwards in the syntax tree ($\rightarrow$ encl\_scope(fath(.))) until either a function declaration (FctDecl) node or a LetExp node (list of declarations followed by an expression) is reached. The second attribute yields for an applied occurrence of an identifier (here: functions or their parameters) the corresponding declaration node by issuing a global lookup starting in the enclosing scope of the used identifier (lookup described in 2.3.5), giving a slight impression of how to use node valued attributes to get information from distant parts of the syntax tree; in the type attribute we have an example for a pattern used as condition: assuming that the expression node E is of sort LetExp@, the pattern "$\langle$\_,EX$\rangle$" binds EX to the second son of the LetExp@, which is the expression to be evaluated with the declaration(s) (first son of E, represented by "\_") being valid.
+ In the cases where E is a constant, the type is simply Integer() or Boolean(); for conditional expressions, the type of the then - branch is returned. If E happens to be a function application, the type is determined out of the UsedId (the name of the function); for an UsedId in a TIFL program there are two possibilities: it can be the applied occurrence of a function (the result type of the corresponding function declaration node is returned) or of a parameter (taking the type of the corresponding parameter declaration node): 
+\begin{verbatim}
+
+ATT encl_scope( Node N ) Scope@ :
+   IF  is[ N, _FctDecl@ ]            : N
+   |   is[ N, _LetExp@ ]             : N 
+   ELSE                     encl_scope( fath( N ) )
+
+ATT decl( UsedId@ UID ) DeclId@ :
+   lookup( id(UID), encl_scope(UID) )
+
+ATT type( Exp@ E ) Type :
+   IF LetExp@<_,EX> E   :  type( EX )
+   |  Int@ E            :  Integer()
+   |  Bool@ E   	:  Boolean()
+   |  CondExp@<_,E2,_> E:  type( E2 ) 
+   |  FctAppl@<UID,_> E :  type( UID ) 
+   |  UsedId@ E         :  term( son( 1, fath(decl(E)) ) )
+   ELSE nil()
+
+\end{verbatim}
+%--------------------------------------------------------
+\subsection{Functions and Predicates}
+%-------------------------------------------------------
+
+The skeleton of an function definition looks like this:
+\begin{verbatim}
+FCT name ( parameters ) result_type :
+    expression
+\end{verbatim}
+Here is an example with three function declarations (explanations below):
+\begin{verbatim}
+
+FCT first_decl( Scope@ S ) Decl@:
+   IF  LetExp@<<FCTD,*>,_> S     :   FCTD
+   |   FctDecl@<_,_,<PARD,*>,_> S:   PARD
+   ELSE nil()
+
+FCT lookup_list( Ident ID, Decl@ D ) DeclId@ :
+   IF  ID = id( son(2,D) )  :  son(2,D)   ELSE  lookup_list( ID, rbroth(D) )
+
+FCT lookup( Ident ID, Scope@ S ) DeclId@ :
+   LET  DID == lookup_list(ID,first_decl(S)) :
+   IF   DID # nil() :  DID  ELSE  lookup( ID, encl_scope(fath(S)) )
+
+\end{verbatim}
+first\_decl takes yields the first declaration node in a given Scope@ S, which can
+be a function declaration (FctDecl@) if S happens to be a LetExp@, or a parameter
+declaration (ParDecl@), if S is a FctDecl@.\\
+lookup\_list examines a list of declarations (either FctDeclList or ParDeclList) for the occurrence of a given identifier. It makes use of the similar structure (concerning Type and DeclId) of the elements in both kinds of declaration lists.\\
+lookup defines a global lookup given an Ident and the directly enclosing scope of an applied occurrence of it by stepping upwards in the syntax tree from enclosing scope to enclosing scope examining the corresponding kind of declaration list (by calling lookup\_list()) for the occurrence of the given identifier. The explicit nil()-checks (termination cases) in all functions have been omitted, since functions are strict with respect to nil().\\
+\noindent
+Predicates are functions with boolean result being not strict with respect to nil(). The skeleton of a predicate definition looks like this:
+\begin{verbatim}
+PRD name [ parameters ]:
+    formula
+\end{verbatim}
+\noindent
+Parameters are enclosed in "[" "]" brackets and precedence is indicated by "\{" "\}".
+The following example gives an impression what a predicate looks like:
+\begin{verbatim}
+
+PRD par_type_check[ ParDecl@ P, Exp@ E ]:
+   term(son(1,P)) = type(E)
+ && { rbroth(P) # nil()  ->  par_type_check[ rbroth(P), rbroth(E) ] }
+
+\end{verbatim}
+par\_type\_check is "true", if the types of the actual parameters of a function application match the types of its formal parameters. There is no "bottom"(nil()) result for predicates, they yield either "true" or "false". In par\_type\_check it must be for sure, that the number of actual/formal parameters matches!
+
+%----------------------------------------------------------
+\subsection{Context Conditions}
+The skeleton of a context condition looks like this:
+\begin{verbatim}
+CND pattern : formula
+| expression
+\end{verbatim}
+where expression has to be a string-expression to print an error message if the condition is violated.\\ 
+Our framework allows to formulate context conditions in a very natural, elegant and convenient way based on predicate logic. Especially during language design time, such high-level executable specifications of context conditions proved to be very useful. To show what context conditions look like, we give a few examples below:
+\begin{verbatim}
+
+CND UsedId@ UID         : decl(UID) # nil()
+| `"### LINE " ln(UID) ": identifier \"" idtos(id(UID)) "\" not declared\n"'
+
+CND ParDeclList@<*,<_,ID1>,*,<_,ID2>,*>  : id(ID1) # id(ID2)
+| `"### LINE(S) " ln(ID1) "/" ln(ID2) ": parameter \"" idtos(id(ID1))
+  "\" doubly declared\n"'
+
+CND FctAppl@<UID,EL> :  numsons(EL) = numsons(son(3,fath(decl(UID))))
+| `"### LINE " ln(UID) ": incorrect number of parameters in call of"
+  " function "idtos(id(UID))"\n"'
+
+\end{verbatim}
+In context conditions patterns are used as universal quantifications, so we can read the context conditions as first-order formulae: For all applied occurrences of identifiers the declaration attribute must be defined (different from nil()); two different parameter declarations in the same declaration list must have distinct identifiers; for all function applications the number of actual parameters must match the number of formal parameters.\\
+In the MAX system, the user can attach an error message to each context condition that may refer to the variables in the pattern. The string expression
+(here: concatenation operators " ` " and " ' ") following the "$\mid$" is evaluated if the context condition is violated.
+
+
+
+
+   	
+

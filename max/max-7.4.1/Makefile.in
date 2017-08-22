@@ -1,0 +1,130 @@
+##
+##  Top-Level Makefile
+##
+
+# ------------------------------------------------
+#   DEFINES
+# ------------------------------------------------
+
+_GETDISTINFO = \
+    _version=`./etc/newvers -lc -d src/max/max_vers.c`; \
+    _date=`date '+%y%m%d_%H%M'`
+
+_BUILDDIST = \
+    echo "Creating tarball..."; \
+    tar cf - -C .. ./$${_distname} | gzip >$${_tarball}; \
+    echo "Done"; \
+    ls -l $${_tarball}
+
+_NEWVERS = \
+	./etc/newvers -lc -p MAX $$OPT src/max/max_vers.c; \
+	V=`./etc/newvers -lc -D src/max/max_vers.c`;\
+	sed -e "s/Version .*(.*)/Version $$V/g" <README >README.n && mv README.n README; \
+	V=`./etc/newvers -lc -d src/max/max_vers.c`;\
+
+_UPDATEVERS = \
+	V=`./etc/newvers -lc -d src/max/max_vers.c`;\
+	./etc/newvers -lc -p MAX -r $$V src/max/max_vers.c; \
+	V=`./etc/newvers -lc -D src/max/max_vers.c`;\
+	sed -e "s/Version .*(.*)/Version $$V/g" <README >README.n && mv README.n README; \
+	V=`./etc/newvers -lc -d src/max/max_vers.c`;\
+
+# ------------------------------------------------
+#   THE SUBDIR MOVEMENT SUPPORT
+# ------------------------------------------------
+
+all:
+	@echo "==> src (make all)"
+	@cd src; make all
+	@echo "<== src"
+alldoc:
+	@echo "==> doc (make all)"
+	@cd doc; make all
+	@echo "<== doc"
+
+clean:
+	@echo "==> src (make clean)"
+	@cd src; make clean
+	@echo "<== src"
+	@echo "==> doc (make clean)"
+	@cd doc; make clean
+	@echo "<== doc"
+
+realclean:
+	@echo "==> src (make realclean)"
+	@cd src; make realclean
+	@echo "<== src"
+	@echo "==> doc (make realclean)"
+	@cd doc; make realclean
+	@echo "<== doc"
+	-rm -f config.log
+	-rm -f config.cache
+	-rm -f config.status
+
+distclean:
+	@echo "==> src (make distclean)"
+	@cd src; make distclean
+	@echo "<== src"
+	@echo "==> doc (make distclean)"
+	@cd doc; make distclean
+	@echo "<== doc"
+	@cd config; make distclean
+	-rm -f Makefile
+	./etc/fixdist -u
+
+install:
+	@echo "==> src (make install)"
+	@cd src; make install
+	@echo "<== src"
+	@echo "==> doc (make install)"
+	@cd doc; make install
+	@echo "<== doc"
+
+# ------------------------------------------------
+#   THE RELEASE STUFF
+# ------------------------------------------------
+
+release: distclean fixperm
+	@$(_GETDISTINFO) \
+	_distname="max-$${_version}"; \
+	_tarball="/tmp/$${_distname}.tar.gz"; \
+	echo "Release Distribution: MAX Version $$_version"; \
+	$(_BUILDDIST); \
+	mv /tmp/$${_distname}.tar.gz $${_distname}.tar.gz 
+
+snap: distclean fixperm
+	@$(_GETDISTINFO) \
+	_distname="max-$${_version}-SNAP-$$_date"; \
+	_tarball="/tmp/$${_distname}.tar.gz"; \
+	echo "Snap of whole source tree: MAX Version $$_version as of $$_date"; \
+	$(_BUILDDIST); \
+	mv /tmp/$${_distname}.tar.gz $${_distname}.tar.gz 
+
+new-version:
+	OPT=-iv; $(_NEWVERS)
+
+new-revision:
+	OPT=-ir; $(_NEWVERS)
+
+new-patchlevel:
+	OPT=-iP; $(_NEWVERS)
+
+new-betalevel:
+	OPT=-ib; $(_NEWVERS)
+
+new-alphalevel:
+	OPT=-ia; $(_NEWVERS)
+
+new-snaplevel:
+	OPT=-is; $(_NEWVERS)
+
+new-release:
+	OPT=-r$(R); $(_NEWVERS)
+
+update-version:
+	$(_UPDATEVERS)
+
+fixperm:
+	./etc/fixperm *
+
+##EOF##

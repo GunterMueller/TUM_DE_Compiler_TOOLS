@@ -1,0 +1,15 @@
+#ifndef SC_H
+#define SC_H
+/*
+**
+**  sc.h -- STATIC configuration header file
+**  Copyright (c) Ralf S. Engelschall, <rse@engelschall.com>
+**
+*/
+
+#define AC_prefix   "@prefix@"
+#define MAXPATHNAME "@prefix@/bin" 
+#define MPP_PROG    "@prefix@/lib/mpp" 
+#define MPP_ARGS    "-traditional -C -nostdinc -nostdinc++ -undef" 
+
+#endif /* SC_H */

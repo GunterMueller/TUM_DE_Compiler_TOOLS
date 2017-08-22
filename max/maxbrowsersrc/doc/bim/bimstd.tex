@@ -1,0 +1,170 @@
+\section{Funktionsbeschreibung des Moduls {\tt bimstd.c}}
+
+Dieses Modul stellt die Funktionen zur Verfügung, die in jedes {\tt 42.c}
+eingebunden werden, unabh"angig von der Umgebung.
+
+\begin{description}
+\item[\tt enter\_max\_bim\_relation
+]{\bf :\\}
+Erzeugt einen Querverweis von einem Knoten des MAX-Baums
+ auf einen Knoten des Browserbaums. Dies wird benoetigt, um nach
+ Erstellen des Browserbaums die Attribute, die Knotenverweise sind
+ richtig zu setzen. Dazu wird in einer Tabelle ein Eintrag mit
+ der Nummer des MAX-Knotens und des Browserknotens erzeugt.
+  \\
+IN:
+\begin{itemize}
+   \item long max\_node: Nummer des Knotens im MAX-Baums
+\item MAX\_NODE * bim\_node: Zugeh"origer Browserknoten
+
+
+\end{itemize}
+\item[\tt lookup\_max\_relation
+]{\bf :\\}
+Findet zu einem MAX-Knoten den zugeh"origen Browserknoten.
+ Der Knoten mu\3 vorher mit {\tt enter\_max\_bim\_relation} in die
+ Querverweisliste eingetragen worden sein.
+  \\
+IN:
+\begin{itemize}
+   \item long max\_node: MAX-Knoten zu dem der Browserknoten gefunden
+werden soll.
+
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item MAX\_NODE *: NULL: falls kein Browserknoten f"ur den
+MAX-Knoten existiert.
+Verweis auf den Knoten sonst.
+
+\end{itemize}
+
+\item[\tt alloc\_relation\_table
+]{\bf :\\}
+Belegt Speicher f"ur die Beziehungstabelle <MAX-Knoten>
+ zu Browserknoten.
+  \\
+\item[\tt free\_relation\_table
+]{\bf :\\}
+Beziehungstabelle freigeben.
+ \\
+\item[\tt Bim\_Viewer
+]{\bf :\\}
+Die Funktion die aufgerufen werden muss, um den Baum
+ am Bildschirm darzustellen. Dazu wird zuerst die Anzahl der Knoten
+ im Baum ermittelt. Dann wird die Beziehungstabelle belegt.
+ Ferner wird die Liste der Sorten alphabetisch sortiert. Dann wird
+ der Browserbaum aus dem MAX-Baum aufgebaut.
+  \\
+IN:
+\begin{itemize}
+   \item long n: Der MAX-Baum
+\item int argc, char *argv[]: Kommandozeilenparameter wie sie von
+main() kommen.
+
+\end{itemize}
+\item[\tt bim\_tree
+]{\bf :\\}
+Baut den Browserbaum aus dem MAX-Baum auf.
+ \\
+\item[\tt find\_production
+]{\bf :\\}
+Sucht in der Parsetabelle einer Produktion nach deren
+ linken Seite.
+ \\
+IN:
+\begin{itemize}
+   \item long left\_side : Linke Seite nach der gesucht werden soll.
+
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item int: Index des Eintrags, oder -1, falls kein solcher
+Eintrag exisitiert.
+
+\end{itemize}
+
+\item[\tt term\_attr\_node
+]{\bf :\\}
+Erzeugt einen Browserknoten aus einem Term.
+ \\
+IN:
+\begin{itemize}
+   \item long term: Term aus dem Knoten erzeugt wird.
+
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item MAX\_NODE * : Zeiger auf Knoten im Erfolgsfall
+NULL sonst.
+
+\end{itemize}
+
+\item[\tt parse\_list\_prod
+]{\bf :\\}
+Parst einen Term gegen eine Listenproduktion.
+ \\
+IN:
+\begin{itemize}
+   \item long term : Zu Parsender Term
+\item int idx : Eintrag der Produktion
+
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item MAX\_NODE *: Zeiger auf Baum oder NULL
+
+\end{itemize}
+
+\item[\tt parse\_tuple\_prod
+]{\bf :\\}
+Parst einen Term gegen eine Tupelproduktion.
+ \\
+IN:
+\begin{itemize}
+   \item long term : Zu Parsender Term
+\item int idx : Eintrag der Produktion
+
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item MAX\_NODE *: Zeiger auf Baum oder NULL
+
+\end{itemize}
+
+\item[\tt parse\_class\_prod
+]{\bf :\\}
+Parst einen Term gegen eine Classproduktion.
+ \\
+IN:
+\begin{itemize}
+   \item long term : Zu Parsender Term
+\item int idx : Eintrag der Produktion
+
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item MAX\_NODE *: Zeiger auf Baum oder NULL
+
+\end{itemize}
+
+\item[\tt parse\_max\_term
+]{\bf :\\}
+Erzeugt aus einem Term einen Browserbaum. Diese Funktion
+ wird zur Darstellung von Termattributen benoetigt. Zum Parsen
+ wird die von 42.c bereitgestellte Tabelle benoetigt.
+  \\
+IN:
+\begin{itemize}
+   \item long term: Term aus dem ein Browserbaum erzeugt werden soll.
+long left\_side: Sorte nach der dieser Term geparst werden
+soll.
+
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item MAX\_NODE * : Zeiger auf Baum im Erfolgsfall
+NULL		sonst
+
+\end{itemize}
+\end{description}

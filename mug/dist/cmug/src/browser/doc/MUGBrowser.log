@@ -1,0 +1,47 @@
+This is TeX, Version 3.1415 (C version 6.1) (format=lplain 94.5.10)  16 JAN 1996 16:18
+**MUGBrowser.tex
+(MUGBrowser.tex
+LaTeX Version 2.09 <25 March 1992>
+(/opt/pkg/tex/lib/tex/latex/distrib/report.sty
+Standard Document Style `report' <14 Jan 92>.
+(/opt/pkg/tex/lib/tex/latex/distrib/rep12.sty)
+\descriptionmargin=\dimen99
+\c@part=\count79
+\c@chapter=\count80
+\c@section=\count81
+\c@subsection=\count82
+\c@subsubsection=\count83
+\c@paragraph=\count84
+\c@subparagraph=\count85
+\c@figure=\count86
+\c@table=\count87
+
+(/opt/pkg/tex/lib/tex/latex/distrib/titlepag.sty
+Document Style Option `titlepage' -- Released 16 June 1991.
+)) (/opt/pkg/tex/lib/tex/latex/contrib/a4/a4.sty
+Style option `A4' 1.2a <30 Nov 90> (NP and JLB)
+English documentation   <26 Feb 90> (JLB)
+)
+(/opt/pkg/tex/lib/tex/latex/contrib/german/german.sty
+Document Style Option `german' Version 2.4a of 12 Apr 1992
+\U@D=\dimen100
+) (MUGBrowser.aux)
+! I can't find file `tumlogo'.
+l.5 \input tumlogo
+                  
+Please type another input file name: 
+! Emergency stop.
+l.5 \input tumlogo
+                  
+End of file on the terminal!
+
+ 
+Here is how much of TeX's memory you used:
+ 331 strings out of 11991
+ 3293 string characters out of 87284
+ 29117 words of memory out of 262141
+ 2281 multiletter control sequences out of 9500
+ 18996 words of font info for 72 fonts, out of 100000 for 255
+ 0 hyphenation exceptions out of 607
+ 12i,0n,17p,157b,17s stack positions out of 300i,40n,60p,3000b,4000s
+No pages of output.

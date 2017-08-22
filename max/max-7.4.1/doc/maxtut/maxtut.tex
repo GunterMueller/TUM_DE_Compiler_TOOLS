@@ -1,0 +1,78 @@
+\documentstyle[12pt,titlepage,psfig]{report}
+
+\evensidemargin0cm
+\oddsidemargin0cm
+\topmargin0cm
+
+\textwidth16.5cm
+\textheight21cm
+
+\sloppy
+
+\begin{document}
+\begin{titlepage}
+
+\vspace*{4cm}
+
+\centerline{\huge\bf The MAX System} 
+
+\vspace*{.5cm}
+
+\centerline{\huge\bf A Tutorial Introduction}
+
+\vspace*{2cm}
+
+\centerline{ {\em Arnd Poetzsch-Heffter}\footnote{poetzsch@informatik.tu-muenchen.de} }
+\centerline{ {\em Thomas Eisenbarth}\footnote{eisenbar@informatik.tu-muenchen.de} }
+
+\vspace*{1cm}
+
+\centerline{Institut f\"ur Informatik}
+\centerline{Technische Universit\"at}
+\centerline{M\"unchen}
+
+\vspace*{2cm}
+
+\centerline{\today}
+
+\end{titlepage}
+
+
+\tableofcontents
+
+\include{intro}
+\include{speclang}
+\include{use}
+\include{conclusions}
+
+
+
+\appendix
+\chapter{The MAX System and its Environment}
+The following two figures show the MAX system and its environment:
+\\
+
+\psfig{figure=maxpic.eps}
+\noindent
+We used LEX and YACC to generate the scanner and the parser, but the user is free to choose other tools for these tasks or to code them himself.\\
+The MAX system takes the specification (tifl\_spec.m) as input and generates an attribution phase from it (in tifl\_spec.h, tifl\_spec.c).\\
+There is a main program to control the phases of the compiler (tifl.c). It scans and parses the input file (according to the specification in tifl\_scan.l and tifl\_pars.y) and then starts the attribution phase ("init\_tifl()"); max\_std.o contains the predefined functions and constants. From these input files
+the executable interpreter (tifl) is generated.
+
+%------------------------------------------------------------
+% Hier finden sich alle Quellen!
+\include{tifl_src/tifl_spec.h}
+%----  env version   -------
+\include{tifl_src/env/Makefile}
+\include{tifl_src/env/tifl_scan.l}
+\include{tifl_src/env/tifl_pars.y}
+\include{tifl_src/env/tifl_spec.m}
+\include{tifl_src/env/tifl.c}
+%----  stack version  ------
+\include{tifl_src/stack/Makefile}
+\include{tifl_src/stack/tifl_spec.m}
+\include{tifl_src/stack/tifl.c}
+\include{tifl_src/stack/stack.c}
+
+\end{document}
+

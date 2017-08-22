@@ -1,0 +1,83 @@
+#comments
+#$idents
+#case_sensitive
+#specials
+{ ignore comments (s.o. # comments) }
+1 1 identsy
+2 0 numbersy
+4 0 #
+5 1 !
+{5 2 "}
+{5 3 $}
+5 4 %
+5 5 &
+{5 6 '}
+5 7 (
+5 8 )
+5 9 *
+5 10 +
+5 11 ,
+5 12 -
+5 13 .
+5 14 /
+5 15 :
+5 16 ;
+5 17 <
+5 18 =
+5 19 >
+5 20 ?
+5 21 @
+5 22 [
+5 23 \
+5 24 ]
+5 25 ^
+5 27 `
+{5 28 <geschweifte Klammer zu>}
+5 29 |
+{5 30 <geschweifte Klammer auf>}
+5 31 ~
+7  0 stringsy  
+#keywords
+3  1 specials
+3  2 keywords
+3  3 comments
+3  4 mcomments
+3  5 ccomments
+3  6 $idents
+3  7 case_sensitive
+3  8 line_directives
+6  1 arrowsy
+6  2 identsy
+6  3 semicsy
+6  4 becomessy
+6  5 periodsy
+6  6 stringsy
+6  7 colonsy
+6  8 commasy
+6  9 dollarsy
+6 10 issy
+6 11 lessequsy
+6 12 lesssy
+6 13 lbracketsy
+6 14 lparsy
+6 15 minussy
+6 16 twoperiodsy
+6 17 monksy
+6 18 notequsy
+6 19 percentsy
+6 20 rbracketsy
+6 21 plussy
+6 22 numbersy
+6 23 rparsy
+6 24 slashsy
+6 25 starsy
+6 26 greatersy
+6 27 greaterequsy
+6 28 combegsy
+6 29 comendsy
+6 30 realsy
+6 31 cstringsy { Strings wie in C }
+6 32 ccharsy   { Characterkonstanten wie in C } 
+6 33 cnumbersy { numbers wie in C }
+6 34 crealsy   { Realzahlen wie in C }
+8 0  ignore

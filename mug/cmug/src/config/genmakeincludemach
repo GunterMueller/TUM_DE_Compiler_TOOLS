@@ -1,0 +1,33 @@
+#!/bin/sh
+dirname=`dirname $0`
+SYSNAME="$MUGXDEV"
+if [ "$SYSNAME" = "" ] ; then
+  if [ -f /bin/uname ] ; then
+    SYSNAME=`/bin/uname`
+  else
+    if [ ! -f $dirname/getuname ] ; then
+      ( cd $dirname ; make getuname ) 1>&2
+    fi
+    SYSNAME=`$dirname/getuname`
+    if [ $? != 0 ] ; then
+      SYSNAME=unknown
+    fi
+  fi
+else 
+  echo 1>&2 Crossdeveloping for $SYSNAME
+fi
+if [ ! -f $dirname/$SYSNAME.flg ] ; then
+  SYSNAME=unknown
+fi
+if [ $SYSNAME = unknown ] ; then
+  echo 1>&2 WARNING: unknown system configuration !
+fi
+rm -f $1
+if [ $SYSNAME = SunOS ] ; then
+   if [ `uname -a | fgrep -c 5.3` -gt 0 ] ; then # Solaris 2.3
+	ln -s Solaris.flg $1
+	exit 0
+   fi
+fi
+ln -s $SYSNAME.flg $1
+

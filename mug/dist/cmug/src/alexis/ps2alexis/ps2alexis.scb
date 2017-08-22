@@ -1,0 +1,26 @@
+SCANNER Convert
+
+OPTIONS
+  minimize
+OPTIONEND
+
+INCLUDE '../src/mugdefs.sci'                { MUG-Definitionen }
+
+LEXMAKROS
+   Ident = allbut(ws) ;
+MAKROEND
+
+LEXEMES
+  ignore  Ws+                 ->   { White Space } ;
+
+  '#comments'                 ->  Code(1,1);
+  '#specials'                 ->  Code(1,2);
+  '#keywords'                 ->  Code(1,3);
+
+  'identsy'                   ->  Code(2,1);
+  'numbersy'                  ->  Code(2,2);
+  'stringsy'                  ->  Code(2,3);
+
+  Digit+                      ->  RetInt(3);                                                 { Relativcode = Wert der Zahl }
+  Ident                       ->  RetId(4);
+LEXEMESEND

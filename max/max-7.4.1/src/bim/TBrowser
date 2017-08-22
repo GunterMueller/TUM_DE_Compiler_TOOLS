@@ -1,0 +1,532 @@
+
+! Bei Farbbildschirmen wird folgender Aufruf verwendet:
+!    xrdb -merge TBrowser
+! Bei Schwarz-Weiss-Bildschirmen wird folgendermassen aufgerufen:
+!    xrdb -merge -DSTATICGRAY TBrowser
+! Und bei Graustufen-Bildschirmen so:
+!    xrdb -merge -DGRAYSCALE TBrowser
+
+!
+! COLORS:
+!
+
+#ifdef STATICGRAY
+
+*.Form.background:  XtDefaultBackground
+*.Form.borderColor: XtDefaultForeground
+
+*.Form.Viewport.background:  XtDefaultBackground
+*.Form.Viewport.borderColor: XtDefaultForeground
+
+*.Form.Viewport.Tree.background:  XtDefaultBackground
+*.Form.Viewport.Tree.borderColor: XtDefaultForeground
+*.Form.Viewport.Tree.foreground:  XtDefaultForeground
+
+*.Form.Viewport.Tree.Node.foreground:  XtDefaultForeground
+
+*.Form.Viewport.Tree.Node.Command.background:  XtDefaultBackground
+*.Form.Viewport.Tree.Node.Command.borderColor: XtDefaultForeground
+*.Form.Viewport.Tree.Node.Command.foreground:  XtDefaultForeground
+
+*.Form.Viewport.Tree.Node.attr_form.background:  XtDefaultBackground
+*.Form.Viewport.Tree.Node.attr_form.borderColor: XtDefaultForeground
+
+*.Form.Viewport.Tree.Node.attr_form.no_label.background:  XtDefaultBackground
+*.Form.Viewport.Tree.Node.attr_form.no_label.borderColor: XtDefaultForeground
+*.Form.Viewport.Tree.Node.attr_form.no_label.foreground:  XtDefaultForeground
+
+*.Form.Viewport.Tree.Node.attr_form.hidden_label.background:  XtDefaultBackground
+*.Form.Viewport.Tree.Node.attr_form.hidden_label.borderColor: XtDefaultForeground
+*.Form.Viewport.Tree.Node.attr_form.hidden_label.foreground:  XtDefaultForeground
+
+*.Form.Viewport.Tree.Node.attr_form.attr_label.background:  XtDefaultBackground
+*.Form.Viewport.Tree.Node.attr_form.attr_label.borderColor: XtDefaultForeground
+*.Form.Viewport.Tree.Node.attr_form.attr_label.foreground:  XtDefaultForeground
+
+*.Form.Viewport.Tree.Node.attr_form.button.background:  XtDefaultBackground
+*.Form.Viewport.Tree.Node.attr_form.button.borderColor: XtDefaultForeground
+*.Form.Viewport.Tree.Node.attr_form.button.foreground:  XtDefaultForeground
+
+*.Form.menu_button_cont.background:  XtDefaultBackground
+*.Form.menu_button_cont.borderColor: XtDefaultForeground
+
+*.Form.menu_button_cont.MenuButton.background:  XtDefaultBackground
+*.Form.menu_button_cont.MenuButton.borderColor: XtDefaultForeground
+*.Form.menu_button_cont.MenuButton.foreground:  XtDefaultForeground
+
+*.Form.menu_button_cont.MenuButton.SimpleMenu.background:  XtDefaultBackground
+*.Form.menu_button_cont.MenuButton.SimpleMenu.borderColor: XtDefaultForeground
+
+*.Form.menu_button_cont.MenuButton.SimpleMenu.SmeBSB.foreground:  XtDefaultForeground
+
+*.Form.Maske.mask_form1.background:  XtDefaultBackground
+*.Form.Maske.mask_form1.borderColor: XtDefaultForeground
+
+*.Form.Maske.mask_form1.mask_unselect.background:  XtDefaultBackground
+*.Form.Maske.mask_form1.mask_unselect.borderColor: XtDefaultForeground
+*.Form.Maske.mask_form1.mask_unselect.foreground:  XtDefaultForeground
+
+*.Form.Maske.mask_form1.mask_cancel.background:  XtDefaultBackground
+*.Form.Maske.mask_form1.mask_cancel.borderColor: XtDefaultForeground
+*.Form.Maske.mask_form1.mask_cancel.foreground:  XtDefaultForeground
+
+*.Form.Maske.mask_form1.mask_ok.background:  XtDefaultBackground
+*.Form.Maske.mask_form1.mask_ok.borderColor: XtDefaultForeground
+*.Form.Maske.mask_form1.mask_ok.foreground:  XtDefaultForeground
+
+*.Form.Maske.mask_form1.mask_viewport.background:  XtDefaultBackground
+*.Form.Maske.mask_form1.mask_viewport.borderColor: XtDefaultForeground
+
+*.Form.Maske.mask_form1.mask_viewport.mask_form2.background:  XtDefaultBackground
+*.Form.Maske.mask_form1.mask_viewport.mask_form2.borderColor: XtDefaultForeground
+
+*.Form.Maske.mask_form1.mask_viewport.mask_form2.Toggle.background:  XtDefaultBackground
+*.Form.Maske.mask_form1.mask_viewport.mask_form2.Toggle.borderColor: XtDefaultForeground
+*.Form.Maske.mask_form1.mask_viewport.mask_form2.Toggle.foreground:  XtDefaultForeground
+
+*.Form.menu_button_cont.Sortenliste.name_form.background:  XtDefaultBackground
+*.Form.menu_button_cont.Sortenliste.name_form.borderColor: XtDefaultForeground
+
+*.Form.menu_button_cont.Sortenliste.name_form.name_label.background:  XtDefaultBackground
+*.Form.menu_button_cont.Sortenliste.name_form.name_label.borderColor: XtDefaultForeground
+*.Form.menu_button_cont.Sortenliste.name_form.name_label.foreground:  XtDefaultForeground
+
+*.Form.menu_button_cont.Sortenliste.name_form.name_cancel.background:  XtDefaultBackground
+*.Form.menu_button_cont.Sortenliste.name_form.name_cancel.borderColor: XtDefaultForeground
+*.Form.menu_button_cont.Sortenliste.name_form.name_cancel.foreground:  XtDefaultForeground
+
+*.Form.menu_button_cont.Sortenliste.name_form.name_viewport.background:  XtDefaultBackground
+*.Form.menu_button_cont.Sortenliste.name_form.name_viewport.borderColor: XtDefaultForeground
+
+*.Form.menu_button_cont.Sortenliste.name_form.name_viewport.name_list.background:  XtDefaultBackground
+*.Form.menu_button_cont.Sortenliste.name_form.name_viewport.name_list.borderColor: XtDefaultForeground
+*.Form.menu_button_cont.Sortenliste.name_form.name_viewport.name_list.foreground:  XtDefaultForeground
+
+*.Form.Viewport.node_menu.background:  XtDefaultBackground
+*.Form.Viewport.node_menu.borderColor: XtDefaultForeground
+
+*.Form.Viewport.node_menu.SmeLine.foreground:  XtDefaultForeground
+
+*.Form.Viewport.node_menu.SmeBSB.foreground:  XtDefaultForeground
+
+#endif
+
+#ifdef GRAYSCALE
+
+*.Form.background:  XtDefaultBackground
+*.Form.borderColor: XtDefaultForeground
+
+*.Form.Viewport.background:  XtDefaultBackground
+*.Form.Viewport.borderColor: XtDefaultForeground
+
+*.Form.Viewport.Tree.background:  XtDefaultBackground
+*.Form.Viewport.Tree.borderColor: XtDefaultForeground
+*.Form.Viewport.Tree.foreground:  XtDefaultForeground
+
+*.Form.Viewport.Tree.Node.foreground:  XtDefaultForeground
+
+*.Form.Viewport.Tree.Node.Command.background:  grey80
+*.Form.Viewport.Tree.Node.Command.borderColor: XtDefaultForeground
+*.Form.Viewport.Tree.Node.Command.foreground:  XtDefaultForeground
+
+*.Form.Viewport.Tree.Node.attr_form.background:  XtDefaultBackground
+*.Form.Viewport.Tree.Node.attr_form.borderColor: XtDefaultForeground
+
+*.Form.Viewport.Tree.Node.attr_form.no_label.background:  grey40
+*.Form.Viewport.Tree.Node.attr_form.no_label.borderColor: XtDefaultForeground
+*.Form.Viewport.Tree.Node.attr_form.no_label.foreground:  white
+
+*.Form.Viewport.Tree.Node.attr_form.hidden_label.background:  grey40
+*.Form.Viewport.Tree.Node.attr_form.hidden_label.borderColor: XtDefaultForeground
+*.Form.Viewport.Tree.Node.attr_form.hidden_label.foreground:  white
+
+*.Form.Viewport.Tree.Node.attr_form.attr_label.background:  grey40
+*.Form.Viewport.Tree.Node.attr_form.attr_label.borderColor: XtDefaultForeground
+*.Form.Viewport.Tree.Node.attr_form.attr_label.foreground:  white
+
+*.Form.Viewport.Tree.Node.attr_form.button.background:  XtDefaultBackground
+*.Form.Viewport.Tree.Node.attr_form.button.borderColor: XtDefaultForeground
+*.Form.Viewport.Tree.Node.attr_form.button.foreground:  XtDefaultForeground
+
+*.Form.menu_button_cont.background:  grey80
+*.Form.menu_button_cont.borderColor: XtDefaultForeground
+
+*.Form.menu_button_cont.MenuButton.background:  grey80
+*.Form.menu_button_cont.MenuButton.borderColor: XtDefaultForeground
+*.Form.menu_button_cont.MenuButton.foreground:  XtDefaultForeground
+
+*.Form.menu_button_cont.MenuButton.SimpleMenu.background:  XtDefaultBackground
+*.Form.menu_button_cont.MenuButton.SimpleMenu.borderColor: XtDefaultForeground
+*.Form.menu_button_cont.MenuButton.SimpleMenu.SmeBSB.foreground:  XtDefaultForeground
+
+*.Form.Maske.mask_form1.background:  grey60
+*.Form.Maske.mask_form1.borderColor: XtDefaultForeground
+
+*.Form.Maske.mask_form1.mask_unselect.background:  XtDefaultBackground
+*.Form.Maske.mask_form1.mask_unselect.borderColor: XtDefaultForeground
+*.Form.Maske.mask_form1.mask_unselect.foreground:  XtDefaultForeground
+
+*.Form.Maske.mask_form1.mask_cancel.background:  XtDefaultBackground
+*.Form.Maske.mask_form1.mask_cancel.borderColor: XtDefaultForeground
+*.Form.Maske.mask_form1.mask_cancel.foreground:  XtDefaultForeground
+
+*.Form.Maske.mask_form1.mask_ok.background:  XtDefaultBackground
+*.Form.Maske.mask_form1.mask_ok.borderColor: XtDefaultForeground
+*.Form.Maske.mask_form1.mask_ok.foreground:  XtDefaultForeground
+
+*.Form.Maske.mask_form1.mask_viewport.background:  XtDefaultBackground
+*.Form.Maske.mask_form1.mask_viewport.borderColor: XtDefaultForeground
+
+*.Form.Maske.mask_form1.mask_viewport.mask_form2.background:  XtDefaultBackground
+*.Form.Maske.mask_form1.mask_viewport.mask_form2.borderColor: XtDefaultForeground
+
+*.Form.Maske.mask_form1.mask_viewport.mask_form2.Toggle.background:  XtDefaultBackground
+*.Form.Maske.mask_form1.mask_viewport.mask_form2.Toggle.borderColor: XtDefaultForeground
+*.Form.Maske.mask_form1.mask_viewport.mask_form2.Toggle.foreground:  grey30
+
+*.Form.menu_button_cont.Sortenliste.name_form.background:  grey60
+*.Form.menu_button_cont.Sortenliste.name_form.borderColor: XtDefaultForeground
+
+*.Form.menu_button_cont.Sortenliste.name_form.name_label.background:  grey60
+*.Form.menu_button_cont.Sortenliste.name_form.name_label.borderColor: XtDefaultForeground
+*.Form.menu_button_cont.Sortenliste.name_form.name_label.foreground:  XtDefaultForeground
+
+*.Form.menu_button_cont.Sortenliste.name_form.name_cancel.background:  XtDefaultBackground
+*.Form.menu_button_cont.Sortenliste.name_form.name_cancel.borderColor: XtDefaultForeground
+*.Form.menu_button_cont.Sortenliste.name_form.name_cancel.foreground:  XtDefaultForeground
+
+*.Form.menu_button_cont.Sortenliste.name_form.name_viewport.background:  XtDefaultBackground
+*.Form.menu_button_cont.Sortenliste.name_form.name_viewport.borderColor: XtDefaultForeground
+
+*.Form.menu_button_cont.Sortenliste.name_form.name_viewport.name_list.background:  XtDefaultBackground
+*.Form.menu_button_cont.Sortenliste.name_form.name_viewport.name_list.borderColor: XtDefaultForeground
+*.Form.menu_button_cont.Sortenliste.name_form.name_viewport.name_list.foreground:  grey30
+
+*.Form.Viewport.node_menu.background:  grey95
+*.Form.Viewport.node_menu.borderColor: XtDefaultForeground
+
+*.Form.Viewport.node_menu.SmeLine.foreground:  XtDefaultForeground
+
+*.Form.Viewport.node_menu.SmeBSB.foreground:  XtDefaultForeground
+
+#endif
+
+
+#ifdef COLOR
+
+*.Form.background:  XtDefaultBackground
+*.Form.borderColor: XtDefaultForeground
+
+*.Form.Viewport.background:  XtDefaultBackground
+*.Form.Viewport.borderColor: XtDefaultForeground
+
+*.Form.Viewport.Tree.background:  Orange
+*.Form.Viewport.Tree.borderColor: XtDefaultForeground
+*.Form.Viewport.Tree.foreground:  XtDefaultForeground
+
+*.Form.Viewport.Tree.Node.foreground:  Yellow
+
+*.Form.Viewport.Tree.Node.Command.background:  Blue
+*.Form.Viewport.Tree.Node.Command.borderColor: XtDefaultForeground
+*.Form.Viewport.Tree.Node.Command.foreground:  XtDefaultForeground
+
+*.Form.Viewport.Tree.Node.attr_form.background:  Red
+*.Form.Viewport.Tree.Node.attr_form.borderColor: XtDefaultForeground
+
+*.Form.Viewport.Tree.Node.attr_form.no_label.background:  Salmon
+*.Form.Viewport.Tree.Node.attr_form.no_label.borderColor: XtDefaultForeground
+*.Form.Viewport.Tree.Node.attr_form.no_label.foreground:  white
+
+*.Form.Viewport.Tree.Node.attr_form.hidden_label.background:  DarkGreen
+*.Form.Viewport.Tree.Node.attr_form.hidden_label.borderColor: XtDefaultForeground
+*.Form.Viewport.Tree.Node.attr_form.hidden_label.foreground:  white
+
+*.Form.Viewport.Tree.Node.attr_form.attr_label.background:  Turquoise
+*.Form.Viewport.Tree.Node.attr_form.attr_label.borderColor: XtDefaultForeground
+*.Form.Viewport.Tree.Node.attr_form.attr_label.foreground:  white
+
+*.Form.Viewport.Tree.Node.attr_form.button.background:  XtDefaultBackground
+*.Form.Viewport.Tree.Node.attr_form.button.borderColor: XtDefaultForeground
+*.Form.Viewport.Tree.Node.attr_form.button.foreground:  XtDefaultForeground
+
+*.Form.menu_button_cont.background:  SpringGreen1
+*.Form.menu_button_cont.borderColor: XtDefaultForeground
+
+*.Form.menu_button_cont.MenuButton.background:  SpringGreen1
+*.Form.menu_button_cont.MenuButton.borderColor: Red
+*.Form.menu_button_cont.MenuButton.foreground:  Red
+
+*.Form.menu_button_cont.MenuButton.SimpleMenu.background:  Pink
+*.Form.menu_button_cont.MenuButton.SimpleMenu.borderColor: SaddleBrown
+
+*.Form.menu_button_cont.MenuButton.SimpleMenu.SmeBSB.foreground:  SaddleBrown
+
+*.Form.Maske.mask_form1.background:  DarkViolet
+*.Form.Maske.mask_form1.borderColor: XtDefaultForeground
+
+*.Form.Maske.mask_form1.mask_unselect.background:  Yellow
+*.Form.Maske.mask_form1.mask_unselect.borderColor: XtDefaultForeground
+*.Form.Maske.mask_form1.mask_unselect.foreground:  XtDefaultForeground
+
+*.Form.Maske.mask_form1.mask_cancel.background:  Yellow
+*.Form.Maske.mask_form1.mask_cancel.borderColor: XtDefaultForeground
+*.Form.Maske.mask_form1.mask_cancel.foreground:  XtDefaultForeground
+
+*.Form.Maske.mask_form1.mask_ok.background:  Yellow
+*.Form.Maske.mask_form1.mask_ok.borderColor: XtDefaultForeground
+*.Form.Maske.mask_form1.mask_ok.foreground:  XtDefaultForeground
+
+*.Form.Maske.mask_form1.mask_viewport.background:  XtDefaultBackground
+*.Form.Maske.mask_form1.mask_viewport.borderColor: XtDefaultForeground
+
+*.Form.Maske.mask_form1.mask_viewport.mask_form2.background:  PapayaWhip
+*.Form.Maske.mask_form1.mask_viewport.mask_form2.borderColor: XtDefaultForeground
+
+*.Form.Maske.mask_form1.mask_viewport.mask_form2.Toggle.background:  Tan
+*.Form.Maske.mask_form1.mask_viewport.mask_form2.Toggle.borderColor: XtDefaultForeground
+*.Form.Maske.mask_form1.mask_viewport.mask_form2.Toggle.foreground:  RoyalBlue
+
+*.Form.menu_button_cont.Sortenliste.name_form.background:  Plum
+*.Form.menu_button_cont.Sortenliste.name_form.borderColor: XtDefaultForeground
+
+*.Form.menu_button_cont.Sortenliste.name_form.name_label.background:  Plum
+*.Form.menu_button_cont.Sortenliste.name_form.name_label.borderColor: XtDefaultForeground
+*.Form.menu_button_cont.Sortenliste.name_form.name_label.foreground:  XtDefaultForeground
+
+*.Form.menu_button_cont.Sortenliste.name_form.name_cancel.background:  Yellow
+*.Form.menu_button_cont.Sortenliste.name_form.name_cancel.borderColor: XtDefaultForeground
+*.Form.menu_button_cont.Sortenliste.name_form.name_cancel.foreground:  XtDefaultForeground
+
+*.Form.menu_button_cont.Sortenliste.name_form.name_viewport.background:  XtDefaultBackground
+*.Form.menu_button_cont.Sortenliste.name_form.name_viewport.borderColor: XtDefaultForeground
+
+*.Form.menu_button_cont.Sortenliste.name_form.name_viewport.name_list.background:  Tan
+*.Form.menu_button_cont.Sortenliste.name_form.name_viewport.name_list.borderColor: XtDefaultForeground
+*.Form.menu_button_cont.Sortenliste.name_form.name_viewport.name_list.foreground:  RoyalBlue
+
+*.Form.Viewport.node_menu.background:  SpringGreen1
+*.Form.Viewport.node_menu.borderColor: XtDefaultForeground
+
+*.Form.Viewport.node_menu.SmeLine.foreground:  Red
+
+*.Form.Viewport.node_menu.SmeBSB.foreground:  Red
+
+#endif
+
+!
+! PIXMAPS:
+!
+*.Form.backgroundPixmap: XtUnspecifiedPixmap
+*.Form.borderPixmap:     XtUnspecifiedPixmap
+
+*.Form.Viewport.backgroundPixmap: XtUnspecifiedPixmap
+*.Form.Viewport.borderPixmap:     XtUnspecifiedPixmap
+
+*.Form.Viewport.Tree.backgroundPixmap: XtUnspecifiedPixmap
+*.Form.Viewport.Tree.borderPixmap:     XtUnspecifiedPixmap
+
+*.Form.Viewport.Tree.Node.Command.backgroundPixmap: XtUnspecifiedPixmap
+*.Form.Viewport.Tree.Node.Command.borderPixmap:     XtUnspecifiedPixmap
+
+*.Form.Viewport.Tree.Node.attr_form.backgroundPixmap: XtUnspecifiedPixmap
+*.Form.Viewport.Tree.Node.attr_form.borderPixmap:     XtUnspecifiedPixmap
+
+*.Form.Viewport.Tree.Node.attr_form.no_label.backgroundPixmap: XtUnspecifiedPixmap
+*.Form.Viewport.Tree.Node.attr_form.no_label.borderPixmap:     XtUnspecifiedPixmap
+
+*.Form.Viewport.Tree.Node.attr_form.hidden_label.backgroundPixmap: XtUnspecifiedPixmap
+*.Form.Viewport.Tree.Node.attr_form.hidden_label.borderPixmap:     XtUnspecifiedPixmap
+
+*.Form.Viewport.Tree.Node.attr_form.attr_label.backgroundPixmap: XtUnspecifiedPixmap
+*.Form.Viewport.Tree.Node.attr_form.attr_label.borderPixmap:     XtUnspecifiedPixmap
+
+*.Form.Viewport.Tree.Node.attr_form.button.backgroundPixmap: XtUnspecifiedPixmap
+*.Form.Viewport.Tree.Node.attr_form.button.borderPixmap:     XtUnspecifiedPixmap
+
+*.Form.menu_button_cont.backgroundPixmap: XtUnspecifiedPixmap
+*.Form.menu_button_cont.borderPixmap:     XtUnspecifiedPixmap
+
+*.Form.menu_button_cont.MenuButton.backgroundPixmap: XtUnspecifiedPixmap
+*.Form.menu_button_cont.MenuButton.borderPixmap:     XtUnspecifiedPixmap
+
+*.Form.menu_button_cont.MenuButton.SimpleMenu.backgroundPixmap: XtUnspecifiedPixmap
+*.Form.menu_button_cont.MenuButton.SimpleMenu.borderPixmap:     XtUnspecifiedPixmap
+
+*.Form.Maske.mask_form1.backgroundPixmap: XtUnspecifiedPixmap
+*.Form.Maske.mask_form1.borderPixmap:     XtUnspecifiedPixmap
+
+*.Form.Maske.mask_form1.mask_unselect.backgroundPixmap: XtUnspecifiedPixmap
+*.Form.Maske.mask_form1.mask_unselect.borderPixmap:     XtUnspecifiedPixmap
+
+*.Form.Maske.mask_form1.mask_cancel.backgroundPixmap: XtUnspecifiedPixmap
+*.Form.Maske.mask_form1.mask_cancel.borderPixmap:     XtUnspecifiedPixmap
+
+*.Form.Maske.mask_form1.mask_ok.backgroundPixmap: XtUnspecifiedPixmap
+*.Form.Maske.mask_form1.mask_ok.borderPixmap:     XtUnspecifiedPixmap
+
+*.Form.Maske.mask_form1.mask_viewport.backgroundPixmap: XtUnspecifiedPixmap
+*.Form.Maske.mask_form1.mask_viewport.borderPixmap:     XtUnspecifiedPixmap
+
+*.Form.Maske.mask_form1.mask_viewport.mask_form2.backgroundPixmap: XtUnspecifiedPixmap
+*.Form.Maske.mask_form1.mask_viewport.mask_form2.borderPixmap:     XtUnspecifiedPixmap
+
+*.Form.Maske.mask_form1.mask_viewport.mask_form2.Toggle.backgroundPixmap: XtUnspecifiedPixmap
+*.Form.Maske.mask_form1.mask_viewport.mask_form2.Toggle.borderPixmap:     XtUnspecifiedPixmap
+
+*.Form.menu_button_cont.Sortenliste.name_form.backgroundPixmap: XtUnspecifiedPixmap
+*.Form.menu_button_cont.Sortenliste.name_form.borderPixmap:     XtUnspecifiedPixmap
+
+*.Form.menu_button_cont.Sortenliste.name_form.name_label.backgroundPixmap: XtUnspecifiedPixmap
+*.Form.menu_button_cont.Sortenliste.name_form.name_label.borderPixmap:     XtUnspecifiedPixmap
+
+*.Form.menu_button_cont.Sortenliste.name_form.name_cancel.backgroundPixmap: XtUnspecifiedPixmap
+*.Form.menu_button_cont.Sortenliste.name_form.name_cancel.borderPixmap:     XtUnspecifiedPixmap
+
+*.Form.menu_button_cont.Sortenliste.name_form.name_viewport.backgroundPixmap: XtUnspecifiedPixmap
+*.Form.menu_button_cont.Sortenliste.name_form.name_viewport.borderPixmap:     XtUnspecifiedPixmap
+
+*.Form.menu_button_cont.Sortenliste.name_form.name_viewport.name_list.backgroundPixmap: XtUnspecifiedPixmap
+*.Form.menu_button_cont.Sortenliste.name_form.name_viewport.name_list.borderPixmap:     XtUnspecifiedPixmap
+
+*.Form.Viewport.node_menu.backgroundPixmap: XtUnspecifiedPixmap
+*.Form.Viewport.node_menu.borderPixmap:     XtUnspecifiedPixmap
+
+!
+! LINE WIDTHS:
+!
+
+*.Form.borderWidth: 1
+
+*.Form.Viewport.borderWidth: 1
+
+*.Form.Viewport.Tree.borderWidth: 1
+*.Form.Viewport.Tree.lineWidth:   0
+
+*.Form.Viewport.Tree.Node.highlightWidth: 2
+*.Form.Viewport.Tree.Node.lineWidth:      1
+
+*.Form.Viewport.Tree.Node.Command.borderWidth:        1
+*.Form.Viewport.Tree.Node.Command.highlightThickness: 2
+
+*.Form.Viewport.Tree.Node.attr_form.borderWidth: 1
+
+*.Form.Viewport.Tree.Node.attr_form.button.borderWidth:        1
+*.Form.Viewport.Tree.Node.attr_form.button.highlightThickness: 2
+
+*.Form.menu_button_cont.borderWidth: 1
+
+*.Form.menu_button_cont.MenuButton.highlightThickness: 2
+*.Form.menu_button_cont.MenuButton.borderWidth:        1
+
+*.Form.menu_button_cont.MenuButton.SimpleMenu.borderWidth: 1
+
+*.Form.menu_button_cont.MenuButton.SimpleMenu.SmeBSB.borderWidth: 1
+
+*.Form.Maske.mask_form1.borderWidth: 1
+
+*.Form.Maske.mask_form1.mask_unselect.borderWidth:        1
+*.Form.Maske.mask_form1.mask_unselect.highlightThickness: 2
+
+*.Form.Maske.mask_form1.mask_cancel.borderWidth:        1
+*.Form.Maske.mask_form1.mask_cancel.highlightThickness: 2
+
+*.Form.Maske.mask_form1.mask_ok.borderWidth:        1
+*.Form.Maske.mask_form1.mask_ok.highlightThickness: 2
+
+*.Form.Maske.mask_form1.mask_viewport.borderWidth: 1
+
+*.Form.Maske.mask_form1.mask_viewport.mask_form2.borderWidth: 1
+
+*.Form.Maske.mask_form1.mask_viewport.mask_form2.Toggle.borderWidth:        1
+*.Form.Maske.mask_form1.mask_viewport.mask_form2.Toggle.highlightThickness: 2
+
+*.Form.menu_button_cont.Sortenliste.name_form.borderWidth: 1
+
+*.Form.menu_button_cont.Sortenliste.name_form.name_label.borderWidth: 0
+
+*.Form.menu_button_cont.Sortenliste.name_form.name_cancel.borderWidth:        1
+*.Form.menu_button_cont.Sortenliste.name_form.name_cancel.highlightThickness: 2
+
+*.Form.menu_button_cont.Sortenliste.name_form.name_viewport.borderWidth: 1
+
+*.Form.Viewport.node_menu.borderWidth: 1
+
+*.Form.Viewport.node_menu.SmeLine.borderWidth: 1
+*.Form.Viewport.node_menu.SmeLine.lineWidth:   1
+
+*.Form.Viewport.node_menu.SmeBSB.borderWidth: 1
+
+!
+! DISTANCES:
+!
+
+*.Form.Viewport.Tree.hSpace: 20
+*.Form.Viewport.Tree.vSpace: 6
+
+*.Form.Viewport.Tree.Node.Command.internalHeight: 2
+*.Form.Viewport.Tree.Node.Command.internalWidth:  4
+
+*.Form.Viewport.Tree.Node.attr_form.defaultDistance: 4
+
+*.Form.menu_button_cont.MenuButton.internalHeight: 2
+*.Form.menu_button_cont.MenuButton.internalWidth:  4
+
+*.Form.menu_button_cont.MenuButton.SimpleMenu.bottomMargin: 0
+*.Form.menu_button_cont.MenuButton.SimpleMenu.topMargin:    0
+
+*.Form.menu_button_cont.MenuButton.SimpleMenu.SmeBSB.leftMargin:  4
+*.Form.menu_button_cont.MenuButton.SimpleMenu.SmeBSB.rightMargin: 4
+*.Form.menu_button_cont.MenuButton.SimpleMenu.SmeBSB.vertSpace:   25
+
+*.Form.Maske.mask_form1.defaultDistance: 4
+
+*.Form.Maske.mask_form1.mask_unselect.internalHeight: 2
+*.Form.Maske.mask_form1.mask_unselect.internalWidth:  4
+
+*.Form.Maske.mask_form1.mask_cancel.internalHeight: 2
+*.Form.Maske.mask_form1.mask_cancel.internalWidth:  4
+
+*.Form.Maske.mask_form1.mask_ok.horizDistance:  18
+*.Form.Maske.mask_form1.mask_ok.internalHeight: 2
+*.Form.Maske.mask_form1.mask_ok.internalWidth:  4
+
+*.Form.Maske.mask_form1.mask_viewport.mask_form2.defaultDistance: 4
+
+*.Form.Maske.mask_form1.mask_viewport.mask_form2.Toggle.internalHeight: 2
+*.Form.Maske.mask_form1.mask_viewport.mask_form2.Toggle.internalWidth:  4
+
+*.Form.menu_button_cont.Sortenliste.name_form.defaultDistance: 4
+
+*.Form.menu_button_cont.Sortenliste.name_form.name_label.internalHeight: 2
+*.Form.menu_button_cont.Sortenliste.name_form.name_label.internalWidth:  4
+
+*.Form.menu_button_cont.Sortenliste.name_form.name_cancel.internalHeight: 2
+*.Form.menu_button_cont.Sortenliste.name_form.name_cancel.internalWidth:  4
+
+*.Form.menu_button_cont.Sortenliste.name_form.name_viewport.name_list.internalHeight: 2
+*.Form.menu_button_cont.Sortenliste.name_form.name_viewport.name_list.internalWidth:  4
+*.Form.menu_button_cont.Sortenliste.name_form.name_viewport.name_list.rowSpacing:     4
+
+*.Form.Viewport.node_menu.bottomMargin: 0
+*.Form.Viewport.node_menu.topMargin:    0
+
+*.Form.Viewport.node_menu.SmeLine.height: 0
+*.Form.Viewport.node_menu.SmeLine.width:  1
+
+*.Form.Viewport.node_menu.SmeBSB.leftMargin:  4
+*.Form.Viewport.node_menu.SmeBSB.rightMargin: 4
+*.Form.Viewport.node_menu.SmeBSB.vertSpace:   25
+
+!
+! TEXTS:
+!
+
+*.Form.Viewport.Tree.Node.attr_form.no_label.label: No Attributes!
+
+*.Form.Viewport.Tree.Node.attr_form.hidden_label.label: Attributes Masked!
+
+!
+! Die Texte fuer die Menue-Buttons und die Menue-Eintraege sind in der Datei 'attr.c' zu aendern
+!
+
+

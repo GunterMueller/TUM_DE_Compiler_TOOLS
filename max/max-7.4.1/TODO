@@ -1,0 +1,28 @@
+[ This file seems to describe changes that have been done for V7.3.0 rather
+  than the things to be done in the future.
+
+  for a list of known MAX bugs see file BUGS
+  A.Huber, 19 Mar 1998
+]
+ 
+- sourcen ident
+- options um ausgabedatei zu aendern
+- option um init-function anzugeben
+- Makefile mit sichtbaren Kommandos
+- 42.c ??
+- core-dump on browser
+- X11LIBS in Makefile
+- bim und max in eine Distribution
+- MAXBINPATH nach config_sc.h
+- bootstrapping:
+  GNu autoconf checked yacc,lex,flex,bison und max
+  und wenn nicht existent, dann xxx.boot nach xxxx kopieren,
+  ansonsten nutzen.
+  Aber auch option, um sowohl neu geneierung zu forcieren,
+  als auch boot-Dateien immer nutzen.
+- echtes getopt nutzen und arguments vorne hin statt hinten
+- statt max_std.o eine libmaxstd.a und
+  fuer browser statt maxbrowse.a ein libmaxbrs.a
+- doc von sources an neue namen anpassen
+- max.pod anlegen fuer manpage
+- wo is tex-Source von tutorial?

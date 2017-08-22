@@ -1,0 +1,165 @@
+##
+##  MAX Program Makefile 
+##
+@SET_MAKE@
+
+# -------------------------------------------------------------------
+# BUILD TOOLS
+# -------------------------------------------------------------------
+
+CP       = cp
+MV       = mv
+RM       = rm -f
+CHMOD    = chmod
+MKDIR    = ../../etc/mkinstalldirs
+STRIP    = strip
+
+CC       = @CC@
+AR       = @AR@
+RANLIB   = @RANLIB@
+DEFINES  = 
+DEBUG    = -g
+INCLUDES = -I../../config -I. -I@PATH_X_INC@
+CFLAGS   = @CFLAGS@ $(DEFINES) $(DEBUG) $(INCLUDES)
+LDFLAGS  = -L@PATH_X_LIB@
+LIBS     = -lX11
+LEX      = @LEX@
+YACC     = @YACC@
+
+MAXOPTS  =
+MAX      = max
+
+PREFIX   = @prefix@
+
+# -------------------------------------------------------------------
+# DEFINITIONS
+# -------------------------------------------------------------------
+
+OBJS = \
+    bim_main.o   \
+    bim_scan.o   \
+    bim_parse.o  \
+    bim_code.o   \
+    bim_sem.o    \
+    bim_vers.o     
+    
+LOBJS = \
+    bim_util.o    \
+    bim_attr.o   \
+	bim_node.o   \
+    bim_tprint.o 
+
+
+# -------------------------------------------------------------------
+# DEFAULT TARGET
+# -------------------------------------------------------------------
+
+all: bim libbim.a bim.1
+
+# -------------------------------------------------------------------
+# BIM PROGRAM
+# -------------------------------------------------------------------
+
+bim: $(OBJS)
+	$(CC) $(LDFLAGS) $(DEBUG) -o bim $(OBJS) $(LIBS)
+
+bim_parse.o: bim_parse.c
+	$(CC) $(CFLAGS) -c bim_parse.c
+
+bim_parse.c bim_parse.h: bim_parse.y 
+	$(YACC) -d bim_parse.y	
+	$(MV) y.tab.c bim_parse.c
+	$(MV) y.tab.h bim_parse.h
+
+bim_scan.c: bim_scan.l bim_parse.h
+	$(LEX) bim_scan.l
+	$(MV) lex.yy.c bim_scan.c
+	
+bim_sem.o: bim_sem.c
+	$(CC) $(CFLAGS) -c bim_sem.c
+
+bim_code.o: bim_code.c
+	$(CC) $(CFLAGS) -c bim_code.c
+
+bim_vers.o: bim_vers.c
+	$(CC) $(CFLAGS) -c bim_vers.c
+
+# -------------------------------------------------------------------
+# COMMON STANDARD MAX LIBRARY
+# -------------------------------------------------------------------
+
+libbim.a: $(LOBJS)
+	$(AR) r libbim.a $(LOBJS)
+	$(RANLIB) libbim.a
+
+bim_node.o: bim_node.c
+	$(CC) $(CFLAGS) -c bim_node.c
+
+bim_tprint.o: bim_tprint.c
+	$(CC) $(CFLAGS) -c bim_tprint.c
+
+bim_attr.o: bim_attr.c
+	$(CC) $(CFLAGS) -c bim_attr.c
+
+bim_util.o: bim_util.c
+	$(CC) $(CFLAGS) -c bim_util.c
+
+
+# -------------------------------------------------------------------
+# DOCUMENTATION
+# -------------------------------------------------------------------
+
+bim.1: bim.pod bim_vers.c
+	V=`../../etc/newvers -l c -D bim_vers.c`; \
+	sed -e "s|\@V\@|$$V|g" -e "s|\@prefix\@|$(prefix)|" <bim.pod >/tmp/bim.pod; \
+	pod2man --section=1 \
+	        --center="TU Muenchen" \
+			--release="TUM" \
+			/tmp/bim.pod >bim.1 && \
+	rm -f /tmp/bim.pod
+
+# -------------------------------------------------------------------
+# INSTALLATION
+# -------------------------------------------------------------------
+
+install: all
+	@$(MKDIR) $(PREFIX)/bin
+	@$(MKDIR) $(PREFIX)/man
+	@$(MKDIR) $(PREFIX)/lib
+	@$(MKDIR) $(PREFIX)/include
+	@$(MKDIR) $(PREFIX)/xad
+	@$(CP) bim $(PREFIX)/bin/bim
+	@$(CHMOD) a+rx $(PREFIX)/bin/bim
+	@$(STRIP) $(PREFIX)/bin/bim
+	@$(CP) bim.1 $(PREFIX)/man/bim.1
+	@$(CHMOD) a+r $(PREFIX)/man/bim.1
+	@$(CP) libbim.a $(PREFIX)/lib/libbim.a
+	@$(CHMOD) a+r $(PREFIX)/lib/libbim.a
+	@$(CP) bim_attrmask.h $(PREFIX)/include/
+	@$(CP) bim_global.h $(PREFIX)/include/
+	@$(CP) bim_nodeinfo.h $(PREFIX)/include/
+	@$(CP) bim_tprintstructs.h $(PREFIX)/include/
+	@$(CP) bim_std.c $(PREFIX)/include/
+	@$(CHMOD) a+r $(PREFIX)/include/*
+	@$(CP) TBrowser $(PREFIX)/xad/TBrowser
+	@$(CHMOD) a+r $(PREFIX)/xad/TBrowser
+
+# -------------------------------------------------------------------
+# CLEANUP
+# -------------------------------------------------------------------
+
+clean:
+	$(RM) $(OBJS) $(LOBJS)
+	$(RM) bim
+	$(RM) libbim.a
+
+realclean: 
+	$(MAKE) clean
+	$(RM) bim_parse.c bim_parse.h
+	$(RM) bim_scan.c
+
+distclean:
+	$(MAKE) realclean
+	rm -f Makefile
+
+##EOF##

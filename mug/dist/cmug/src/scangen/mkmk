@@ -1,0 +1,41 @@
+#!/bin/sh
+echo "#"
+echo "# Variabler Anteil Scanner"
+echo "#"
+for def in `fgrep '#ifdef L_' scn_link.c | sed -e "s/\#ifdef L_//"` ; do 
+  ccmd="$(CC) $(CFLAGS) -DL_$def scn_link.c" 
+  mcmd="$(MV) scn_link.o $(OBJ)/$def.o"
+  echo "$(OBJ)/$def.o: scn_link.c"
+  echo "\t$ccmd && $mcmd"
+  echo "\t$(AR) $(OBJ)/$(LIBPREF)Parscan$(LIBEXT) $(OBJ)/$def.o"
+done
+echo "#"
+echo "# Dekoderroutinen"
+echo "#"
+for def in `fgrep '#ifdef L_' scn_dec.c | sed -e "s/\#ifdef L_//"` ; do 
+  ccmd="$(CC) $(CFLAGS) -DL_$def scn_dec.c" 
+  mcmd="$(MV) scn_dec.o $(OBJ)/$def.o" 
+  echo "$(OBJ)/$def.o: scn_dec.c"
+  echo "\t$ccmd && $mcmd"
+  echo "\t$(AR) $(OBJ)/$(LIBPREF)Parscan$(LIBEXT) $(OBJ)/$def.o"
+done
+echo "#"
+echo "# Verwaltung Datenstruktur Token"
+echo "#"
+for def in `fgrep '#ifdef L_' scn_tok.c | sed -e "s/\#ifdef L_//"` ; do
+  ccmd="$(CC) $(CFLAGS) -DL_$def scn_tok.c" 
+  mcmd="$(MV) scn_tok.o $(OBJ)/$def.o"
+  echo "$(OBJ)/$def.o: scn_tok.c"
+  echo "\t$ccmd && $mcmd"
+  echo "\t$(AR) $(OBJ)/$(LIBPREF)Parscan$(LIBEXT) $(OBJ)/$def.o"
+done
+echo "#"
+echo "# Kompatibilitaetsmoduln"
+echo "#"
+for def in `fgrep '#ifdef L_' scn_komp.c | sed -e "s/\#ifdef L_//"` ; do 
+  ccmd="$(CC) $(CFLAGS) -DL_$def scn_komp.c" 
+  mcmd="$(MV) scn_komp.o $(OBJ)/$def.o"
+  echo "$(OBJ)/$def.o: scn_komp.c"
+  echo "\t$ccmd && $mcmd" 
+  echo "\t$(AR) $(OBJ)/$(LIBPREF)Psold$(LIBEXT) $(OBJ)/$def.o"
+done

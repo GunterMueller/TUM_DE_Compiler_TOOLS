@@ -1,0 +1,72 @@
+CMAX -- Constraint Praeprozessor fuer MAX
+
+(c) Copyright 1996-1998 by Aurel Huber, TU Muenchen
+
+Kurzbeschreibung
+
+-------------------------------------------------------------------------------
+
+AUFRUF VON CMAX
+
+CMAX wird wie folgt aufgerufen:
+
+      cmax [Optionen] Eingabedatei
+
+Folgende Optionen werden unterstuetzt:
+  -nocode         keinen Code generieren
+  -verbosecode    Code generieren, so dass bei der Constraintloesung
+                  Diagnosemeldungen ausgegeben werden
+  -nosrcpos       In der generierten MAX-Spezifikation nicht fuer jeden
+                  Identifikator die urspruengliche Quelltextposition
+                  in der CMAX-Spez. mit angeben.
+                  Nur fuer Kompatibilitaet mit MAX-Versionen vor 7.4.0.
+  -o Ausgabedatei Fuer MAX-Code die angegebene Datei (.m wird von
+                  CMAX selbst angehaengt!) verwenden. Falls diese
+                  Option fehlt, wird 'stdmax_spec' verwendet.
+
+ARBEITSWEISE VON CMAX
+
+CMAX erweitert das MAX-System [1] um die Moeglichkeit, Constraints
+fuer Datenflussanalyse oder Typanalyse von Programmen zu spezifizieren.
+Das CMAX-System ist ein Praeprozessor fuer MAX und erzeugt aus einer
+erweiterten MAX-Spezifikation (*.cm - Datei) eine 'konventionelle'
+MAX-Spezifikation (*.m - Datei) und ein C-Programm (*_solver.c - Datei),
+das zu einem Eingabe-Syntaxbaum eine Menge von Constraints erzeugt und loest.
+
+ANMERKUNGEN ZUR SEMANTIK DER MAX-ERWEITERUNGEN
+
+In der Diplomarbeit [2] wird die Constraint-Semantik weitgehend
+unabhaengig vom MAX-System beschrieben. Folgende Spezialfaelle,
+die die Semantik der Erweiterungen moeglichst aehnlich der restlichen
+MAX-Semantik machen sollen, sind in der Arbeit nicht erwaehnt:
+
+* die Auswertung von Variablen ist strikt bzgl. nil (wie Attribute)
+* falls die rechte Seite eines <=- oder >=-Constraints zu nil
+  auswertet, gilt das Constraint als erfuellt (keine Fehlermeldung!)
+* falls bei einer benutzerdefinierten Assertion als Argument nil
+  uebergeben wird, gilt die Assertion als erfuellt, ohne den Rumpf
+  zu beruecksichtigen. So muessen wie bei MAX-Funktionen Terminierungsfaelle
+  bei Rekursion meistens nicht extra angegeben werden.
+
+
+LITERATUR
+
+[1] A. Poetzsch-Heffter, T. Eisenbarth:
+     ``The MAX System -- A Tutorial Introduction''
+    Institut fuer Informatik, TU Muenchen, 1994
+
+[2] A. Huber:
+     ``Erweiterung des MAX-Systems um Constraint-Behandlung''
+    Diplomarbeit, Institut fuer Informatik, TU Muenchen, 1997
+     
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,67 @@
+grammar expr : g1 -> g2;
+
+function printresult(number) : number;
+function makeadd(number,addop,number) : number;  
+function makemult(number,multop,number) : number;
+function get(number) : number ;
+
+nonterminals
+
+CALC  attributes  erg: number synthesized; 
+EXPR  attributes  erg: number synthesized ;
+TERM  attributes   erg: number synthesized; 
+FACTOR attributes erg: number synthesized; 
+
+
+terminals
+
+number   sem
+addop    sem 
+multop   sem
+lkl 
+rkl;
+
+axiom CALC 
+
+productions
+
+syn P1: CALC -> EXPR.
+sem
+        CALC.erg = printresult(EXPR.erg) $
+semend
+
+syn P2: EXPR<0>  ->  EXPR<1> addop TERM .
+sem
+	EXPR<0>.erg = makeadd(EXPR<1>.erg,addop,TERM.erg)  $
+semend
+
+syn P3: EXPR -> TERM.
+sem
+	EXPR.erg = TERM.erg  $
+
+semend
+
+syn P4:  TERM<0> -> TERM<1> multop FACTOR .
+sem
+	TERM<0>.erg = makemult(TERM<1>.erg,multop,FACTOR.erg) $
+semend
+
+syn P5: TERM -> FACTOR.
+sem
+	TERM.erg = FACTOR.erg $
+semend
+
+syn P6: FACTOR -> lkl EXPR rkl .
+sem
+	FACTOR.erg = EXPR.erg  $         	
+semend
+
+syn P7: FACTOR -> number .
+sem
+	FACTOR.erg =  number $
+semend
+
+grammarend
+    
+
+

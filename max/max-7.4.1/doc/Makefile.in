@@ -1,0 +1,69 @@
+##
+##  MAX Program Makefile 
+##
+@SET_MAKE@
+
+# -------------------------------------------------------------------
+# BUILD TOOLS
+# -------------------------------------------------------------------
+
+CP       = cp
+MV       = mv
+RM       = rm -f
+CHMOD    = chmod
+MKDIR    = ../etc/mkinstalldirs
+
+PREFIX   = @prefix@
+
+# -------------------------------------------------------------------
+# DEFAULT TARGET
+# -------------------------------------------------------------------
+
+SUBDIRS = \
+    bimalgo \
+    bimattr \
+    bimfopra \
+    biminfo \
+    bimmaxmod \
+    bimsource \
+    bimuser \
+    maxlygen \
+    maxsource \
+    maxtut 
+
+all:
+	@for dir in $(SUBDIRS); do \
+		(cd $$dir; $(MAKE) all); \
+	done
+
+# -------------------------------------------------------------------
+# INSTALLATION
+# -------------------------------------------------------------------
+
+install: all
+	$(MKDIR) $(PREFIX)/lib/doc 
+	@for dir in $(SUBDIRS); do \
+		(cd $$dir; cp *.ps $(PREFIX)/lib/doc/ || true); \
+	done
+
+# -------------------------------------------------------------------
+# CLEANUP
+# -------------------------------------------------------------------
+
+clean:
+	@for dir in $(SUBDIRS); do \
+		(cd $$dir; $(MAKE) clean); \
+	done
+
+realclean:
+	@for dir in $(SUBDIRS); do \
+		(cd $$dir; $(MAKE) realclean); \
+	done
+
+distclean:
+	@for dir in $(SUBDIRS); do \
+		(cd $$dir; $(MAKE) distclean); \
+	done
+	rm -f Makefile
+
+##EOF##

@@ -1,0 +1,163 @@
+
+\section{Interne Strukturen des Moduls {\tt tprint.c}}
+
+Im folgenden Abschnitt werden die zur Fenster- und Baumverwaltung ben"otigten
+Strukturen beschrieben.
+
+\subsection{Die Strukturen {\tt Context} und {\tt XCONTEXT}}
+
+Die Struktur Context wird f"ur die Verwaltung der Daten eines Fensters
+ben"otigt. Jedes Fenster besitzt seinen eingenen Kontext, der dynamisch
+beim "Offnen des Fensters erzeugt wird. Alle Kontexte eines Programmes
+sind hierarchisch angeordnet. Wenn ein Kontext zerst"ort wird, so 
+m"ussen auch seine Kinder zerst"ort werden.
+
+Die Struktur XCONTEXT ist eine Unterstruktur des Kontextes. Sie enth"alt
+Informationen, die f"ur die Darstellung durch Xt ben"otigt werden.
+
+
+\begin{verbatim}
+typedef struct 
+   {
+   Display      *display;   
+   Widget       toplevel;  
+   XtAppContext app_context;
+   int          argc;      
+   char         **argv;   
+   Widget       form;   
+   Widget       global_menu; 
+   Widget       viewport;   
+   Widget       h_scrollbar; 
+   Widget       v_scrollbar; 
+   Widget       tree;   
+   AttrMask     *attr_mask; 
+   } XCONTEXT;
+
+typedef struct 
+   {
+   void         *max_tree;   
+   XCONTEXT     *xcontext;  
+   int          incarnation;
+   int          number; 
+   struct _Context_ *children; 
+   struct _Context_ *next; 
+   struct _Context_ *prev;
+   struct _Context_ *parent; 
+   } Context;
+\end{verbatim}
+
+\begin{description}
+\item[\tt display]
+   ist ein Verweis auf das von der Applikation verwendeten Display.
+   Er wird mittels {\tt XtOpenDisplayi()} bei der Erzeugung der ersten
+   {\tt XCONTEXT} Struktur ermittelt.
+\item[\tt toplevel]
+   ist das Widget der Shell des entprechenden Fensters.
+   Es wird mittels {\tt XtVaAppCreateShell()} bei der Erzeugung eines
+   Fensters ermittelt.
+\item[\tt app\_context]
+   ist der Xt-Kontext der Applikation.
+   Er wird mittels {\tt XtCreateApplicationContext()} bei der Erzeugung
+   der ersten {\tt XCONTEXT} Struktur ermittelt.
+\item[\tt argc]
+   gibt die Gr"o"se des Feldes {\tt argv} an. Der Wert wird von {\tt main()}
+   durchgereicht.
+\item[\tt argv]
+   ist ein Verweis auf eine Liste von Argumenten. Er wird von {\tt main()}
+   durchgereicht.
+\item[\tt form]
+   ist das Widget, welches den Viewport und die Men"uleiste enthaelt.
+   Es wird mittels {\tt XtVaCreateWidget} beim Erzeugen eines Fensters
+   ermittelt.
+\item[\tt global\_menu]
+   ist das Widget, welches die Men"uleiste enth"alt.
+   Es wird mittels {\tt CreateGlobalMenu} beim Erzeugen eines Fensters
+   ermittelt.
+\item[\tt viewport]
+   ist das Widget, welches den Viewport enth"alt.
+   Es wird mittels {\tt XtVaCreateWidget} beim Erzeugen eines Fensters
+   ermittelt.
+\item[\tt h\_scrollbar]
+   ist das Widget, welches den horizontalen Scrollbar des Viewports
+   darstellt. Es wird mittels {\tt XtNameToWidget} beim Erzeugen eines 
+   Fensters ermittelt.
+\item[\tt v\_scrollbar]
+   ist das Widget, welches den vertikalen Scrollbar des Viewports
+   darstellt. Es wird mittels {\tt XtNameToWidget} beim Erzeugen eines 
+   Fensters ermittelt.
+\item[\tt tree]
+   ist das Widget, welches den Baum darstellt.
+   Es wird mittels {\tt XtVaCreateWidget} beim Erzeugen eines Fensters
+   ermittelt.
+\item[\tt attr\_mask]
+   ist ein Verweis auf die zu einem Fenster geh"orende Attributmaske.
+   Er wird von den Funktionen {\tt GetAttrMask()} oder 
+   {\tt CopyAttrMask()} erzeugt.
+\item[\tt max\_tree]
+   ist ein Verweis auf den darzustellenden MAX-Baum. Er wird beim
+   Aufruf der Funktion {\tt CreateMainShell()} geliefert.
+\item[\tt xcontext]
+   ist ein Verweis auf die zum Kontext geh"orende XCONTEXT Struktur.
+   Er wird von den Funktionen {\tt CreateXCONTEXT()} oder
+   {\tt CopyXCONTEXT()} erzeugt.
+\item[\tt incarnation]
+   gibt die Position des Kontextes in der hierarchischen Ordnung der
+   Kontexte an. Der Kontext des ersten Fensters hat den Wert 0. Alle
+   Anderen haben Werte gr"osser als 0.
+\item[\tt number]
+   gibt die Nummer des Kontextes in einer hierarchischen Ebene an.
+   Die Nummerrierung erfolgt fortlaufend.
+\item[\tt children]
+   ist ein Verweis auf den Kontext des ersten Kind-Fensters.
+\item[\tt next]
+   ist ein Verweis auf den Kontext eines Fensters der gleichen
+   hierarchischen Ebene, dessen Nummer gr"o"ser ist.
+\item[\tt prev]
+   ist ein Verweis auf den Kontext eines Fensters der gleichen
+   hierarchischen Ebene, dessen Nummer kleiner ist.
+\item[\tt parent]
+   ist ein Verweis auf den Kontext eines Fensters, aus welchem heraus
+   dieses Fenster erzeugt wurde.
+   
+\end{description}
+
+\subsection{Die Struktur {\tt X\_INFO}}
+
+Die Struktur {\tt X\_INFO} wird f"ur die Verwaltung der Knoten des
+MAX-Baumes ben"otigt. Jeder Knoten enth"alt einen Verweis auf eine
+eigene Instanz. Sie gibt den Zustand des Knoten an, aus dem das 
+aktuelle Darstellungformat ausgelesen werden kann.
+
+\begin{verbatim}
+typedef struct _XIS_ {
+   Context      *context; 
+   Widget       widget; 
+   Boolean      hidden_tree; 
+   Boolean      show_attributes; 
+   Boolean      marked; 
+   Widget       attr_widget; 
+   AttrMask     *attr_mask;
+} X_INFO;
+\end{verbatim}
+
+\begin{description}
+\item[\tt context]
+   ist ein Verweis auf den zu diesem Knoten geh"orenden Kontext.
+\item[\tt widget]
+   ist das Widget, welches den Knoten auf dem Bildschirm darstellt.
+\item[\tt hidden\_tree]
+   ist ein Flag, das angibt, ob ein eventuell vorhandener Unterbaum des Knotens
+   zusammengefaltet ist.
+\item[\tt show\_attributes]
+   ist ein Flag, das angibt, ob die Attribute des Knotens angezeigt werden.
+\item[\tt marked]
+   ist ein Flag, das angibt, ob der Knoten markiert dargestellt wird.
+\item[\tt attr\_widget]
+   ist das Widget, welches die Attribute auf dem Bildschirm darstellt.
+   Dieses Widget existiert nur dann, wenn das Flag {\tt show\_attributes}
+   auf {\tt True} gesetzt ist.
+\item[\tt attr\_mask]
+   ist ein Verweis auf die Attributmaske die zur generierung des 
+   Attributwidgets benutzt wurde. Die Maske ist nur dann gespeichert,
+   wenn das Flag {\tt show\_attributes} auf {\tt True} gesetzt ist.
+\end{description}

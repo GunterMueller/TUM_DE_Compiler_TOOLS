@@ -1,0 +1,7 @@
+
+ Installation:
+
+ $ ./configure --prefix=/path/to/max
+ $ make
+ $ make install
+

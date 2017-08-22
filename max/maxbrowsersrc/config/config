@@ -1,0 +1,16 @@
+#!/bin/sh
+rm -f MACHINE.flg
+if [ `uname -s` = SunOS ] ; then
+	if [ `uname -a | fgrep -c 5.3` -eq 1 ] ; then
+	   ln -s Solaris.flg MACHINE.flg
+	else ln -s SunOS.flg MACHINE.flg
+	fi
+else 
+	if [ -s `uname`.flg ] ; then
+		ln -s `uname`.flg MACHINE.flg
+	else
+		echo "Keine Konfigurations-Datei fuer" `uname` 2>&1
+		exit 1
+	fi
+fi
+exit 0

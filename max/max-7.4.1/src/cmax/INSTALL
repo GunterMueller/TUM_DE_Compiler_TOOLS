@@ -1,0 +1,19 @@
+Installation instructions for CMAX 2.1.0
+========================================
+
+If you use CMAX as part of the MAX distribution (version 7.4.0 and
+above) simply install the whole MAX system which includes cmax
+(See the corresponding file INSTALL in the root directory of the
+MAX distribution).
+
+If you want to generate a standalone version of CMAX (you will need MAX
+too in version 7.2 or above) follow these instructions:
+  1. 'cp Makefile.standalone Makefile'
+  2. adapt MACHINE.flg to the system you use
+  3. enter the directory you want cmax to be installed at the beginning
+     of Makefile
+  4. 'make'
+  5. 'make install' 
+  6. 'make clean' removes generated files not needed anymore
+  7. 'make realclean' removes all generated files 
+

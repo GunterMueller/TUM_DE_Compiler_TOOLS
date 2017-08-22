@@ -1,0 +1,177 @@
+##
+## Makefile for Constraint MAX preprocessor
+##
+
+# for bootstrapping: path to (ev.) existing version of cmax
+
+CMAX	= ./cmax
+
+CP	= cp
+MV	= mv
+RM	= rm -f
+CHMOD	= chmod
+MKDIR	= ../../etc/mkinstalldirs
+STRIP	= strip
+
+CC	= @CC@
+AR	= @AR@
+RANLIB	= @RANLIB@
+DEFINES	=
+DEGUG	= -g
+INCLUDES = -I../../config -I.. -I.
+CFLAGS	= @CFLAGS@ $(DEFINES) $(DEBUG) $(INCLUDES)
+LDFLAGS	=
+LEX	= @LEX@
+YACC	= @YACC@
+
+MAXOPTS	=
+MAX	= ../../max/max
+
+PREFIX	= @prefix@
+
+MAXOPTS	   =
+
+STDMAXSPEC = stdmax_spec
+
+CMAXOPTS   = -debug -verbosecode -o stdmax_spec
+
+all: gen cmax libcmax.a cmax.1
+
+typecheck: gen/$(STDMAXSPEC).m
+	( cd gen ; $(MAX) $(MAXOPTS) -warn $(STDMAXSPEC).m ) 
+
+gen:
+	mkdir gen
+
+
+install : all
+	$(MKDIR) $(PREFIX)/bin
+	$(MKDIR) $(PREFIX)/lib
+	$(MKDIR) $(PREFIX)/include
+	$(CP) cmax $(PREFIX)/bin/cmax
+	$(CHMOD) a+rx $(PREFIX)/bin/cmax
+	$(CP) libcmax.a $(PREFIX)/lib/libcmax.a
+	$(CHMOD) a+r $(PREFIX)/lib/libcmax.a
+	$(CP) solver.h $(PREFIX)/include/solver.h
+	$(CHMOD) a+r $(PREFIX)/include/solver.h
+	$(CP) cmax.1 $(PREFIX)/man/cmax.1
+	$(CHMOD) a+r $(PREFIX)/man/cmax.1
+	
+cmax : gen/$(STDMAXSPEC).o gen/cmax.o gen/y.tab.o gen/main.o \
+             gen/cmax_solver.o ../max/libmax.a libcmax.a
+	$(CC) $(CFLAGS) -o cmax  gen/y.tab.o  gen/main.o $(MAXLIB) \
+		gen/cmax.o gen/$(STDMAXSPEC).o gen/cmax_solver.o \
+                ../max/libmax.a libcmax.a \
+	|| /bin/rm -f cmax
+
+libcmax.a: gen/solver.o
+	$(AR) r libcmax.a gen/solver.o
+	$(RANLIB) libcmax.a
+
+gen/solver.o : solver.c solver.h
+	cp solver.c solver.h gen/
+	( cd gen ; $(CC) $(CFLAGS) -c solver.c )
+
+gen/cmax_solver.o : gen/cmax_solver.c  gen/$(STDMAXSPEC).h
+	( cd gen ; $(CC) $(CFLAGS) -c cmax_solver.c )
+
+gen/y.tab.o : gen/y.tab.c gen/lex.yy.c gen/$(STDMAXSPEC).h
+	 cd gen ; $(CC) $(CFLAGS) -c y.tab.c
+
+gen/y.tab.c gen/y.tab.h: cmax_pars.y gen/$(STDMAXSPEC).h
+	cp cmax_pars.y gen/
+	( cd gen ; yacc -d cmax_pars.y )
+
+gen/lex.yy.c: cmax_scan.l gen/y.tab.h
+	cp cmax_scan.l gen/
+	(cd gen ; flex cmax_scan.l )
+
+gen/$(STDMAXSPEC).o :  gen/$(STDMAXSPEC).c
+	( cd gen ; \
+	$(CC) $(CFLAGS) -c $(STDMAXSPEC).c )
+
+gen/$(STDMAXSPEC).c gen/$(STDMAXSPEC).h gen/$(STDMAXSPEC).g :\
+		gen/$(STDMAXSPEC).m
+	( cd gen ; $(MAX) $(MAXOPTS) -notc $(STDMAXSPEC).m )
+
+gen/$(STDMAXSPEC).m gen/cmax_solver.c : cmax_spec.cm
+	if [ -x $(CMAX) ] ; then cp cmax_spec.cm gen/ ; \
+	    $(CMAX) $(CMAXOPTS) gen/cmax_spec.cm ;  \
+	else \
+	    $(CP) $(STDMAXSPEC).m.B gen/$(STDMAXSPEC).m ; \
+	    $(CP) cmax_solver.c.B gen/cmax_solver.c ; fi
+
+gen/cmax.o :  cmax.c main.h gen/$(STDMAXSPEC).h
+	cp cmax.c main.h gen/
+	( cd gen ; $(CC) $(CFLAGS) -c cmax.c )
+
+gen/main.o : main.c main.h gen/$(STDMAXSPEC).h
+	cp main.c main.h gen/
+	( cd gen ; $(CC) $(MAINCFLAGS) \
+		$(CFLAGS) -c main.c )
+
+bootstrapfiles:
+	@if [ -f $(STDMAXSPEC).m.B.orig or -f cmax_solver.c.B.orig ] ;\
+	then \
+	  echo "ERROR:" ;\
+	  echo "Original bootstrap files exist. Copy the files *.B.orig" ;\
+	  echo "to a save place or make sure the current bootstrap" ;\
+	  echo "files *.B work." ;\
+	  echo "Then remove original files *.B.orig and try again!" ;\
+	else \
+	  $(CP) $(STDMAXSPEC).m.B $(STDMAXSPEC).m.B.orig ;\
+	  $(CP) cmax_solver.c.B cmax_solver.c.B.orig ;\
+	  echo "Original bootstrap files saved." ;\
+	  echo "Generating new bootstrap files (PLEASE BE PATIENT!)" ;\
+	  touch cmax_spec.cm ;\
+	  make ;\
+	  touch cmax_spec.cm ;\
+	  make ;\
+	  touch cmax_spec.cm ;\
+	  make ;\
+	  $(CP) gen/$(STDMAXSPEC).m $(STDMAXSPEC).m.B ;\
+	  $(CP) gen/cmax_solver.c cmax_solver.c.B ;\
+	  echo "Done!" ;\
+	fi 
+
+# -------------------------------------------------------------------
+# DOCUMENTATION
+# -------------------------------------------------------------------
+
+cmax.1: cmax.pod.in ../max/max_vers.c
+	V=`../../etc/newvers -l c -D ../max/max_vers.c`; \
+	sed -e "s|\@V\@|$$V|g" -e "s|\@prefix\@|$(prefix)|" <cmax.pod.in >cmax.pod; \
+	pod2man --section=1 \
+	        --center="TU Muenchen" \
+		--release="TUM" \
+		cmax.pod >cmax.1 && \
+	rm -f cmax.pod
+	  
+clean :
+	rm -rf ./gen
+	$(RM) cmax.1
+	$(RM) cmax libcmax.a
+
+realclean: clean
+	$(RM) *~
+
+distclean:
+	$(MAKE) realclean
+	rm -f Makefile
+
+##EOF##
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

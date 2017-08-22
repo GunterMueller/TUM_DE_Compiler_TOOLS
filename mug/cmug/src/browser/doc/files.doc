@@ -1,0 +1,18 @@
+Files in src:
+
+Makefile		Makefile
+
+header/browse_const.h	Defines
+header/browse_len.h	Length of array declarations
+header/configure.h	Prototypes of functions concerning attribute/image
+			configuration in mugbrowse.c
+header/browse_ds.h	Data structures for interface MUG/MUGBrowser
+header/browse_types.h	Data structures for layout information
+header/visualize.h	Header for visualize.c
+
+src/mugbrowse.c		Frontend
+src/visualize.c		Backend
+
+icons/*/*		Images for attributes as c code
+
+

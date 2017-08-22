@@ -1,0 +1,226 @@
+\section{Zusammenspiel von Browser und MAX}
+Zur Laufzeit des Browsers werden Informationen zur Visualisierung 
+ben"otigt, die im generierten Compiler nicht mehr explizit zur
+Verf"ugung stehen, z.B. die Sortennamen, wie sie in der Grammatik
+definiert wurden. Deshalb m"ussen diese Informationen gerettet
+werden und dem Browser zur Verf"ugung gestellt werden.\\
+Die Informationen werden von MAX in eine sprachspezifische Datei mit
+der Endung {\tt .g} ausgegeben. Hier st"unden sie theoretisch dem
+Zielsystem zur Verf"ugung. Es w"are aber die Folge, da\3 dem Compiler
+auch immer die {\tt .g} Datei vorliegen m"usste. Um dies zu vermeiden
+wird aus der {\tt .g} Datei C-Quelltext erzeugt, der "ubersetzt und
+zu dem Zielcompiler hinzugebunden wird. Die Erzeugung des Quelltexts
+"ubernimmt das Programm {\tt bim}.\\
+Der sprachunabh"angige Teil des Browsers liegt in einem Archiv vor
+(Endung {\tt .a}) und wird einfach zum Zielcompiler hinzugebunden.
+Die Verarbeitung der Eingabedateien im Vergleich MAX mit/ohne Browser
+sieht also wie folgt aus:
+	\psfig{figure=bim/bim_use.eps}
+
+
+\section{Algorithmen und Datenstrukturen des MAX-Browser Interfaces}
+Dieses Dokument beschreibt die Algorithmen und Datenstrukturen,
+die f"ur das Zusammenspiel zwischen MAX und dem Browser von Bedeutung 
+sind.\\
+Die Komponenten des Interfaces sind:\\
+\begin{itemize}
+	\item nodeinfo - generelle Definitionen f"ur den Baum - und
+	\item bim\_util - Operationen auf dem Baum,
+	
+\end{itemize}
+
+\subsection{nodeinfo.h}
+Diese Include-Datei definiert die Datenstruktur f"ur den dargestellten
+Baum. Die darin definierten Strukturen sind:
+\begin{itemize}
+	\item ATTR\_INFO - Informationen "uber die Attribute eines Knotens
+	\item NODE\_INFO - Beziehung zur Grammatik
+	\item MAX\_NODE - Verwaltet die Baumstruktur.
+\end{itemize}
+\begin{verbatim}
+typedef char * ATTR_TYPE;
+
+typedef struct _AIS_ {
+
+   char * name;            /* Name of the attribute */
+   char * defined_by_sort; /* Sort that defined this attribute */
+   ATTR_TYPE type;         /* Type of the attribute */
+   long attr_value;        /* Value of the attribute, has to be interpreted 
+                           // Depending on the type
+                           */
+   
+}ATTR_INFO;
+
+\end{verbatim}
+\begin{itemize}
+	\item name: Enth"alt den Namen des Attributs, wie er
+	in der Grammatik definiert wurde.
+	\item defined\_by\_sort: Enth"alt den Namen der Sorte, f"ur die 
+	dieses Attribut in der Grammatik definiert wurde. Dies ist nicht
+	notwendigerweise die Sorte des Knotens, f"ur den dieses Attribut
+	berechnet wurde, wenn es sich z.B. um ein Attribut handelt, das
+	ererbt wurde.
+	\item type: Definiert den Typ des Attributs. Dies ist einer der
+	vom Browser darstellbaren Typen Int, String, Bool, Point, MAX\_NODE
+	(Verweis auf einen anderen Knoten)
+	\item attr\_value: Enth"alt den eigentlichen Wert des Attributs.
+	Dieses Feld mu\3 je nach Typ unterschiedlich interpretiert werden.
+	Als Verbesserung k"onnte man hier vielleicht mal eine union
+	draus machen, l"auft aber auch so.
+\end{itemize}
+\begin{verbatim}
+typedef struct _NIS_ {
+   char * name;            /* Sort of this Node as C-String */
+   char ** parent_sorts;   /* NULL-pointer terminated array of parent sorts */
+   int no_of_attributes;   /* Number of attributes that are defined for this 
+                           // node
+                           */
+   ATTR_INFO * attributes; /* Array of attribute descriptions */
+}NODE_INFO;
+
+\end{verbatim}
+\begin{itemize}
+	\item name: Name der Knotensorte
+	\item parent\_sort: Array der Namen der Sorten, von denen diese
+	Sorte abgeleitet ist, NULL-Pointer terminiert.
+	\item no\_of\_attributes: Anzahl der Attribute, die f"ur diese
+	Sorte definiert wurden.
+	\item attributes: Zeiger auf das erste Attribut dieses Knotens,
+	die weiteren Attribute k"onnen "uber Array-Indizierung angesprochen
+	werden (attributes[0]...attributes[ no\_of\_attributes - 1 ]). Hat
+	dieser Knoten keine Attribute, so ist der Inhalt dieses Felds
+	nicht definiert.
+\end{itemize}
+\begin{verbatim}
+typedef struct _NOD_ {
+   struct _NOD_ * parent;     /* Parent node */
+   struct _NOD_ * children;   /* First child node */
+   struct _NOD_ * next, * prev; /* Linked list of children */
+   NODE_INFO * node_info;     /* Information about the node */
+   X_INFO      * x_info;        /* Information for Xt handling */
+   void * origin_node;
+} MAX_NODE;
+
+\end{verbatim}
+\begin{itemize}
+	\item parent: Zeiger auf Vaterknoten
+	\item children: Zeiger auf ersten Sohn, die Kinder sind mit
+	\item prev, next: in einer doppelt verketteten Liste verbunden.
+	\item node\_info: Zeigt auf die Sorteninformation dieses Knotens.
+	\item x\_info: Zeiger auf die grafische Information.
+	\item origin\_node: Wird beim Kopieren eines Baumes ben"otigt,
+	siehe auch bim\_util.c
+\end{itemize}
+
+\subsection{bimutil.c}
+\begin{verbatim}
+extern struct MAX_BIM_RELATION {
+   long max_node;
+   MAX_NODE * bim_node;
+} * max_bim_relation; 
+\end{verbatim}
+Diese Struktur stellt die Beziehung zwischen den Knoten, wie sie
+von MAX geliefert werden und den Browserknoten her. Beim Baumaufbau
+wird ein Feld mit diesen Informationen erstellt und sp"ater
+beim Kopieren des Baumes und beim Verzweigen durch Terme wieder
+ben"otigt.\\
+
+Beim ersten Erzeugen eines Baumes m"ussen die Knotenattribute voom Tyo
+MAX\_NODE (Knotenverweis) auf die richtigen Werte gesetzt werden. Nach Aufbau des Baumes enthalten sie noch die Knoten, wie sie von MAX geliefert werden
+(long-Werte), der Browser ben"otigt jedoch Zeiger auf MAX\_NODE. Deswegen
+wird der Baum einmal durchlaufen und f"ur jedes MAX\_NODE-Attribut mittels
+der Tabelle max\_bim\_relation der richtige Wert ermittelt.
+
+Bim\_CopyMaxTree kopiert einen Baum. Dazu werden im zu kopierenden
+Baum in allen Knoten das Feld origin\_node auf NULL gesetzt. Dann
+wird mit Bim\_CopyMaxTree\_Do rekursiv eine Kopie des Baums erzeugt.
+Wichtig ist hierbei, das jeweils in dem Quellknoten das Feld origin\_node
+so gesetzt wird, da\3 es auf die Kopie zeigt. Da jetzt im neuen Baum die
+Attribute, die Verweise auf Knoten sind, noch in den Quellbaum zeigen, ist
+ein korrigieren dieser Verweise n"otig. Dazu l"auft Bim\_UpdateAttributesOnCopy
+einmal "uber den neuen Baum. F"ur jeden Knotenverweis "uberpr"uft es, ob in dem
+referenzierten Knoten das Feld origin\_node gesetzt ist. Falls ja, zeigt origin\_node auf den Knoten, auf den das Attribut zeigen soll. Das Attribut kann
+somit leicht umgesetzt werden.
+
+\subsection{bim\_std.c}
+Diese Datei enth"alt die Routinen, die zum Aufbau des Baumes ben"otigt
+werden und unabh"angig vom Zielsystem sind. Diese Quelldatei wird in
+die spezifische Datei einkopiert, und stellt somit ihre Routinen f"ur
+das Zielsystem zur Verf"ugung.\par
+Die Routine {\tt bim\_tree} baut aus einem Baum,
+wie er von MAX geliefert wird den vom Browser ben"otigten Baum auf.
+Die Signatur dieser Funktion ist 
+{\tt MAX\_NODE * bim\_tree( ELEMENT n, MAX\_NODE * parent, MAX\_NODE * broth )}.\par
+Argument {\tt n} ist der Baum, der visualisiert werden soll. Diese Funktion
+arbeitet rekursiv und ben"otigt die beiden letzten Argumente f"ur ihre 
+rekursiven Aufrufe. Beim ersten Aufruf m"ussen diese Werte auf {\tt NULL}
+gesetzt werden.\par
+In dieser Funktion wird zuerst versucht, Speicher f"ur den neuen Knoten zu
+belegen, dann werden einige Werte initialisiert und die {\tt x\_info}-Struktur
+erstellt. Nachdem die Eltern-Kind-Verweise gesetzt wurden, werden die
+Sorten- und Attributinformationen ausgef"ullt und die Beziehung MAX-Knoten
+zu Browserknoten in eine Tabelle eingetragen. Dann wird rekursiv der Rest
+des Baumes aufgebaut.\par
+
+Um einen MAX-Baum zu visualisieren, ben"otigt man die Routine {\tt 
+Bim\_Viewer}. Sie ben"otigt als Argumente den MAX-Baum und die Argumente
+{\tt argc} und {\tt argv} wie sie der Routine {\tt main()} "ubergeben werden.
+Die Kommandozeilenargumente werden ben"otigt, um bei der Darstellung des
+Baumes die Schalter, die von X akzeptiert werden, richtig setzen zu k"onnen,
+also z.B. Wahl des Zeichensatzes, der Hintergrundfarbe etc.\par
+In dieser Routine wird zuerst die Anzahl der ben"otigten Knoten ermittelt.
+Dann wird Speicherplatz f"ur die Beziehungstabelle MAX-Knoten zu Browserknoten
+belegt. Nachdem die Liste aller Sorten aufgebaut wurde, wird der Browserbaum
+mit {\tt bim\_tree} erstellt. Als MAX-Baum wird immer {\tt root()} verwendet.
+Nachdem die Attribute aktualisiert wurden, wird der Baum dargestellt. Nach
+Beendigung der Visualisierung, wird ben"otigter Speicherplatz wieder freigegeben.\par
+
+Da MAX-Attribute auch Terme sein k"onnen, m"ussen diese Terme zur 
+Visualisierung in Browserb"aume umgewandelt werden. Die zentrale Funktion
+zur Erstellung eines Baums aus einem Term ist {\tt MAX\_NODE * parse\_max\_term( long term, long left\_side )}. Hierbei ist {\tt term} der umzuwandelnde
+Term und {\tt left\_side} die Sorte, nach der geparst werden soll. Zu 
+Anfang wird in der Parsetabelle gesucht, ob sich Information "uber diese
+Sorte findet, falls nicht, wird ein Knoten erzeugt und zur"uckgegeben. 
+Andernfalls wird abh"angig von der Produktion der Term weitergeparst mit den
+Funktionen {\tt parse\_class\_prod}, {\tt parse\_list\_prod} und
+{\tt parse\_tuple\_prod}. Diese bauen jeweils rekursiv die ben"otigten
+Unterb"aume auf.
+
+\subsection{42.c}
+Die f"ur jedes Zielsystem spezifisch generierte Datei {\tt 42.c} enth"alt
+grammatikabh"angige Datenstrukturen und Funktionen.\\ Die Datei enth"alt in
+der Reihenfolge ihres Auftretens:\\
+\begin{itemize}
+\item Die Tabelle tpt, die Informationen "uber die Sortenproduktionen in
+der Grammatik enth"alt. Diese Tabelle wird zur Erstellung der B"aume
+von Termattributen ben"otigt.
+\item Die Liste der Sortennamen. Ein {\tt NULL}-Pointer terminiertes Array
+von Stringpointern.
+\item Die Liste der Attributnamen. Ein {\tt NULL}-Pointer terminiertes Array
+von Stringpointern. Das vorletzte Element des Feldes ist der String
+ ``SEMVAL``, der f"ur semantische Werte ben"otigt wird.
+\item Information "uber die Sortenvererbung. F"ur jede Sorte exisitiert ein
+Feld von Strings, das angibt, von welchen Sorten diese Sorte abgeleitet wurde.
+\item Attributfunktionen. F"ur jede Sorte exisitiert eine Funktion {\tt
+attributes\_\sl SORTE}, die die Attribute eines Knotens und deren Anzahl
+ermittelt.
+\item Routinen zur Ermittlung von Sortennamen, Anzahl der Attribute, 
+Sortenabh"angigkeiten und Attributen. 
+\item den einkopierten Inhalt der Datei {\tt bim\_std.c}.
+
+\end{itemize} 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

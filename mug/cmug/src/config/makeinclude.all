@@ -1,0 +1,65 @@
+# Directory, in dem System generiert wird (= current directory Makefile)
+PROJHOME=/usr/proj/cmug/src
+#
+# Hauptdirectory, in dem das CMUG-System installiert wird
+INSTALLDIR=/usr/proj/cmug
+#
+# allgemeine Hilfsbibliothek
+COMMLIB=/usr/proj/commlib
+#
+# Directory der verwendeten Generatoren, bei Crossdevelopment
+GENHOME=$(PROJHOME)
+#
+# Unterdirectories der Installation
+INSTALLBINDIR=$(INSTALLDIR)/bin
+INSTALLBSPDIR=$(INSTALLDIR)/bsp
+INSTALLLIBDIR=$(INSTALLDIR)/lib
+INSTALLINCDIR=$(INSTALLDIR)/include
+INSTALLDOCDIR=$(INSTALLDIR)/doc
+INSTALLDIRS=$(INSTALLDIR) $(INSTALLBINDIR) $(INSTALLBSPDIR) $(INSTALLLIBDIR) $(INSTALLINCDIR) $(INSTALLDOCDIR)
+#
+SHELL=/bin/sh
+#
+# chmod Flags der installierten Daten
+#
+CMBINFLAGS=755 # Binaries 		 : rwxr-xr-x
+CMLIBFLAGS=755 # Libraries, Objectmodule : rwxr-xr-x
+CMINCFLAGS=644 # Includes, Quellen	 : rw-r--r--
+CMDOCFLAGS=644 # Dokumentationen	 : rw-r--r--
+CMDIRFLAGS=755 # Directories		 : rwxr-xr-x
+#
+RMFAIL= || ( $(RM) $@ && $(ABORT) )
+RMDEBRIS=$(RM) core mon.out gmon.out
+INSTALLALL=\
+if [ ! "$(INSTALLBINS)" = "NULL" ] ; then \
+  for bin in  $(INSTALLBINS) ; do \
+    $(ECHO) " installing" $$bin in $(INSTALLBINDIR) ; \
+    $(CP) $$bin $(INSTALLBINDIR) ; \
+    $(CHMOD) $(CMBINFLAGS) $(INSTALLBINDIR)/`basename $$bin` ; \
+  done ; \
+fi ; \
+if [ ! "$(INSTALLLIBS)" = "NULL" ] ; then \
+  for lib in  $(INSTALLLIBS) ; do \
+    libf=`basename $$lib` ; \
+    $(ECHO) " installing" $$lib in $(INSTALLLIBDIR) ; \
+    $(CP) $$lib $(INSTALLLIBDIR) ; \
+    $(CHMOD) $(CMLIBFLAGS) $(INSTALLLIBDIR)/$$libf	; \
+    if [ ! "`basename $$lib $(LIBEXT)`" = "`basename $$lib`" ] ; then \
+      $(RANLIB) $(INSTALLLIBDIR)/$$libf ; \
+    fi ; \
+  done ; \
+fi ; \
+if [ ! "$(INSTALLINCS)" = "NULL" ] ; then \
+  for inc in  $(INSTALLINCS) ; do \
+    $(ECHO) " installing" $$inc in $(INSTALLINCDIR) ; \
+    $(CP) $$inc $(INSTALLINCDIR) ; \
+    $(CHMOD) $(CMINCFLAGS) $(INSTALLINCDIR)/`basename $$inc` ; \
+  done ; \
+fi ; \
+if [ ! "$(INSTALLDOCS)" = "NULL" ] ; then \
+  for doc in $(INSTALLDOCS) ; do \
+    $(ECHO) " installing" $$doc in $(INSTALLDOCDIR) ; \
+    $(CP) $$doc $(INSTALLDOCDIR) ; \
+    $(CHMOD) $(CMDOCFLAGS) $(INSTALLDOCDIR)/`basename $$doc` ; \
+  done ; \
+fi

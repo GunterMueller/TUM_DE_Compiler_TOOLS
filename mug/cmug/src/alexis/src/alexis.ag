@@ -1,0 +1,837 @@
+grammar alexis : g1 -> g2;
+ 
+function ScanTrue                           : BOOL;
+function AutomatNil                         : AUTOMAT;
+function IPlus1(INT)                        : INT;
+function IntNull                            : INT;
+function SetTrue                            : BOOL;
+function SetFalse                           : BOOL;
+
+(****************************  Hilfsfunktionen ****************************)
+
+function boclko2bool(BOCLKO)                : BOOL;
+function boclko2class(BOCLKO)               : CLASSDESC;
+function boclko2kompr(BOCLKO)               : KOMPRUEB;
+
+function autbo2aut(AUTBOOL)                 : AUTOMAT;
+function autbo2bool(AUTBOOL)                : BOOL;
+
+function bopar2bool(BOOLPAR)                : BOOL;
+function bopar2par(BOOLPAR)                 : PARTYPE;
+
+function intort2i(INTORT)                  : INT;
+function intort2o(INTORT)                  : QUELLORT;
+
+function charbo2char(CHARBOOL)              : CHARSET;
+function charbo2bool(CHARBOOL)              : BOOL;
+
+(* *************************** a2b-Funktionen ****************************** *)
+
+
+function InitAlexis (BOOL)                  : BOOL;
+ 
+function SKompress  (BOOL,
+                     AUTOMAT)               : BOCLKO;
+ 
+function sgentable  (BOOL,
+                     KOMPRUEB,
+                     CLASSDESC)             : BOOL;
+ 
+function SGenActions (BOOL)                 : BOOL;
+ 
+function GenEmptPars                        : PARTYPE;
+ 
+function SetInstFl  (BOOL,
+                     INSTRUCTSY)            : BOOL;
+ 
+function DispLexMak (AUTOMAT,
+                     BOOL)                  : AUTBOOL;
+ 
+function SMyhill    (AUTOMAT,
+                     BOOL)                  : AUTBOOL;
+ 
+function SNegate    (AUTOMAT)               : AUTOMAT;
+ 
+function SMinimize  (AUTOMAT,
+                     BOOL)                  : AUTBOOL;
+ 
+function InstActMak (BOOL,
+                     IDENT,
+                     INT,
+                     PROGSTRINGSY)          : BOOL;
+ 
+function StoreSpec  (BOOL,
+                     SPECIALSY,
+                     PROGSTRINGSY)          : BOOL;
+ 
+function InstLexMak (BOOL,
+                     IDENT,
+                     AUTOMAT)               : BOOL;
+ 
+function SAlternative(AUTOMAT,
+                     AUTOMAT,
+                     BOOL)                  : AUTBOOL;
+ 
+function InsParam   (BOOL,
+                     INT,
+                     PARTYPE,
+                     INT,
+                     QUELLORT)              : BOOLPAR;
+ 
+function ComplSet   (CHARSET)               : CHARSET;
+ 
+function SemIntToStr (INTEGERSY)            : INTORT;
+ 
+function SemStrToStr (STRINGSY)             : INTORT;
+ 
+function ChkFormPar (BOOL,
+                     FORMPAR,
+                     INT)                   : BOOL;
+ 
+function DefMakAct  (BOOL,
+                     BOOL,
+                     AUTOMAT,
+                     INT,
+                     IDENT,
+                     PARTYPE)               : AUTBOOL;
+ 
+function DefAction  (BOOL,
+                     BOOL,
+                     AUTOMAT,
+                     PROGSTRINGSY)          : AUTBOOL;
+ 
+function GenEProg                           : PROGSTRINGSY;
+ 
+function SConcat     (AUTOMAT,
+                     AUTOMAT,
+                     BOOL)                  : AUTBOOL;
+   
+function SMultiply  (BOOL,
+                     AUTOMAT,
+                     INTEGERSY,
+                     INTEGERSY)             : AUTBOOL;
+ 
+function GenMOne                            : INTEGERSY;
+ 
+function GenZero                            : INTEGERSY;
+ 
+function RegOperator(AUTOMAT,
+                     REGOP,
+                     BOOL)                  : AUTBOOL;
+ 
+function SStrToAut  (STRINGSY)              : AUTOMAT;
+ 
+function SSetToAut  (CHARSET)               : AUTOMAT;
+ 
+function ExpndLexMak(BOOL,
+                     IDENT)                 : AUTBOOL;
+ 
+function SAllbut     (AUTOMAT,
+                      BOOL)                 : AUTBOOL;
+ 
+function makeset    (STRINGSY,
+                     STRINGSY,
+                     BOOL)                  : CHARBOOL;
+ 
+function union_sets (CHARSET,
+                     CHARSET)               : CHARSET;
+ 
+ 
+nonterminals
+ 
+scanner            attributes   dscan:  BOOL     synthesized;
+ 
+actionspec         attributes   icode:  BOOL     inherited
+                                ignore: BOOL     inherited
+                                iautom: AUTOMAT  inherited
+                                dautom: AUTOMAT  synthesized
+                                dcode:  BOOL     synthesized;
+ 
+definitions        attributes   icode:  BOOL     inherited
+                                dcode:  BOOL     synthesized;
+ 
+formparlist        attributes   icode:  BOOL     inherited
+                                iparanz:INT      inherited
+                                dparanz:INT      synthesized
+                                dcode:  BOOL     synthesized;
+ 
+lexemes            attributes   icode:  BOOL     inherited
+                                iautom: AUTOMAT  inherited
+                                dautom: AUTOMAT  synthesized
+                                dcode:  BOOL     synthesized;
+ 
+main               attributes   icode:  BOOL     inherited
+                                dautom: AUTOMAT  synthesized
+                                dcode:  BOOL     synthesized;
+ 
+makroact           attributes   icode:  BOOL     inherited
+                                dcode:  BOOL     synthesized;
+ 
+makroactseq        attributes   icode:  BOOL     inherited
+                                dcode:  BOOL     synthesized;
+ 
+makrolexemes       attributes   icode:  BOOL     inherited
+                                dcode:  BOOL     synthesized;
+ 
+makros             attributes   icode:  BOOL     inherited
+                                dcode:  BOOL     synthesized;
+ 
+option             attributes   icode:  BOOL     inherited
+                                dcode:  BOOL     synthesized;
+ 
+optionseq          attributes   icode:  BOOL     inherited
+                                dcode:  BOOL     synthesized;
+ 
+par                attributes   dpar:   INT      synthesized
+                                ort:    QUELLORT synthesized;
+ 
+parlist            attributes   icode:  BOOL     inherited
+                                ipars:  PARTYPE  inherited
+                                iparanz:INT      inherited
+                                dpars:  PARTYPE  synthesized
+                                dparanz:INT      synthesized
+                                dcode:  BOOL     synthesized;
+ 
+regelem            attributes   icode:  BOOL     inherited
+                                dautom: AUTOMAT  synthesized
+                                dcode:  BOOL     synthesized;
+ 
+regexpr            attributes   icode:  BOOL     inherited
+                                dautom: AUTOMAT  synthesized
+                                dcode:  BOOL     synthesized;
+ 
+regfaktor          attributes   icode:  BOOL     inherited
+                                dautom: AUTOMAT  synthesized
+                                dcode:  BOOL     synthesized;
+ 
+regterm            attributes   icode:  BOOL     inherited
+                                dautom: AUTOMAT  synthesized
+                                dcode:  BOOL     synthesized;
+ 
+setseq             attributes   icode:  BOOL     inherited
+                                dset:   CHARSET  synthesized
+                                dcode:  BOOL     synthesized;
+ 
+specialact         attributes   icode:  BOOL     inherited
+                                dcode:  BOOL     synthesized;
+ 
+times              attributes   dug:    INTEGERSY   synthesized
+                                dog:    INTEGERSY   synthesized;
+ 
+ 
+ 
+ 
+terminals
+ 
+ 
+(* 1*) actionmakrossy
+(* 2*) allbutsy
+(* 3*) arrowsy
+(* 4*) barsy
+(* 5*) chrsy
+(* 6*) closebracksy
+(* 7*) closepsy
+(* 8*) commasy
+(* 9*) doubledotsy
+(*10*) equalsy
+(*11*) FORMPAR           sem
+(*12*) IDENT             sem
+(*13*) ignoresy
+(*14*) includesy
+(*15*) INSTRUCTSY        sem
+(*16*) INTEGERSY         sem
+(*17*) lexemessy
+(*18*) lexemesendsy
+(*19*) lexmakrossy
+(*20*) makroendsy
+(*21*) notsy
+(*22*) numbersy
+(*23*) optionssy
+(*24*) optionendsy
+(*25*) openbracksy
+(*26*) openpsy
+(*27*) PROGSTRINGSY      sem
+(*28*) REGOP             sem
+(*29*) scannersy
+(*30*) semicolonsy
+(*31*) SPECIALSY         sem
+(*32*) STRINGSY          sem ;
+ 
+ 
+ 
+ 
+axiom scanner
+ 
+ 
+productions
+ 
+syn p1   : scanner       -> scannersy IDENT
+                            option  definitions  main       .
+sem
+  auxiliarys    coda : BOOL
+                ko   : KOMPRUEB
+                cd   : CLASSDESC
+                hb   : BOOL
+                hc   : BOOL
+                bck  : BOCLKO;   (*wegn 1 rueckgabe *)
+
+  scanner.hb             = ScanTrue                                     $
+
+  option.icode           = InitAlexis(scanner.hb)                       $
+  definitions.icode      = option.dcode                                 $
+  main.icode             = definitions.dcode                            $
+
+  scanner.bck            = SKompress(main.dcode,
+                                     main.dautom)                       $
+
+  scanner.coda           = boclko2bool(scanner.bck)                     $
+  scanner.cd             = boclko2class(scanner.bck)                    $
+  scanner.ko             = boclko2kompr(scanner.bck)                    $
+
+  scanner.hc             = sgentable(scanner.coda,
+                                     scanner.ko,
+                                     scanner.cd)                        $
+  scanner.dscan          = SGenActions(scanner.hc)                      $ 
+semend
+ 
+ 
+syn p21  : option        -> optionssy optionseq optionendsy             .
+sem
+  optionseq.icode        = option.icode                                 $
+  option.dcode           = optionseq.dcode                              $
+semend
+ 
+syn p22  : option        -> .
+sem
+  option.dcode           = option.icode                                 $
+semend
+ 
+ 
+syn p31  : optionseq<0>  -> INSTRUCTSY optionseq<1>                     .
+sem
+  optionseq<1>.icode     = SetInstFl(optionseq<0>.icode,
+                                     INSTRUCTSY)                        $
+  optionseq<0>.dcode     = optionseq<1>.dcode                           $
+semend
+syn p32  : optionseq     ->                                             .
+sem
+  optionseq.dcode        = optionseq.icode                              $
+semend
+ 
+ 
+ 
+syn p41  : definitions<0>-> includesy   definitions<1>                  .
+sem
+  definitions<1>.icode   = definitions<0>.icode                         $
+  definitions<0>.dcode   = definitions<1>.dcode                         $
+semend
+ 
+syn p42  : definitions<0>-> makros      definitions<1>                  .
+sem
+  makros.icode           = definitions<0>.icode                         $
+  definitions<1>.icode   = makros.dcode                                 $
+  definitions<0>.dcode   = definitions<1>.dcode                         $
+semend
+ 
+syn p43  : definitions<0>-> makroact    definitions<1>                  .
+sem
+  makroact.icode         = definitions<0>.icode                         $
+  definitions<1>.icode   = makroact.dcode                               $
+  definitions<0>.dcode   = definitions<1>.dcode                         $
+semend
+ 
+syn p44  : definitions<0>-> specialact  definitions<1>                  .
+sem
+  specialact.icode       = definitions<0>.icode                         $
+  definitions<1>.icode   = specialact.dcode                             $
+  definitions<0>.dcode   = definitions<1>.dcode                         $
+semend
+ 
+syn p45  : definitions   ->                                             .
+sem
+  definitions.dcode      = definitions.icode                            $
+semend
+ 
+ 
+syn p51  : main          -> lexemessy lexemes lexemesendsy              .
+sem    auxiliarys      auxc: BOOL
+                       auxd: BOOL
+                       dis: AUTOMAT
+                       myh: AUTOMAT
+                       aubo1: AUTBOOL
+                       aubo2: AUTBOOL
+                       aubo3: AUTBOOL;   (* wegen sattr *)
+  lexemes.icode          = main.icode                                   $
+  lexemes.iautom         = AutomatNil                              $
+   main.aubo1           = DispLexMak (lexemes.dautom,
+                                       lexemes.dcode)                  $
+   main.auxd=  autbo2bool(main.aubo1)  $
+   main.dis=   autbo2aut(main.aubo1)   $
+
+   main.aubo2            = SMyhill(main.dis,
+                                   main.auxd)                          $
+   main.auxc=  autbo2bool(main.aubo2)  $
+   main.myh=   autbo2aut(main.aubo2)   $
+   main.aubo3          = SMinimize(main.myh,
+                                     main.auxc)                         $
+   main.dcode=  autbo2bool(main.aubo3)  $
+   main.dautom= autbo2aut(main.aubo3)   $
+semend
+ 
+ 
+syn p61  : makroact      -> actionmakrossy makroactseq makroendsy       .
+sem
+  makroactseq.icode      = makroact.icode                               $
+  makroact.dcode         = makroactseq.dcode                            $
+semend
+ 
+ 
+syn p71  : makroactseq<0>-> IDENT openpsy formparlist closepsy
+                            PROGSTRINGSY makroactseq<1>                 .
+sem
+  formparlist.icode      = makroactseq<0>.icode                         $
+  formparlist.iparanz    = IntNull                                     $
+
+  makroactseq<1>.icode   = InstActMak (formparlist.dcode,
+                                       IDENT,
+                                       formparlist.dparanz,
+                                       PROGSTRINGSY)                    $
+  makroactseq<0>.dcode   = makroactseq<1>.dcode                         $
+semend
+ 
+syn p72  : makroactseq<0>-> IDENT PROGSTRINGSY makroactseq<1>           .
+sem     auxiliarys zero:INT;
+  makroactseq<0>.zero    = IntNull     $
+
+  makroactseq<1>.icode   = InstActMak (makroactseq<0>.icode,
+                                       IDENT,
+                                       makroactseq<0>.zero,
+                                       PROGSTRINGSY)                    $
+  makroactseq<0>.dcode   = makroactseq<1>.dcode                         $
+semend
+ 
+syn p73  : makroactseq   ->                                             .
+sem
+  makroactseq.dcode     = makroactseq.icode                             $
+semend
+ 
+ 
+syn p81  : formparlist   -> FORMPAR                                     .
+sem  auxiliarys plusone : INT;
+  formparlist.plusone   = IPlus1(formparlist.iparanz)                   $
+  formparlist.dparanz   = formparlist.plusone                           $
+  formparlist.dcode     = ChkFormPar (formparlist.icode,
+                                      FORMPAR,
+                                      formparlist.plusone)              $
+semend
+ 
+syn p82  : formparlist<0>-> FORMPAR commasy formparlist<1>              .
+sem  auxiliarys plusone : INT;
+  formparlist<0>.plusone = IPlus1(formparlist<0>.iparanz)               $
+  formparlist<1>.iparanz = formparlist<0>.plusone                       $
+  formparlist<1>.icode   = ChkFormPar (formparlist<0>.icode,
+                                      FORMPAR,
+                                      formparlist<0>.plusone)           $
+  formparlist<0>.dcode   = formparlist<1>.dcode                         $
+  formparlist<0>.dparanz = formparlist<1>.dparanz                       $
+semend
+ 
+syn p91  : specialact    -> SPECIALSY PROGSTRINGSY                      .
+sem
+  specialact.dcode      = StoreSpec( specialact.icode,
+                                     SPECIALSY,
+                                     PROGSTRINGSY)                      $
+semend
+ 
+ 
+syn p111 : makros        -> lexmakrossy makrolexemes makroendsy         .
+sem
+  makrolexemes.icode    = makros.icode                                  $
+  makros.dcode          = makrolexemes.icode                            $
+semend
+ 
+syn p120 : makrolexemes<0> -> IDENT equalsy regexpr semicolonsy
+                              makrolexemes<1>                           .
+sem
+  regexpr.icode         = makrolexemes<0>.icode                         $
+  makrolexemes<1>.icode = InstLexMak (regexpr.dcode,
+                                      IDENT,
+                                      regexpr.dautom)                   $
+  makrolexemes<0>.dcode = makrolexemes<1>.dcode                         $
+semend
+ 
+syn p121 : makrolexemes    -> IDENT equalsy regexpr semicolonsy         .
+sem
+  regexpr.icode         = makrolexemes.icode                            $
+  makrolexemes.dcode    = InstLexMak (regexpr.dcode,
+                                      IDENT,
+                                      regexpr.dautom)                   $
+semend
+ 
+ 
+syn p131 : lexemes<0>    -> ignoresy regexpr arrowsy actionspec (*ignoresy*)
+                            semicolonsy lexemes<1>                      .
+sem
+     auxiliarys      aubo: AUTBOOL;
+
+   regexpr.icode      = lexemes<0>.icode                               $
+   actionspec.icode   = regexpr.dcode                                  $
+   actionspec.ignore  = SetTrue                                        $
+   actionspec.iautom  = regexpr.dautom                                 $
+   lexemes<0>.aubo  = SAlternative ( actionspec.dautom,
+                                       lexemes<0>.iautom,
+                                       actionspec.dcode)               $
+   lexemes<1>.iautom = autbo2aut(lexemes<0>.aubo)        $
+   lexemes<1>.icode  = autbo2bool(lexemes<0>.aubo)       $
+
+   lexemes<0>.dcode   = lexemes<1>.dcode                               $
+   lexemes<0>.dautom  = lexemes<1>.dautom                              $
+semend
+ 
+syn p132 : lexemes<0>    -> regexpr arrowsy actionspec
+                            semicolonsy lexemes<1>                      .
+sem
+     auxiliarys      aubo: AUTBOOL;
+
+   regexpr.icode      = lexemes<0>.icode                               $
+   actionspec.icode   = regexpr.dcode                                  $
+   actionspec.iautom  = regexpr.dautom                                 $
+   actionspec.ignore  = SetFalse                           $
+    lexemes<0>.aubo  = SAlternative ( actionspec.dautom,
+                                       lexemes<0>.iautom,
+                                       actionspec.dcode)               $
+
+   lexemes<1>.iautom = autbo2aut(lexemes<0>.aubo)        $
+   lexemes<1>.icode  = autbo2bool(lexemes<0>.aubo)       $
+
+   lexemes<0>.dcode   = lexemes<1>.dcode                               $
+   lexemes<0>.dautom  = lexemes<1>.dautom                              $
+semend
+ 
+syn p133 : lexemes<0>    -> includesy lexemes<1>                        .
+sem
+   lexemes<1>.icode   = lexemes<0>.icode                               $
+   lexemes<0>.dcode   = lexemes<1>.dcode                               $
+   lexemes<1>.iautom  = lexemes<0>.iautom                              $
+   lexemes<0>.dautom  = lexemes<1>.dautom                              $
+semend
+ 
+syn p134 : lexemes       ->                                             .
+sem
+   lexemes.dcode      = lexemes.icode                                   $
+   lexemes.dautom     = lexemes.iautom                                  $
+semend
+ 
+ 
+ 
+syn p141 : actionspec    -> IDENT openpsy parlist closepsy              .
+sem
+     auxiliarys      aubo: AUTBOOL;
+  parlist.icode       = actionspec.icode                                $
+  parlist.ipars       = GenEmptPars                                     $
+  parlist.iparanz     = IntNull                      $
+  actionspec.aubo    = DefMakAct (parlist.dcode,
+                                   actionspec.ignore,
+                                   actionspec.iautom,
+                                   parlist.dparanz,
+                                   IDENT,
+                                   parlist.dpars)                      $
+
+   actionspec.dautom =   autbo2aut(actionspec.aubo)  $
+   actionspec.dcode =    autbo2bool(actionspec.aubo)  $
+
+semend
+ 
+ 
+syn p142 : actionspec    -> IDENT                                       .
+sem
+  auxiliarys   dummy :PARTYPE
+               null  : INT
+               aubo: AUTBOOL;
+  actionspec.dummy   = GenEmptPars                                    $
+  actionspec.null    = IntNull           $
+  actionspec.aubo   = DefMakAct (actionspec.icode,
+                                   actionspec.ignore,
+                                   actionspec.iautom,
+                                   actionspec.null,
+                                   IDENT,
+                                   actionspec.dummy)                    $
+   actionspec.dautom =   autbo2aut(actionspec.aubo)  $
+   actionspec.dcode =    autbo2bool(actionspec.aubo)  $
+semend
+ 
+syn p143 : actionspec    -> PROGSTRINGSY                                .
+sem
+     auxiliarys      aubo: AUTBOOL;
+  actionspec.aubo  = DefAction(actionspec.icode,
+                                 actionspec.ignore,
+                                 actionspec.iautom,
+                                 PROGSTRINGSY)                          $
+   actionspec.dautom =   autbo2aut(actionspec.aubo)  $
+   actionspec.dcode =    autbo2bool(actionspec.aubo)  $
+semend
+ 
+syn p144 : actionspec    ->                                             .
+sem
+  auxiliarys nulp : PROGSTRINGSY
+             aubo: AUTBOOL;
+  actionspec.nulp    = GenEProg                                         $
+    actionspec.aubo  = DefAction(actionspec.icode,
+                                 actionspec.ignore,
+                                 actionspec.iautom,
+                                 actionspec.nulp)                       $
+   actionspec.dautom =   autbo2aut(actionspec.aubo)  $
+   actionspec.dcode =    autbo2bool(actionspec.aubo)  $
+semend
+ 
+ 
+syn p151 : parlist       -> par                                         .
+sem    auxiliarys plusone : INT
+                  bopa:BOOLPAR;
+
+
+  parlist.plusone    = IPlus1(parlist.iparanz)           $
+  parlist.dparanz    = parlist.plusone                                  $
+   parlist.bopa    = InsParam (parlist.icode,
+                                 par.dpar,
+                                 parlist.ipars,
+                                 parlist.plusone,
+                                 par.ort)                           $
+   parlist.dcode=bopar2bool(parlist.bopa)   $
+   parlist.dpars=bopar2par(parlist.bopa)   $
+semend
+ 
+syn p152 : parlist<0>    -> par commasy parlist<1>                      .
+sem    auxiliarys plusone : INT
+                  bopa:BOOLPAR;
+  parlist<0>.plusone = IPlus1(parlist<0>.iparanz)                 $
+  parlist<1>.iparanz = parlist<0>.plusone                               $
+   parlist<0>.bopa = InsParam (parlist<0>.icode,
+                                 par.dpar,
+                                 parlist<0>.ipars,
+                                 parlist<0>.plusone,
+                                 par.ort)                           $
+   parlist<1>.icode=bopar2bool(parlist<0>.bopa)   $
+   parlist<1>.ipars=bopar2par(parlist<0>.bopa)   $
+  parlist<0>.dcode   = parlist<1>.dcode                                 $
+  parlist<0>.dparanz = parlist<1>.dparanz                               $
+  parlist<0>.dpars   = parlist<1>.dpars                                 $
+semend
+ 
+ 
+syn p161 : par           -> INTEGERSY                                   .
+sem
+     auxiliarys      dint:INTORT;
+
+    par.dint  = SemIntToStr(INTEGERSY)                           $
+   par.dpar=intort2i(par.dint)      $
+   par.ort=intort2o(par.dint)      $
+semend
+ 
+syn p162 : par           -> STRINGSY                                    .
+sem
+     auxiliarys      dint:INTORT;
+   par.dint      = SemStrToStr(STRINGSY)                            $
+   par.dpar=intort2i(par.dint)      $
+   par.ort=intort2o(par.dint)      $
+
+
+semend
+ 
+ 
+syn p171 : regexpr<0>    -> regexpr<1> barsy regterm               .
+sem
+  auxiliarys aubo:AUTBOOL;
+
+   regexpr<1>.icode   = regexpr<0>.icode                               $
+   regterm.icode      = regexpr<1>.dcode                               $
+    regexpr<0>.aubo = SAlternative(regexpr<1>.dautom,
+                                     regterm.dautom,
+                                     regterm.dcode)                    $
+    regexpr<0>.dautom=autbo2aut(regexpr<0>.aubo) $
+    regexpr<0>.dcode=autbo2bool(regexpr<0>.aubo) $
+
+semend
+ 
+syn p172 : regexpr       -> regterm                                     .
+sem
+   regterm.icode      = regexpr.icode                                  $
+   regexpr.dcode      = regterm.dcode                                  $
+   regexpr.dautom     = regterm.dautom                                 $
+semend
+ 
+ 
+ 
+syn p181 : regterm<0>    -> regterm<1> regfaktor                        .
+sem
+  auxiliarys aubo:AUTBOOL;
+
+   regterm<1>.icode   = regterm<0>.icode                               $
+   regfaktor.icode    = regterm<1>.dcode                               $
+    regterm<0>.aubo = SConcat(regterm<1>.dautom,
+                                regfaktor.dautom,
+                                regfaktor.dcode)                       $
+    regterm<0>.dautom=autbo2aut(regterm<0>.aubo) $
+    regterm<0>.dcode=autbo2bool(regterm<0>.aubo) $
+semend
+ 
+syn p182 : regterm       -> regfaktor                                   .
+sem
+   regfaktor.icode    = regterm.icode                                  $
+   regterm.dcode      = regfaktor.dcode                                $
+   regterm.dautom     = regfaktor.dautom                               $
+semend
+ 
+ 
+ 
+syn p191 : regfaktor     -> regelem REGOP                               .
+sem
+   auxiliarys aubo : AUTBOOL;
+
+   regelem.icode      = regfaktor.icode                                $
+    regfaktor.aubo  = RegOperator(regelem.dautom,REGOP,
+                                    regelem.dcode )                    $
+    regfaktor.dautom=   autbo2aut(regfaktor.aubo) $
+    regfaktor.dcode =  autbo2bool(regfaktor.aubo) $
+
+semend
+ 
+syn p192 : regfaktor     -> regelem numbersy times                      .
+sem   auxiliarys aubo : AUTBOOL;
+   regelem.icode      = regfaktor.icode                                $
+   regfaktor.aubo  = SMultiply(regelem.dcode,
+                                  regelem.dautom,
+                                  times.dug,
+                                  times.dog)                            $
+    regfaktor.dautom=   autbo2aut(regfaktor.aubo) $
+    regfaktor.dcode =  autbo2bool(regfaktor.aubo) $
+
+semend
+ 
+syn p193 : regfaktor     -> regelem                                     .
+sem
+   regelem.icode      = regfaktor.icode                                $
+   regfaktor.dcode    = regelem.dcode                                  $
+   regfaktor.dautom   = regelem.dautom                                 $
+semend
+ 
+ 
+ 
+syn p201 : times         -> INTEGERSY                                   .
+sem
+   times.dug          = INTEGERSY                                      $
+   times.dog          = INTEGERSY                                      $
+semend
+ 
+syn p202 : times         -> INTEGERSY commasy                           .
+sem
+   times.dug          = INTEGERSY                                      $
+   times.dog          = GenMOne                                        $
+semend
+ 
+syn p203 : times         -> commasy INTEGERSY                           .
+sem
+   times.dug          = GenZero                                        $
+   times.dog          = INTEGERSY                                      $
+semend
+ 
+syn p204 : times         -> INTEGERSY<0> commasy INTEGERSY<1>           .
+sem
+   times.dug          = INTEGERSY<0>                                   $
+   times.dog          = INTEGERSY<1>                                   $
+semend
+ 
+ 
+ 
+syn p211 : regelem       -> STRINGSY                                    .
+sem
+   regelem.dcode      = regelem.icode                                  $
+   regelem.dautom     = SStrToAut(STRINGSY)                            $
+semend
+ 
+syn p212 : regelem       -> openbracksy setseq closebracksy             .
+sem
+   setseq.icode       = regelem.icode                                  $
+   regelem.dcode      = setseq.dcode                                   $
+   regelem.dautom     = SSetToAut(setseq.dset)                         $
+semend
+ 
+syn p213 : regelem       -> notsy openbracksy setseq closebracksy       .
+sem   auxiliarys   chse: CHARSET;
+   setseq.icode       = regelem.icode                                  $
+   regelem.dcode      = setseq.dcode                                   $
+   regelem.chse       = ComplSet(setseq.dset)                          $
+   regelem.dautom     = SSetToAut(regelem.chse)                        $
+semend
+ 
+syn p214 : regelem       -> openpsy regexpr closepsy                    .
+sem
+   regexpr.icode      = regelem.icode                                  $
+   regelem.dcode      = regexpr.dcode                                  $
+   regelem.dautom     = regexpr.dautom                                 $
+semend
+ 
+syn p215 : regelem       -> IDENT                                       .
+sem
+  auxiliarys aubo:AUTBOOL;
+   regelem.aubo    = ExpndLexMak(regelem.icode,IDENT)               $
+   regelem.dautom = autbo2aut(regelem.aubo) $
+   regelem.dcode = autbo2bool(regelem.aubo) $
+semend
+ 
+syn p216 : regelem       -> allbutsy openpsy regexpr closepsy           .
+sem
+  auxiliarys aubo:AUTBOOL;
+   regexpr.icode      = regelem.icode                                  $
+   regelem.aubo = SAllbut(regexpr.dautom, regexpr.dcode)         $
+   regelem.dautom = autbo2aut(regelem.aubo) $
+   regelem.dcode = autbo2bool(regelem.aubo) $
+semend
+ 
+ 
+ 
+syn p231 : setseq        -> STRINGSY                                    .
+sem
+ auxiliarys chbo:CHARBOOL;
+   setseq.chbo        = makeset(STRINGSY, STRINGSY,
+                                setseq.icode)                       $
+  setseq.dset = charbo2char(setseq.chbo) $
+  setseq.dcode = charbo2bool(setseq.chbo) $
+semend
+ 
+syn p232 : setseq<0>     -> STRINGSY commasy setseq<1>                  .
+sem  auxiliarys set: CHARSET
+                chbo:CHARBOOL;
+  setseq<0>.chbo      = makeset(STRINGSY, STRINGSY, setseq<0>.icode) $
+  setseq<0>.set = charbo2char(setseq<0>.chbo)  $
+  setseq<1>.icode = charbo2bool(setseq<0>.chbo)  $
+  setseq<0>.dcode     = setseq<1>.dcode                              $
+  setseq<0>.dset      = union_sets (setseq<0>.set,
+                                    setseq<1>.dset )                 $
+semend
+ 
+ 
+syn p233 : setseq        -> STRINGSY<0> doubledotsy STRINGSY<1>         .
+sem
+ auxiliarys chbo:CHARBOOL;
+   setseq.chbo        = makeset(STRINGSY<0>, STRINGSY<1>,
+                                setseq.icode)                       $
+  setseq.dset=charbo2char(setseq.chbo) $
+  setseq.dcode=charbo2bool(setseq.chbo) $
+semend
+ 
+ 
+syn p234 : setseq<0>     -> STRINGSY<0> doubledotsy STRINGSY<1>
+                            commasy setseq<1>                           .
+sem   auxiliarys set: CHARSET
+                 chbo:CHARBOOL;
+  (*(setseq<0>.set, setseq<1>.icode)*)
+  setseq<0>.chbo       = makeset(STRINGSY<0>, STRINGSY<1>,
+                                 setseq<0>.icode)                   $
+  setseq<0>.set=charbo2char(setseq<0>.chbo) $
+  setseq<1>.icode=charbo2bool(setseq<0>.chbo) $
+  setseq<0>.dcode      = setseq<1>.dcode                            $
+  setseq<0>.dset       = union_sets(setseq<0>.set,
+                                    setseq<1>.dset )                $
+semend
+grammarend

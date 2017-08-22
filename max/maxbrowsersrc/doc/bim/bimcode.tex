@@ -1,0 +1,135 @@
+\section{Funktionsbeschreibung des Moduls {\tt bimcode.c}}
+
+Dieses Modul ist f"ur die Erzeugung des Files {\tt 42.c} zust"andig.
+
+\begin{description}
+
+\item[\tt semval\_typ
+]{\bf :\\}
+Ermittelt zu einem Typnamen den dazugeh"origen Typ des semantischen
+ Werts. Gibt fuer Typen, die einen semantischen Wert haben, den Typ dieses
+ Wertes als C-String zurueck. Typen, denen kein semantischer Wert zugeordnet
+ ist, ergeben als Resultat einen NULL-Zeiger.
+ \\
+IN:
+\begin{itemize}
+   \item char * typ :	 Name des Typen
+
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item char * : Name des Typen des semantischen Werts
+
+\end{itemize}
+
+\item[\tt actual\_attributes
+]{\bf :\\}
+Z"ahlt durch, wieviele Attribute eine Sorte wirklich hat, dazu
+ summiert die Funktion die Anzahl die Attribute dieses Knoten und aller
+ seiner Vorfahren.
+ \\
+IN:
+\begin{itemize}
+   \item struct SORT * p : Zeiger auf Sortendefinition
+
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item int : Anzahl der Attribute
+
+\end{itemize}
+
+\item[\tt actual\_node\_attributes
+]{\bf :\\}
+Z"ahlt durch, wieviele Attribute eine Sorte wirklich hat, wenn
+ es sich bei der Instanz um einen Knoten handelt.
+ Die Funktion sumimert die Anzahl der Knoten-Attribute dieses Knoten und
+ aller seiner Vorfahren.
+ \\
+IN:
+\begin{itemize}
+   \item struct SORT * p : Zeiger auf Sortendefinition
+
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item int : Anzahl der Attribute
+
+\end{itemize}
+
+\item[\tt actual\_term\_attributes
+]{\bf :\\}
+Z"ahlt durch, wieviele Attribute eine Sorte wirklich hat, wenn
+ es sich bei der Instanz {\bf nicht} um einen Knoten handelt.
+ \\
+IN:
+\begin{itemize}
+   \item struct SORT * p : Zeiger auf Sortendefinition
+
+\end{itemize}
+OUT:
+\begin{itemize}
+   \item int : Anzahl der Attribute
+
+\end{itemize}
+
+\item[\tt bimcode
+]{\bf :\\}
+Gibt den zu erzeugenden Code in die Datei 42.c aus.
+ \\
+IN:
+\begin{itemize}
+   \item char * bn: Name der Sprache
+
+\end{itemize}
+\item[\tt replace\_suffix
+]{\bf :\\}
+Ersetzt ein Dateisuffix durch ein anderes.
+ \\
+\item[\tt emit\_header
+]{\bf :\\}
+Gibt den Header der Zieldatei aus.
+ \\
+\item[\tt emit\_bim\_sort\_name
+]{\bf :\\}
+Gibt die Funktion aus, die zu jeder Sorte deren Namen als String
+ zur"uckgibt
+ \\
+\item[\tt emit\_sort\_dependency
+]{\bf :\\}
+Gibt die Liste der Sortenabh"angigkeiten aus
+ \\
+\item[\tt emit\_bim\_nodeinfo
+]{\bf :\\}
+Gibt die Routine get\_nodeinfo() aus.
+ \\
+\item[\tt emit\_bim\_number\_of\_attributes
+]{\bf :\\}
+Gibt f"ur jede Sorte die Anzahl ihrer Attribute zur"uck.
+ \\
+\item[\tt emit\_sort\_dependencies
+]{\bf :\\}
+Gibt die Sortenabh"angigkeiten aus.
+ \\
+\item[\tt emit\_sort\_attributes
+]{\bf :\\}
+Gibt die Funktionen aus, die die Sorten berechnen sollen.
+ \\
+\item[\tt emit\_attr\_list
+]{\bf :\\}
+Gibt f"ur ein MAX-Element die Liste der Knoten zur"uck
+ \\
+\item[\tt emit\_list\_of\_sorts\_array
+]{\bf :\\}
+Gibt die Liste aller vorkommenden Sorten aus.
+ \\
+\item[\tt emit\_term\_parse\_table
+]{\bf :\\}
+Gibt die Parsertabelle aus, die zum Erstellen der Darstellung von
+ Termattributen n"otig ist.
+ \\
+\item[\tt emit\_standard\_code
+]{\bf :\\}
+Kopiert den Code aus {\tt bim\_std.c} her"uber
+ \\
+\end{description}

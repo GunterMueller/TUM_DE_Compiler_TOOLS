@@ -1,0 +1,76 @@
+#$idents
+
+#comments
+
+#mcomments
+
+#keywords
+
+ 1 0 OR 
+ 2 0 ARRAY 
+ 4 0 BEGIN 
+ 5 0 CASE 
+ 9 0 CONST 
+11 0 DO 
+14 0 DOWNTO 
+15 0 ELSE 
+16 0 END 
+18 0 EXTERNAL 
+19 0 FILE 
+20 0 FOR 
+21 0 FORWARD 
+22 0 FUNCTION
+23 0 GOTO 
+25 0 IF 
+26 0 LABEL 
+29 3 AND 
+29 4 DIV 
+29 5 MOD
+30 0 NIL 
+31 0 NOT
+32 0 OF 
+33 0 OTHERWISE 
+34 0 PACKED 
+35 0 PROCEDURE 
+36 0 PROGRAM 
+39 0 RECORD 
+40 7 IN
+41 0 REPEAT 
+44 0 SET 
+46 0 THEN
+47 0 TO 
+48 0 TYPE 
+49 0 UNTIL 
+51 0 VAR 
+52 0 WHILE 
+53 0 WITH
+
+#specials
+
+1 1 + 
+1 2 - 
+3 0 := 
+6 0 stringsy
+7 0 :
+8 0 ,
+10 0 numbersy
+12 0 . 
+13 0 .. 
+17 0 =
+24 0 identsy 
+27 0 [
+28 0 ( 
+29 1 *
+29 2 /
+37 0 ]
+38 0 realsy
+40 2 >=
+40 3 >
+40 4 <= 
+40 5 < 
+40 6 <>
+42 0 )
+43 0 ;
+45 0 ** 
+50 0 ^
+50 0 ->

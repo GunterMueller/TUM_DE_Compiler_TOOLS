@@ -1,0 +1,34 @@
+		       Der MUGBrowser - Kurzbeschreibung
+
+Der MUGBrowser ist ein im Rahmen eines Fortgeschrittenenpraktikums am  Lehrstuhl
+von Prof. Eickel unter der Betreuung von Frau Höllerer entwickeltes Werkzeug zur
+Visualisierung attributierter Syntaxbäume,  wie  sie  im  MUG-System  Verwendung
+finden.
+Ziel des Projekts ist es, Studenten, die im Praktikum des Übersetzerbaus mit dem
+MUG-System  arbeiten,  durch  einige  Hilfsprogramme  bei  der  Entwicklung  der
+Compilerspezifikation zu unterstützen. Der MUGBrowser  stellt  die  erste  Stufe
+dieser Toolbox dar. Er soll später zu einem Editor für attributierte Grammatiken
+ausgebaut  werden.  Bei  der  Entwicklung   des   Browsers   war   deshalb   der
+Übersichtlichkeit,  Wartungsfreundlichkeit  und  Dokumentation des Programmcodes
+höchste Priorität einzuräumen, um die spätere Erweiterung optimal vorzubereiten.
+Großes  Augenmerk  wurde auch auf die interne Gliederung des Browsers, sowie auf
+die Definition der Schnittstellen gelegt.
+Um den  Browser  realisieren  zu  können,  mußten  am  MUG-System  Veränderungen
+vorgenommen  werden,  um  die  generierten  Compiler  zu  veranlassen, neben dem
+erzeugten Code auch Informationen über den Syntaxbaum in einer Datei  abzulegen.
+Da  nur  beim  KW-Auswerter ein kompletter attributierter Syntaxbaum im Speicher
+vorliegt, war diese MUG-Komponente Ansatzpunkt für Veränderungen.
+Der Browser selbst ist zweiteilig organisiert. Das erste Modul (Frontend)  liest
+die   vom   Compiler  erzeugte  Baumbeschreibung  und  errechnet  anhand  dieser
+Information das Layout  der  Baumdarstellung.  Dieses  wird  über  eine  weitere
+Schnittstelle an das zweite Modul, das Backend, weitergereicht. Durch Einführung
+dieser Schnittstelle wird eine Entkopplung des Backends vom  Frontend  erreicht,
+was einen vielseitigeren Einsatz der beiden Module ermöglichen soll (siehe Blatt
+3).
+Das Backend ist schließlich für die grafische Darstellung am  Bildschirm,  sowie
+für  die  Kommunikation  mit  dem Anwender verantwortlich. Eine Beschreibung des
+Funktionsumfangs ist Blatt 1 zu entnehmen.
+Insgesamt soll  der  MUGBrowser  die  Arbeit  mit  dem  MUG-System  erleichtern.
+Insbesondere  die  Fehlersuche  wird  durch  die  Möglichkeit,  Attributwerte zu
+betrachten und Attributverläufe zu verfolgen, erheblich vereinfacht.
+

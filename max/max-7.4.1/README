@@ -1,0 +1,29 @@
+   __  __    _    __  __
+  |  \/  |  / \   \ \/ /
+  | |\/| | / _ \   \  / 
+  | |  | |/ ___ \  /  \ 
+  |_|  |_/_/   \_\/_/\_\
+                      
+  MAX -- the Munich Attribute system for uniX
+
+  Version 7.4.1 (08-04-1998)
+
+  MAX is a system that supports programming language specification and 
+  implementation. It provides a functional, attribute-based framework with 
+  order-sorted recursive data types for the specification of syntax and 
+  static semantics. Abstract state machines are used for the specification 
+  of dynamic semantics.
+
+  From a specification the MAX system generates an attribute evaluator and
+  an implementation for the abstract state machine. The powerful interface
+  to C programs enables flexible interactions with other tools, in particular
+  scanners and parsers.
+  
+  The Constraint preprocessor CMAX provides support for the constraint-based
+  specification of type-analysis and dataflow-analysis problems.
+ 
+  Copyright (c) 1993-1998 
+  TU Muenchen, Lehrstuhl Informatik II, Prof. J. Eickel
+  FernUni Hagen, Lehrgebiet Prakt. Informatik V, Prof. A. Poetzsch-Heffter
+  and all authors listed in the file AUTHORS.
+

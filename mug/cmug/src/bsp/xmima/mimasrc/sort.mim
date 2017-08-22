@@ -1,0 +1,83 @@
+program SORT
+begin
+   type IntSeq = empty() | append(int first,IntSeq rest);
+   
+   func filter_kl_gl(int el; IntSeq s) : IntSeq;
+   begin
+     if s is empty then
+       return s
+     else
+       if first(s) <= el then
+         return append(first(s),filter_kl_gl(rest(s)));;;;
+       else
+         return filter_kl_gl(rest(s))
+       fi
+     fi
+   end; { filter_kl_gl }
+
+   func filter_gr(int el; IntSeq s) : IntSeq;
+   begin
+     if s is empty then
+       return s
+     else
+       if first(s) > el then
+         return append(first(s),filter_gr(rest(s)))
+       else
+         return filter_gr(rest(s))
+       fi
+     fi
+   end; { filter_gr }
+
+   func conc(IntSeq s1; IntSeq s2) : IntSeq;
+   begin
+     if s1 is empty then
+       return s2
+     else 
+       if s2 is empty then 
+         return s1
+       else
+         return append(first(s1),conc(rest(s1),s2))
+       fi
+     fi
+   end; { conc }
+
+   func sort(IntSeq s) : IntSeq;
+   begin
+     if s is empty then
+       return s
+     else 
+       if rest(s) is empty then
+         return s
+       else
+         return conc(filter_kl_gl(first(s),rest(s)),
+                append(first(s),filter_gr(first(s),rest(s))))
+       fi 
+     fi
+   end; { sort }
+
+   var IntSeq ss;
+   var BOOL   weiter;
+   var Int    ein;
+
+   ss     := empty;
+   weiter := TRUE;
+   while weiter do
+     read(ein);
+     if ein <> 0 then
+       ss := append(ein,ss)
+     else
+       weiter := FALSE
+     fi
+   od ;
+   ss := sort(ss);
+   while ss is append do
+     write(first(ss));
+     write(nl)
+   od
+
+end { program SORT }
+
+
+
+
+

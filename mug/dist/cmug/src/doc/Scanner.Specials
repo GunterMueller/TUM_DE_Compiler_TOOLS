@@ -1,0 +1,51 @@
+Verfuegbare "special" - Symbolnamen fuer MUG-scanner
+
+
+    Name             Bedeutung
+
+1.  arrowsy		^
+2.  identsy		Identifier
+3.  semicsy		;	
+4.  becomessy		:=
+5.  periodsy		.
+6.  stringsy		'
+7.  colonsy		:
+8.  commasy		,
+9.  dollarsy		$
+10. issy		=
+11. lessequsy		<=
+12. lesssy		<
+13. lbracketsy		[
+14. lparsy		(
+15. minussy		-
+16. twoperiodsy		..
+17. monksy		@
+18. notequsy		<>
+19. percentsy		%
+20. rbracketsy		]
+21. plussy		+
+22. numbersy		Integerzahlen
+23. rparsy		)
+24. slashsy		/
+25. starsy		*
+26. greatersy		>
+27. greaterequsy	>=
+28. pfeilsy		->
+29. crossy		#
+30. barsy		|
+31. concatsy		||
+32. notsy		~
+33. strsy		"
+34. qmarksy		?
+35. emarksy		!
+36. andsy		&
+37. lparpersy		(.
+38. perrparsy		.)
+39. lessdotsy		<.
+40. greaterdotsy	>.
+41. unequalsy		!=
+42. eqequalsy		==
+43. lbracesy		{
+44. rbracesy		}
+
+Kommentar beginnt mit "(*" und endet mit "*)"

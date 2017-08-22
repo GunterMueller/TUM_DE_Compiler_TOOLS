@@ -1,0 +1,42 @@
+#mcomments
+#comments
+#case_sensitive
+#specials
+
+1  0 arrowsy
+2  0 colonsy
+3  0 commasy
+5  0 dollarsy
+6  0 greatersy
+7  1 identsy
+8 0 issy
+9 0 lesssy
+10 0 lparsy
+11 0 minussy
+12 0 numbersy
+13 0 periodsy
+14 0 plussy
+15 0 rparsy
+16 0 semicsy
+29 0 stringsy
+#keywords
+ 4 0 const
+17 0 attributes
+18 0 auxiliarys
+18 0 auxiliaries
+19 0 axiom
+20 0 function
+21 0 grammar
+22 0 grammarend
+23 0 inherited
+24 0 nonterminals
+25 0 productions
+26 0 sem
+27 0 semend
+28 0 sfunction
+30 0 syn
+31 0 synthesized
+32 0 terminals
+33 0 type
+
+

@@ -1,0 +1,549 @@
+\documentstyle[german,12pt,a4]{article}
+\begin{document}
+
+{\LARGE\bf\centerline{Dokumentation der MAX-Optionen}}
+\bigskip\noindent
+In Abschnitt~1 werden die m"oglichen Optionen der MAX-Version 0.6 beschrieben.
+Der Rest dieser Dokumentation (Abschnitte 2 bis 5)
+behandelt die Generierung von Scanner, Parser, Rahmenprogramm und Makefile.
+Damit ist es m"oglich, nur aus der MAX-Spezifikation ({\tt LANG\_spec.m})
+sowie der Bibliotheksdatei {\tt max\_std.o}
+eine lauff"ahige MAX-Anwendung zu generieren.
+
+\bigskip\noindent (Roland Merk, 17.12.93)
+
+\vspace{2cm}
+\tableofcontents
+\newpage
+\section{Programmaufruf von MAX}
+
+In diesem Abschnitt werden kurz die Optionen beschrieben, die beim Aufruf des
+MAX-Compilers ({\tt max}) erlaubt sind.
+
+\begin{itemize}
+\item Zu bearbeitende MAX-Spezifikation (Dateiname "`{\tt <spec\_name>.m}"'):
+
+Bei mehreren Dateinamen wird der letzte ausgew"ahlt.
+Vor oder nach dem Dateinamen k"onnen beliebig viele Optionen angegeben
+werden.
+
+\item Generierung eines Makefile (Option {\tt -m}):
+
+Ein Makefile mit dem Namen "`{\tt Makefile}"' wird erzeugt, das
+eine MAX-Anwendung generieren kann.
+
+\item Generierung eines Rahmenprogramms (Option {\tt -f}):
+
+Es wird ein Rahmenprogramm "`{\tt <name>.c}"' erzeugt, das
+das Quellprogramm einliest, parst, die Attribute auswertet
+und anschlie"send den abstrakten Syntaxbaum des Quellprogramms
+in die Standardausgabe schreibt.
+
+Dabei wird der {\tt <name>} aus der ersten \mbox{\tt STRUC <name> [...]\{\}}
+in der MAX-Spezifikation genommen.
+
+\item Generierung von Scanner und Parser f"ur die abstrakte Syntax
+(Option {\tt -ya}):
+
+In Abschnitt \ref{abssyn} wird beschrieben, wie die abstrakte
+Syntax genau aussehen mu"s.
+
+Der Scanner wird als LEX-Spezifikation in die Datei "`{\tt <spec\_name>.l}"'
+geschrieben; der Parser als YACC-Spezifikation in die Datei
+"`{\tt <spec\_name>.y}"'.
+
+\item Generierung von Scanner und Parser f"ur die konkrete Syntax
+(Option {\tt -yc}):
+
+Zur Spezifikation der konkreten Syntax werden die in die MAX-Spezifikation
+eingestreuten Symbole und Kommandos verwendet (Beschreibung in Abschnitt
+\ref{konkrsyn}).
+
+Es werden die gleichen Dateien wie beim letzten Punkt erzeugt.
+
+\item Strategie der Attributauswertung (Option {\tt -O[123]}):
+
+Bei der Attributauswertung k"onnen drei verschiedene Optimierungsstufen
+gew"ahlt werden (der Defaultwert ist dabei {\tt O3}):
+
+\begin{tabular}{ll}
+Option & Vorgehensweise\\
+\hline
+{\tt -O1}: & Ohne Durchlaufstrategie ohne partielle Auswertung.\\
+{\tt -O2}: & Ohne Durchlaufstrategie mit partieller Auswertung.\\
+{\tt -O3} (Defaultwert): & Mit Durchlaufstrategie und partieller Auswertung.
+\end{tabular}
+
+\noindent
+Dabei bedeutet "`mit Durchlaufstrategie"' einen Baumdurchlauf, bei
+dem die Attributinstanzen gem"a"s einer topologischen Sortierung
+ihres Abh"angigkeitsgraphen besucht werden.
+
+\item Ausgabe der Ergebnisse der Abh"angigkeitsanalyse (Option {\tt -p}):
+
+Das funktionale Verhalten aller (in MAX definierten) Funktionen und Attribute
+{\tt (f : Node -> Node)} wird als regul"arer Ausdruck "uber den
+elementaren Baumlauffunktionen {\tt fath}, {\tt son}, {\tt rbroth}
+und {\tt lbroth} ausgegeben. Falls nach der Analyse keine Aussage m"oglich
+ist, wird der Wert {\tt nil()} ausgegeben.
+
+\item Ausgabe des abstrakten Syntaxbaums (Option {\tt -t}).
+
+\item Aufruf des Baumbrowsers zur Visualisierung (Option {\tt -b}).
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Quellprogrammeingabe in der abstrakten Syntax}
+\label{abssyn}
+
+\subsection{Terminale}
+
+In MAX sind nur Elemente der f"unf vordefinierten Typen {\tt Int},
+{\tt Ident}, {\tt Bool}, {\tt Char} und {\tt String}
+als Terminale der abstrakten Syntax zul"assig.
+
+\begin{table}
+\begin{center}
+\caption{Terminale der abstrakten Syntax} \medskip
+\begin{tabular}{|l|ll|}
+\hline
+Terminalsorte & Syntax & Beispiel \\
+\hline
+Int    &{\tt [-][0-9]* }& {\tt 123 } \\
+Ident  &{\tt [a-zA-Z][a-zA-Z0-9\_]* }& {\tt TypeSpec } \\
+Bool   &{\tt true} oder {\tt false }& {\tt true}\\
+Char   &{\tt '[a-zA-Z...]' }& {\tt 'k' } \\
+String &{\tt \verb@"@[a-zA-Z...]*\verb@"@ }& {\tt \verb@"@Fehler !\verb@"@ } \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\subsubsection*{Anmerkung :}
+
+Kann {\tt Bool} im Syntaxbaum vorkommen, so werden {\tt true}
+und {\tt false} vom generierten Scanner stets als {\tt Bool}-Symbole
+interpretiert. Sonst werden sie als {\tt Ident} betrachtet.
+
+
+\subsection{Nichtterminale}
+
+Alle Sorten, die in der MAX-Spezifikation als Tupel- oder Listenproduktionen
+definiert wurden, k"onnen in der folgender Form angegeben werden :
+
+\medskip\noindent
+{\bf Schema :} \qquad {\tt Sortenname( Subterme, durch ',' getrennt )}
+
+\medskip\noindent
+Die Sorten der Subterme m"ussen mit denen in der Definition der Produktionen
+"ubereinstimmen. Dies wird beim Termaufbau des Syntaxbaums "uberpr"uft.
+Bei Listenproduktionen kann eine leere Liste in der Form
+{\tt Sortenname()} angegeben werden.
+
+\medskip\noindent {\bf Beispiel :}
+
+\medskip\noindent Tupelproduktion in der MAX-Spezifikation :
+
+{\tt Function ( Ident ParList Type )}
+
+\medskip\noindent Abstrakte Syntax im Quellprogramm :
+
+{\tt Function( zeichnen, ParList(...), Type(...) )}
+
+\subsubsection*{Anmerkung :}
+
+Ein Sortenname (im Beispiel "`{\tt Function}"') kann entweder als
+Termaufbaufunktion oder als einfacher Bezeichner ({\tt Ident})
+angesehen werden. Der generierte Scanner erkennt diesen Unterschied am
+Lookahead. Falls eine "offnende Klammer folgt, nimmt er eine
+Termaufbaufunktion an.
+
+\subsubsection*{Sorte des gesamten Quellprogramms}
+
+Der Syntaxbaum des gesamten Quellprogramms mu"s dieselbe Sorte
+haben, die in der ersten {\tt STRUC} der MAX-Spezifikation
+in eckigen Klammern angegeben wird.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Quellprogrammeingabe in der konkreten Syntax}
+\label{konkrsyn}
+
+Bei der konkreten Syntax werden die Sorten der Teilb"aume nicht im
+Quellprogramm eingegeben. Stattdessen wird die Struktur des Quellprogramms
+durch eingestreute Token festgelegt.
+
+Die Beschreibung der abstrakten Syntax wird durch Token und diverse
+Kontrollbefehle (mit \# beginnend) realisiert, deren Bedeutung
+im folgenden beschrieben wird.
+
+
+\subsection{Zugeordnete abstrakte Syntax einer MAX-Spezifikation}
+
+Die abstrakte Semantik der MAX-Spezifikation erh"alt man, indem
+alle Token und Kontrollbefehle ignoriert werden. Sie ist nur durch die
+spezifizierten Sorten definiert.
+
+\medskip\noindent{\bf Ausnahme :}
+
+\noindent
+Die Befehle {\tt \#line} und {\tt \#col} zur Angabe von Positionen im
+Quellprogramm werden durch den vordefinierten MAX-Typ {\tt Int} ersetzt.
+
+
+
+\section{Erweiterungen der MAX-Syntax}
+
+
+Nun werden die Erweiterungen mit Beispielen vorgestellt. Dabei wird
+jeweils die zugeordnete konkrete Syntax durch Produktionen einer
+kontextfreien Grammatik definiert. Bei der Generierung des Parsers
+werden die Grammatikproduktionen in eine entsprechende
+yacc-Spezifikation umgesetzt.
+
+
+\subsection{Listenproduktionen}
+
+Motivation :
+H"aufig werden z.B.\ Listen von Bezeichnern in verschiedenem Kontext
+in einer Sprache verwendet. Daher soll es m"oglich sein, f"ur
+Listenproduktionen verschiedene Alternativen der konkreten Syntax
+anzugeben.
+
+F"ur jede Alternative soll dabei angegeben werden,
+welches Trennzeichen zwischen je zwei Objekten der Untersorte steht und
+ob die Liste leer sein darf.
+
+\begin{table}
+\begin{center}
+\caption{Spezifikationsm"oglichkeiten der konkreten Syntax}
+\medskip
+\begin{tabular}{ll}
+in der MAX-Spez. & Bedeutung \\
+\hline
+{\tt Alist * Anont *\verb@"@Sep1\verb@"@}& leere Liste {\tt Alist()} erlaubt\\
+{\tt Blist * Bnont +\verb@"@Sep2\verb@"@}& leere Liste {\tt Blist()} nicht erlaubt\\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+Steht keine Angabe "uber eine konkrete Syntax, so wird als Defaultwert
+{\tt *\verb@"@\verb@"@} eingesetzt (leere Liste erlaubt, kein Trennsymbol).
+Mehrere Alternativen k"onnen einfach hintereinandergeschrieben werden.
+
+\subsubsection*{Beispiel :}
+
+{\tt Clist * Cnont *\verb@"@Sep1\verb@"@ +\verb@"@Sep2\verb@"@}
+
+\subsubsection*{Referenz auf eine Alternative der Listenproduktion}
+
+Mit dem einfachen Sortennamen wird stets die erste Alternative angesprochen.
+Die weiteren Alternativen erreicht man durch Angabe ihrer Nummer, die sich
+auf die Reihenfolge der Aufschreibung bezieht.
+
+\begin{table}
+\begin{center}
+\caption{Beispiele f"ur Referenzen auf Listenproduktionen}\medskip
+\begin{tabular}{ll}
+\hline
+{\tt Clist}    : & Bezug auf {\tt Clist * Cnont *\verb@"@Sep1\verb@"@} \\
+{\tt Clist\#1} : & Bezug auf {\tt Clist * Cnont *\verb@"@Sep1\verb@"@} \\
+{\tt Clist\#2} : & Bezug auf {\tt Clist * Cnont +\verb@"@Sep2\verb@"@} \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\noindent Eine Nummernangabe darf bis jetzt nur auf der
+rechten Seite einer Tupelproduktion stehen.
+
+\medskip\noindent{\bf
+Zugeordnete konkrete Syntax von {\tt Alist * Anont *\verb@"@Sep1\verb@"@}
+}
+
+Ein Hilfsnichtterminal {\tt Aseq} wird dabei eingef"uhrt.
+
+{\tt
+\medskip
+\begin{tabular}{lll}
+Alist & ::= & $\varepsilon$ \\
+      & |   & Aseq \\
+Aseq  & ::= & Aseq \verb@"@Sep1\verb@"@ Anont \\
+      & |   & Anont
+\end{tabular}
+}
+
+\medskip\noindent{\bf
+Zugeordnete konkrete Syntax von {\tt Blist * Bnont +\verb@"@Sep2\verb@"@}
+}
+
+
+{\tt
+\medskip
+\begin{tabular}{lll}
+Blist & ::= & Bseq \\
+Bseq  & ::= & Bseq \verb@"@Sep2\verb@"@ Bnont \\
+      & |   & Bnont
+\end{tabular}
+}
+
+\medskip\noindent
+Anmerkung : Namensgleichheiten, falls dieselben Sorten
+mehrmals auf der rechten Seite verschiedener Listenproduktionen auftreten,
+werden bei der Generierung des Parsers vermieden. Ebenso werden die Nummern
+der Alternativen korrekt behandelt.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Klassenproduktionen}
+
+Bei Klassenproduktionen d"urfen auf der rechten Seite
+zus"atzlich vor und nach jedem Sortenbezeichner beliebig viele Token
+angegeben werden, die direkt in die konkrete Syntax "ubernommen werden.
+Dabei darf derselbe Sortenbezeichner auch mehrmals mit verschiedenen
+Token angegeben werden.
+
+\medskip\noindent{\bf MAX-Spezifikation :}
+
+{\tt Stat = Block | While \verb@"@;\verb@"@| For \verb@"@;\verb@"@}
+
+\medskip\noindent {\bf Zugeh"orige konkrete Syntax :}
+\begin{verbatim}
+Stat ::= Block
+       | While ";"
+       | For   ";"
+\end{verbatim}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Tupelproduktionen}
+%rechts String #1 #line #col #mark
+
+Innerhalb der rechten Seite einer Tupelproduktion ist es m"oglich,
+Positionen im Quelltext (Zeile und Spalte) von Terminalen des
+konkreten Syntaxbaums zu verwenden.
+
+\subsubsection*{Elemente auf der rechten Seite einer Tupelproduktion}
+
+\begin{itemize}
+\item Token.\\
+Das in Anf"uhrungszeichen angegebene Token wird in die konkrete Syntax
+eingebaut. Es erscheint nicht im abstrakten Syntaxbaum.
+
+\item Markierung eines Terminals.\\
+Soll bei einem Terminal die Position in Quelltext (Zeile und Spalte)
+bekannt sein, mu"s dieses Terminal mit {\tt \#mark} markiert werden.
+Der generierte Scanner merkt sich dann die Position.
+Als Terminale k"onnen auch Token verwendet werden, obwohl diese nicht mehr
+in den abstrakten Syntaxbaum aufgenommen werden.
+
+\item Positionen im Quelltext\\
+Bei {\tt \#line} bzw.\ {\tt \#col} wird die Zeile bzw.\ Spalte
+des zuletzt markierten Terminals in den abstrakten Syntaxbaum eingesetzt.
+Dabei wird der vordefinierte Typ {\tt Int} verwendet.
+\end{itemize}
+
+\noindent{\bf Beispiel :}
+\begin{verbatim}
+MAX-Spezifikation: NodeSortId  ( Ident#mark '@' #line #col )
+abstrakte Syntax : NodeSortId  ( Ident Int Int )
+
+konkrete Syntax :  Bezeichner mit Suffix '@'
+\end{verbatim}
+
+
+
+\subsection{Benutzerdefinierte yacc-Regeln}
+%% #yacc #yaccadd 
+
+Es gibt zwei M"oglichkeiten, um benutzerdefinierte Regeln in das yacc-file
+einzubinden :
+
+\begin{itemize}
+\item Als Ersatz f"ur die standardm"a"sig erzeugte Regel
+(Kommando {\tt \#yacc}).
+
+\item Als zus"atzliche Regel, um eine alternative Syntax
+anzugeben (Kommando {\tt \#yaccadd}).
+\end{itemize}
+
+\noindent
+Beide Kommandos werden direkt nach dem neu definierten Sortenbezeichner
+angegeben. Auf {\tt \#yacc} und {\tt \#yaccadd} mu"s zwischen {\tt `'}
+eine Folge von Strings stehen, die in die yacc-Spezifikation kopiert wird.
+Token m"ussen in diesen Strings in einfachen Hochkommas eingegeben werden.
+
+\noindent{\bf Beispiel :}
+
+\medskip\noindent
+Bei Funktionsaufrufen mit nur einem Parameter soll f"ur "`{\tt f(N)}"' als
+alternative Schreibweise "`{\tt N.f}"' erlaubt sein.
+
+\begin{verbatim}
+FuncAppl #yaccadd `
+  "| ParamNt '.' SortIdNt "
+  "  { $$ = FuncAppl( $3, appback(Parlist(),$1) ); } "
+'
+           ( SortId "(" ParList ")" )  // abstrakte Syntax
+\end{verbatim}
+
+\noindent{\bf Erzeugte Yacc-Regel :}
+
+\begin{verbatim}
+FuncApplNt :
+   SortIdNt '(' ParListNt ')'
+   { $$ = FuncAppl( $1, $3 ); }
+|  ParamNt '.' SortIdNt
+   { $$ = FuncAppl( $3, appback(Parlist(),$1) ); }
+;
+\end{verbatim}
+
+\noindent Bemerkung :
+Alle Sortenbezeichner (auch die vordefinierten
+Terminalen) bekommen in der yacc-Spezifikation das Suffix "`Nt"'.
+
+
+\subsection{M"ogliche Sorten im konkreten Syntaxbaum}
+%% #ignore #aux
+
+Normalerweise wird durch eine Analyse der Produktionen automatisch erkannt,
+welche Sorten im Syntaxbaum auftreten d"urfen. Bei Verwendung von
+benutzerdefinierten Regeln ({\tt \#yacc} bzw. {\tt \#yaccadd}) k"onnen sich
+Abweichungen ergeben.
+
+\begin{itemize}
+\item
+Steht {\tt \#ignore} nach einem Produktionsbezeichner, so wird
+f"ur die Produktion (und von ihr abh"angige) keine Parserregel erzeugt.
+\item
+Steht {\tt \#aux} nach einem Produktionsbezeichner, so wird eine
+entsprechende Parserregel erzeugt.
+\end{itemize}
+
+\noindent{\bf Beispiel :}
+
+\medskip\noindent
+In der konkreten Syntax soll eine formale Parameterliste einer Prozedur
+als {\tt ( SortId Name , SortId Name , ...)} angegeben werden.
+
+In der abstrakten Syntax jedoch sollen die Typen und Namen auseinandersortiert
+werden, d.h.\ es soll eine {\tt SortIdList} und eine {\tt NameList} 
+im abstrakten Syntaxbaum stehen.
+
+\noindent M"ogliche Spezifikation :
+
+\begin{verbatim}
+Function #yacc`
+" 'FCT' DefIdNt '(' ParTupListNt ')' SortIdNt ':' ExprNt"
+" { $$ = Function( $2, subt1($4), subt2($4), $6 ,$8 );}"
+'  ( DefId  SortIdList  NameList  SortId  Expr  )
+
+SortIdList #ignore * SortId
+NameList   #ignore * Name
+
+ParTupList #aux    *   ParTup  *","
+ParTup             (   SortId  Name  )
+\end{verbatim}
+
+\noindent
+Dabei sind vom Benutzer zwei Hilfsfunktionen\\
+{\tt subt1: ParTupList -> SortIdList} \enspace und\\
+{\tt subt2: ParTupList -> NameList} \quad zu schreiben, die die ersten
+bzw.\ zweiten Subterme der {\tt ParTupList} aufsammeln.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Priorit"aten bei arithmetischen Ausdr"ucken}
+
+In Sprachen kommen h"aufig arithmetische Ausdr"ucke vor. Daher soll auch
+hier ein unterst"utzendes Sprachkonstrukt bereitgestellt werden.
+Anhand eines kleinen Beispiels sollen Syntax und Semantik des
+Konstruktes erl"autert werden.
+
+\begin{verbatim}
+Expr #prio = Sum | Prod | Fact | "(" Expr ")"
+
+Sum        = Add | Sub
+Add  #left ( Expr "+" Expr )
+Sub  #left ( Expr "-" Expr )
+
+Prod       = Mult | Div
+Mult #left ( Expr "*" Expr )
+Div  #left ( Expr "/" Expr )
+
+Factor     = Neg | Ident | Int
+Neg  #left ( "-" Expr )
+\end{verbatim}
+
+\noindent {\bf Erzeugte Grammatik :}
+
+\begin{verbatim}
+Expr ::= Sum
+Sum  ::= Add | Sub | Prod
+Add  ::= Sum "+" Prod
+Sub  ::= Sum "-" Prod
+Prod ::= Mult | Div | Fact
+Mult ::= Prod "*" Fact
+Div  ::= Prod "/" Fact
+
+Fact ::= Neg | Ident | Int | "(" Expression ")"
+Neg  ::= "-" Fact
+\end{verbatim}
+
+
+\noindent{\bf Erl"auterungen :}
+
+\begin{itemize}
+\item
+Die Reihenfolge der Sorten bei der mit {\tt \#prio} versehenen Klassenproduktion
+gibt die Priorit"atsreihenfolge an, beginnend bei den niedrigen Priorit"aten.
+Als letzte Alternative mu"s die eingeklammerte Verwendung der linken Seite stehen.
+
+\item
+Mit {\tt \#left} bzw.\ {\tt \#right} kann man bei einer Sorte, die Untersorte einer
+Priorit"atsstufensorte ist, angeben, ob sie linksrekursiv oder rechtsrekursiv verwendet
+werden soll. Im Beispiel sind alle Untersorten linksrekursiv.
+Das bedeutet, da"s beim ersten Auftreten von {\tt Expr} von links bzw.\ rechts
+dieselbe Priorit"atsstufe steht und beim zweiten Auftreten die n"achsth"ohere.
+
+In der abstrakten Syntax bleibt jeweils {\tt Expr} stehen.
+
+\item Kommt {\tt Expr} nur einmal auf der rechten Seite einer Tupelproduktion
+vor, so werden {\tt \#left} bzw.\ {\tt \#right} ignoriert.
+
+\item
+F"ur die {\tt \#prio}-Klassenproduktion wird eine Kette von Produktionen\\
+{\tt Expr ::= Sum}\\ {\tt Sum ::= Prod}\\ {\tt Prod ::= Fact} \quad und \quad
+{\tt Fact ::= '(' Expr ')'} \quad generiert.
+
+
+\end{itemize}
+
+\section{Einbau von vordefinierten Objekten in den Syntaxbaum}
+
+Bei der Generierung des Parsers wird bei der Wurzelproduktion eine Funktion
+{\tt add\_predeclarations} eingeh"angt, die der Benutzer verwenden kann, um
+vordefinierte Objekte (z.B.\ Definitionen von Sorten oder Funktionen)
+in den Syntaxbaum einzuh"angen.
+
+Im mit der Option {\tt -f} erzeugten Rahmenprogramm wird diese Funktion
+erzeugt. Sie reicht jedoch nur den Syntaxbaum unver"andert weiter.
+
+\medskip\noindent {\bf Beispiel aus der yacc-Spezifikation :}
+
+\begin{verbatim}
+Specification :
+	Program
+	{ $$ = add_predeclarations( $1 ); }
+;
+\end{verbatim}
+
+
+\end{document}

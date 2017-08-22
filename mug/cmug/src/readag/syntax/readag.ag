@@ -1,0 +1,1071 @@
+grammar readag: g1 -> g2;
+
+function graminit : gramptr;
+function GramName(gramptr, ident, ident, ident) : gramptr;
+function GramReturn(gramptr) : gramptr;
+function EnterTerm(gramptr, ident) : gramptr;
+function EnterSemTerm(gramptr, ident) : gramptr;
+function MakeNT(gramptr, ident) : nontermIndex;
+function PrefixNT(gramptr, ident, nontermIndex) : nontermIndex;
+function InitAList(gramptr) : attrIndex;
+function MakeAttr(gramptr, ident) : attrIndex;
+function AddAttr(gramptr, attrIndex, ident) : attrIndex;
+function SpecAttr(gramptr, attrIndex, ident, attrkenn) : attrIndex;
+function LinkAttr(gramptr, nontermIndex, attrIndex) : gramptr;
+function NoAttr(gramptr, nontermIndex) : gramptr;
+function EnterAxiom(gramptr, ident) : gramptr;
+function MakeInherited : attrkenn;
+function MakeSynthesized : attrkenn;
+function EmptyArg : fparamIndex;
+function CreateArg(gramptr, ident) : fparamIndex;
+function PrefixArg(gramptr, ident, fparamIndex) : fparamIndex;
+function StartArg(gramptr) : fparamIndex;
+function EndArg(gramptr, fparamIndex) : fparamIndex;
+function CreateFunct(gramptr, ident, fparamIndex, fparamIndex) : gramptr;
+function CreateSFunct(gramptr, ident, fparamIndex, ident) : gramptr;
+function NoPos : number;
+function EmptyRHS : prodposIndex;
+function CreateProdpos(gramptr, ident, number) : prodposIndex;
+function PrefixProdpos(gramptr, ident, number, prodposIndex) : prodposIndex;
+function CreateProd(gramptr, ident, prodposIndex) : productIndex;
+function AddAuxInf(gramptr, productIndex, attrposIndex) : productIndex;
+function CreateAux(gramptr, ident, ident) : attrposIndex;
+function PrefixAux(attrposIndex, attrposIndex) : attrposIndex;
+function NoAux : attrposIndex;
+function CrtAttrAuftr(gramptr, productIndex, nontermIndex, attrIndex,
+                                                         number) : aparamIndex;
+function fCrtSemAuftr(gramptr, productIndex, ident, number) : functIndex;
+function aCrtSemAuftr(gramptr, productIndex, ident, number) : aparamIndex;
+function NoFunct : functIndex;
+function CrtAuftr(gramptr, productIndex, ident, number, ident) : aparamIndex; 
+function PrefAuftr(aparamIndex, aparamIndex) : aparamIndex;
+function CrtQ(gramptr, functIndex, aparamIndex) : aufrufIndex;
+function CrtQuelle(gramptr, ident, aparamIndex) : aufrufIndex;
+function CrtMakeid(gramptr, aparamIndex, functIndex) : aufrufIndex;
+function CrtRule(gramptr, aparamIndex, aufrufIndex) : aufrufIndex;
+function PrefixRule(aufrufIndex, aufrufIndex) : aufrufIndex;
+function EnterRules(gramptr, productIndex, aufrufIndex) : gramptr;
+function NoRules(gramptr, productIndex) : gramptr;
+(*neue Funktionen*)
+function SecondAttr(attrIndex, attrIndex) : attrIndex;
+function WarnMehrfErg : ident;
+
+
+nonterminals
+ 
+AG               attributes sgram  : gramptr    synthesized;
+ 
+GRAMID           attributes igram  : gramptr    inherited
+                            sgram  : gramptr    synthesized;
+ 
+FUNCTPART        attributes   igram   : gramptr     inherited
+                              sgram   : gramptr     synthesized;
+
+FUNCTDEFLIST     attributes   igram   : gramptr     inherited
+                              sgram   : gramptr     synthesized;
+
+FUNCTDEF         attributes   igram   : gramptr     inherited
+                              sgram   : gramptr     synthesized;
+ 
+FPARAMLIST       attributes   igram   : gramptr     inherited
+                              sparams  : fparamIndex synthesized;
+ 
+FIDLIST          attributes   igram   : gramptr     inherited 
+                              iparams  : fparamIndex inherited
+                              sparams  : fparamIndex synthesized;
+ 
+NTPART           attributes   igram   : gramptr      inherited
+                              sgram   : gramptr      synthesized;
+ 
+NTDEFLIST        attributes   igram   : gramptr      inherited
+                              sgram   : gramptr      synthesized;
+ 
+NTDEF            attributes   igram   : gramptr      inherited 
+                              sgram   : gramptr      synthesized;
+ 
+NTIDLIST         attributes   igram   : gramptr      inherited 
+                              ntlist  : nontermIndex synthesized;
+ 
+NSIDLIST         attributes   igram   : gramptr      inherited 
+                              iident  : ident        inherited
+                              sattr   : attrIndex    synthesized;
+ 
+ATTRSP            attributes  igram   : gramptr      inherited 
+                              sattr   : attrIndex    synthesized;
+ 
+ASPLIST           attributes  igram   : gramptr      inherited
+                              iattr   : attrIndex    inherited
+                              sattr   : attrIndex    synthesized;
+ 
+ASP               attributes  igram   : gramptr      inherited
+                              sattr   : attrIndex    synthesized;
+ 
+ATTRKIND          attributes  sdir    : attrkenn     synthesized;
+ 
+TPART             attributes  igram   : gramptr      inherited
+                              sgram   : gramptr      synthesized;
+ 
+TERMDEFLIST       attributes  igram   : gramptr      inherited
+                              sgram   : gramptr      synthesized;
+ 
+TERMDEF           attributes  igram   : gramptr      inherited
+                              sgram   : gramptr      synthesized;
+ 
+PRODPART          attributes  igram   : gramptr      inherited
+                              sgram   : gramptr      synthesized;
+ 
+PRODLIST          attributes  igram   : gramptr      inherited
+                              sgram   : gramptr      synthesized;
+ 
+PROD              attributes  igram   : gramptr      inherited
+                              sgram   : gramptr      synthesized;
+ 
+SRULE             attributes  igram   : gramptr      inherited
+                              rlist   : prodposIndex synthesized
+                              sgram   : gramptr      synthesized;
+ 
+POSNR             attributes  pnr     : number       synthesized;
+ 
+RHS
+RHSLIST           attributes  igram   : gramptr      inherited
+                              ilist   : prodposIndex inherited
+                              rlist   : prodposIndex synthesized;
+ 
+SEMANTIK          attributes  igram   : gramptr      inherited
+                              irule   : productIndex inherited
+                              sgram   : gramptr      synthesized;
+ 
+AUXPART           
+ATTRDEFLIST
+ATTRDEF           attributes  igram   : gramptr      inherited
+                              auxl    : attrposIndex synthesized;
+ 
+EVALRULELIST      attributes  igram   : gramptr      inherited
+                              irule   : productIndex inherited
+                              ialist  : aufrufIndex  inherited
+                              slist   : aufrufIndex  synthesized;
+
+EVALRULE          attributes  igram   : gramptr      inherited
+                              irule   : productIndex inherited
+                              slist   : aufrufIndex  synthesized;
+ 
+EVALRLS           attributes  igram   : gramptr      inherited
+                              irule   : productIndex inherited 
+                              alist   : aparamIndex synthesized;
+
+ATTRAUFTRLIST     attributes  igram   : gramptr      inherited
+                              irule   : productIndex inherited 
+                              alist   : aparamIndex synthesized;
+
+ATTRAUFTR         attributes  igram   : gramptr      inherited
+                              irule   : productIndex inherited 
+                              alist   : aparamIndex synthesized
+                              funct   : functIndex  synthesized;
+ 
+EVALRRS           attributes  igram   : gramptr      inherited
+                              irule   : productIndex inherited
+                              q       : aufrufIndex  synthesized;
+
+AUXirule          attributes  srule : productIndex synthesized
+                              irule : productIndex inherited;
+(* neue Nonterminals *)
+(*
+CONSTDEFPART ;
+CONSTDEFLIST ;
+CONSTDEF ;
+CONSTANT ;
+UNSIGNEDNUMBER ;
+UNSIGNEDREAL ;
+SIGN ;
+TYPEDEFPART ;
+TYPEDEFLIST ;
+TYPEDEF ;
+*)
+
+SFUNCTPART       attributes   igram   : gramptr     inherited
+                              sgram   : gramptr     synthesized;
+ 
+SFUNCTDEFLIST    attributes   igram   : gramptr     inherited
+                              sgram   : gramptr     synthesized;
+
+SFUNCTDEF        attributes   igram   : gramptr     inherited 
+                              sgram   : gramptr     synthesized;
+ 
+SFPARAMLIST      attributes   igram   : gramptr     inherited 
+                              arglst  : fparamIndex synthesized;
+ 
+SFIDLIST         attributes   igram   : gramptr     inherited 
+                              iarglst  : fparamIndex inherited
+                              sarglst  : fparamIndex synthesized;
+ 
+FPERGLIST         attributes sergs : fparamIndex synthesized
+                             igram : gramptr     inherited;
+ERGLIST          attributes   igram : gramptr     inherited
+                              iergs  : fparamIndex inherited
+                              sergs  : fparamIndex synthesized;
+ 
+terminals
+ 
+(*1*)  arrowsy
+(*2*)  colonsy
+(*3*)  commasy
+(*4*)  constsy
+(*5*)  dollarsy
+(*6*)  greatersy
+(*7*)  ident           sem
+(*8*)  issy
+(*9*)  lesssy
+(*10*) lparsy
+(*11*) minussy
+(*12*) number          sem
+(*13*) periodsy
+(*14*) plussy
+(*15*) rparsy
+(*16*) semicsy
+(*17*) attributessy
+(*18*) auxiliaryssy
+(*19*) axiomsy
+(*20*) functionsy      (*sem*)
+(*21*) grammarsy
+(*22*) grammarendsy
+(*23*) inheritedsy
+(*24*) nonterminalssy
+(*25*) productionssy 
+(*26*) semsy
+(*27*) semendsy
+(*28*) sfunctionsy
+(*29*) stringsy          (* sem *)
+(*30*) synsy
+(*31*) synthesizedsy
+(*32*) terminalssy
+(*33*) typesy;
+
+axiom AG
+ 
+productions
+ 
+(*=================================================================*)
+ 
+syn P1:  AG ->
+     grammarsy GRAMID (* CONSTDEFPART TYPEDEFPART *) SFUNCTPART FUNCTPART
+     NTPART TPART axiomsy ident PRODPART grammarendsy .
+ 
+sem
+GRAMID.igram      = graminit $
+SFUNCTPART.igram   = GRAMID.sgram $
+FUNCTPART.igram   = SFUNCTPART.sgram $
+NTPART.igram      = FUNCTPART.sgram $
+TPART.igram       = NTPART.sgram $
+PRODPART.igram    = EnterAxiom(TPART.sgram, ident) $
+AG.sgram          = GramReturn(PRODPART.sgram) $
+semend
+ 
+(*=================================================================*)
+ 
+syn P2:  GRAMID ->
+     ident<1> colonsy ident<2> arrowsy ident<3> semicsy .
+ 
+sem
+    GRAMID.sgram = GramName(GRAMID.igram, ident<1>, ident<2>, ident<3>) $
+semend
+
+(*=================================================================
+ 
+syn P3a:  CONSTDEFPART ->
+     .
+
+
+syn P3b:  CONSTDEFPART ->
+     constsy CONSTDEFLIST semicsy .
+
+===================================================================
+
+syn P4a:  CONSTDEFLIST ->
+     CONSTDEF .
+
+
+syn P4b:  CONSTDEFLIST<0> ->
+     CONSTDEF *)(* ACHTUNG semicsy *) (* CONSTDEFLIST<1> .
+
+=================================================================
+
+syn P5:  CONSTDEF ->
+     ident issy CONSTANT *)(* ACHTUNG !!! *) (* semicsy.
+
+=================================================================
+
+syn P6a:  CONSTANT ->
+     UNSIGNEDNUMBER .
+
+     
+syn P6b:  CONSTANT ->
+     SIGN UNSIGNEDNUMBER .
+
+
+syn P6c:  CONSTANT ->
+     ident .
+
+
+syn P6d:  CONSTANT ->
+     SIGN ident .
+
+
+syn P6e:  CONSTANT ->
+     string .
+
+=================================================================
+
+syn P7a:  UNSIGNEDNUMBER ->
+     number .
+
+
+syn P7b:  UNSIGNEDNUMBER ->
+     UNSIGNEDREAL .
+
+=================================================================
+
+syn P8:  UNSIGNEDREAL ->
+     number<1> periodsy number<2> .   
+                                   *)(* -> number periodsy number e SCALEFACTOR . *)
+                                     (* -> number e SCALEFACTOR .*)
+                                     (* solange ,bis Scanner Realzahlen kennt ! *)
+                          (* SCALEFACTOR -> number . *)
+                          (*             -> SIGN number . *)
+
+(*=================================================================
+
+syn P9a:  SIGN ->
+     plussy .
+
+
+syn P9b:  SIGN ->
+      minussy . 
+
+=================================================================
+
+syn P10a:  TYPEDEFPART ->
+     .
+
+
+syn P10b:  TYPEDEFPART ->
+     typesy TYPEDEFLIST semicsy .
+
+=================================================================
+
+syn P11a:  TYPEDEFLIST ->
+     TYPEDEF .
+
+
+syn P11b:  TYPEDEFLIST<0> ->
+     TYPEDEF *)(* ACHTUNG semicsy *) (* TYPEDEFLIST<1> .
+
+=================================================================
+
+syn P12:  TYPEDEF ->
+     ident<1> issy ident<2> *)(* ACHTUNG *) (* semicsy.
+
+=================================================================*)
+
+ 
+syn P32a: SFUNCTPART ->
+    .
+ 
+sem
+SFUNCTPART.sgram = SFUNCTPART.igram $
+semend
+ 
+syn P32b: SFUNCTPART ->
+    SFUNCTDEFLIST .
+ 
+sem
+SFUNCTDEFLIST.igram = SFUNCTPART.igram $
+SFUNCTPART.sgram = SFUNCTDEFLIST.sgram $
+semend
+ 
+(*=================================================================*)
+ 
+syn P33a: SFUNCTDEFLIST ->
+    SFUNCTDEF .
+ 
+sem
+SFUNCTDEF.igram = SFUNCTDEFLIST.igram $
+SFUNCTDEFLIST.sgram = SFUNCTDEF.sgram $
+semend
+ 
+syn P33b: SFUNCTDEFLIST<0> ->
+    SFUNCTDEF SFUNCTDEFLIST<1> .
+ 
+sem
+SFUNCTDEF.igram = SFUNCTDEFLIST<0>.igram $
+SFUNCTDEFLIST<1>.igram = SFUNCTDEF.sgram $
+SFUNCTDEFLIST<0>.sgram = SFUNCTDEFLIST<1>.sgram $
+semend
+ 
+(*=================================================================*)
+ 
+syn P34: SFUNCTDEF ->
+    sfunctionsy ident<1> SFPARAMLIST colonsy ident<2> semicsy .
+ 
+sem
+SFPARAMLIST.igram = SFUNCTDEF.igram $
+SFUNCTDEF.sgram = CreateSFunct(SFUNCTDEF.igram, ident<1>, SFPARAMLIST.arglst,
+                                                                  ident<2>) $
+semend
+ 
+(*=================================================================*)
+ 
+syn P35a: SFPARAMLIST ->
+    lparsy SFIDLIST rparsy .
+ 
+sem
+SFIDLIST.igram = SFPARAMLIST.igram $
+SFIDLIST.iarglst = StartArg(SFPARAMLIST.igram) $
+SFPARAMLIST.arglst = EndArg(SFPARAMLIST.igram, SFIDLIST.sarglst) $
+semend
+ 
+syn P35b: SFPARAMLIST ->
+    .
+ 
+sem
+SFPARAMLIST.arglst = EmptyArg $
+semend
+ 
+(*=================================================================*)
+ 
+syn P36a: SFIDLIST    ->
+    ident .
+ 
+sem
+SFIDLIST.sarglst = PrefixArg(SFIDLIST.igram, ident, SFIDLIST.iarglst) $
+semend
+ 
+syn P36b: SFIDLIST<0> ->
+    ident commasy SFIDLIST<1> .
+ 
+sem
+SFIDLIST<1>.igram = SFIDLIST<0>.igram $
+SFIDLIST<1>.iarglst = PrefixArg(SFIDLIST<0>.igram, ident, SFIDLIST<0>.iarglst) $
+SFIDLIST<0>.sarglst = SFIDLIST<1>.sarglst $
+semend
+ 
+(*=================================================================*)
+ 
+syn P37a: FUNCTPART ->
+     .
+sem
+FUNCTPART.sgram = FUNCTPART.igram $
+semend
+ 
+syn P37b: FUNCTPART ->
+     FUNCTDEFLIST .
+ 
+sem
+FUNCTDEFLIST.igram = FUNCTPART.igram $
+FUNCTPART.sgram = FUNCTDEFLIST.sgram $
+semend
+ 
+(*=================================================================*)
+ 
+syn P38a: FUNCTDEFLIST ->
+     FUNCTDEF .
+ 
+sem
+FUNCTDEF.igram = FUNCTDEFLIST.igram $
+FUNCTDEFLIST.sgram = FUNCTDEF.sgram $
+semend
+ 
+syn P38b: FUNCTDEFLIST<0> ->
+     FUNCTDEF FUNCTDEFLIST<1> .
+ 
+sem
+FUNCTDEF.igram = FUNCTDEFLIST<0>.igram $
+FUNCTDEFLIST<1>.igram = FUNCTDEF.sgram $
+FUNCTDEFLIST<0>.sgram = FUNCTDEFLIST<1>.sgram $
+semend
+ 
+(*=================================================================*)
+ 
+syn P39: FUNCTDEF ->
+     functionsy ident FPARAMLIST colonsy FPERGLIST semicsy .
+ 
+sem
+(* auxiliarys erg : fparamIndex; *)
+
+(* FUNCTDEF.erg = CreateArg(FUNCTDEF.igram, FPERGLIST.id) $ *)
+FPARAMLIST.igram = FUNCTDEF.igram $
+FPERGLIST.igram = FUNCTDEF.igram $
+FUNCTDEF.sgram = CreateFunct(FUNCTDEF.igram, ident, FPARAMLIST.sparams,
+                                                    FPERGLIST.sergs) $
+semend
+ 
+(*=================================================================*)
+ 
+syn P40a: FPARAMLIST ->
+     lparsy FIDLIST rparsy .
+ 
+sem
+FIDLIST.igram = FPARAMLIST.igram $
+FIDLIST.iparams = StartArg(FPARAMLIST.igram) $
+FPARAMLIST.sparams = EndArg(FPARAMLIST.igram, FIDLIST.sparams) $
+semend
+ 
+syn P40b: FPARAMLIST ->
+     .
+ 
+sem
+FPARAMLIST.sparams = EmptyArg $
+semend
+ 
+(*=================================================================*)
+ 
+syn P41a: FIDLIST    ->
+     ident .
+ 
+sem
+FIDLIST.sparams = PrefixArg(FIDLIST.igram, ident, FIDLIST.iparams) $
+semend
+ 
+syn P41b: FIDLIST<0> ->
+     ident commasy FIDLIST<1> .
+ 
+sem
+FIDLIST<1>.igram = FIDLIST<0>.igram $
+FIDLIST<1>.iparams = PrefixArg(FIDLIST<0>.igram, ident, FIDLIST<0>.iparams) $
+FIDLIST<0>.sparams = FIDLIST<1>.sparams $
+semend
+
+(*==================================================================*)
+
+syn P42a: FPERGLIST ->
+     ident .
+sem
+  FPERGLIST.sergs = CreateArg(FPERGLIST.igram,ident) $
+semend
+
+syn P42b:  FPERGLIST ->
+     lparsy ERGLIST rparsy .
+sem
+ERGLIST.igram = FPERGLIST.igram $
+ERGLIST.iergs = StartArg(FPERGLIST.igram) $
+FPERGLIST.sergs = EndArg(FPERGLIST.igram, ERGLIST.sergs) $
+semend
+ 
+(*==================================================================*)
+
+syn P43a:  ERGLIST ->
+     ident .
+sem
+  ERGLIST.sergs = PrefixArg(ERGLIST.igram, ident, ERGLIST.iergs) $
+semend
+
+
+syn P43b:  ERGLIST<0> ->
+     ident commasy ERGLIST<1> .
+sem
+ERGLIST<1>.igram = ERGLIST<0>.igram $
+ERGLIST<1>.iergs = PrefixArg(ERGLIST<0>.igram, ident, ERGLIST<0>.iergs) $
+ERGLIST<0>.sergs = ERGLIST<1>.sergs $
+semend
+
+
+(*==================================================================*)
+ 
+syn P44: NTPART ->
+     nonterminalssy NTDEF semicsy NTDEFLIST .
+ 
+sem
+NTDEF.igram = NTPART.igram $
+NTDEFLIST.igram = NTDEF.sgram $
+NTPART.sgram = NTDEFLIST.sgram $
+semend
+ 
+(*=================================================================*)
+ 
+syn P45a: NTDEFLIST ->          (* NTDEF in P44 *)
+     terminalssy .
+ 
+sem
+NTDEFLIST.sgram = NTDEFLIST.igram $
+semend
+ 
+syn P45b: NTDEFLIST<0> ->
+     NTDEF semicsy NTDEFLIST<1> .
+ 
+sem
+NTDEF.igram = NTDEFLIST<0>.igram $
+NTDEFLIST<1>.igram = NTDEF.sgram $
+NTDEFLIST<0>.sgram = NTDEFLIST<1>.sgram $
+semend
+ 
+(*=================================================================*)
+ 
+syn P46a: NTDEF ->
+     NTIDLIST .
+ 
+sem
+NTIDLIST.igram    = NTDEF.igram $                                  (* !!! *)
+NTDEF.sgram = NoAttr(NTDEF.igram, NTIDLIST.ntlist) $
+semend
+ 
+syn P46b: NTDEF ->
+     NTIDLIST ATTRSP .
+ 
+sem
+NTIDLIST.igram = NTDEF.igram $
+ATTRSP.igram = NTDEF.igram $
+NTDEF.sgram   = LinkAttr(NTDEF.igram, NTIDLIST.ntlist, ATTRSP.sattr) $
+semend
+ 
+(*=================================================================*)
+ 
+syn P47a: NTIDLIST ->
+     ident .
+ 
+sem
+NTIDLIST.ntlist = MakeNT(NTIDLIST.igram, ident) $
+semend
+ 
+syn P47b: NTIDLIST<0> ->
+     ident NTIDLIST<1> .
+ 
+sem
+NTIDLIST<1>.igram = NTIDLIST<0>.igram $
+NTIDLIST<0>.ntlist= PrefixNT(NTIDLIST<0>.igram, ident, NTIDLIST<1>.ntlist) $
+semend
+ 
+(*=================================================================*)
+ 
+syn P48a: NSIDLIST ->
+     .                                (* !!! *)
+ 
+sem
+NSIDLIST.sattr = MakeAttr(NSIDLIST.igram, NSIDLIST.iident) $
+semend
+ 
+syn P48b: NSIDLIST<0> ->
+     ident NSIDLIST<1> .
+ 
+sem
+NSIDLIST<1>.igram = NSIDLIST<0>.igram $
+NSIDLIST<1>.iident = ident $
+NSIDLIST<0>.sattr = AddAttr(NSIDLIST<0>.igram, NSIDLIST<1>.sattr, NSIDLIST<0>.iident) $
+semend
+ 
+(*=================================================================*)
+ 
+syn P49: ATTRSP ->
+     attributessy ASPLIST .
+ 
+sem
+ASPLIST.igram = ATTRSP.igram $
+ASPLIST.iattr = InitAList(ATTRSP.igram) $
+ATTRSP.sattr = ASPLIST.sattr $
+semend
+ 
+(*=================================================================*)
+ 
+syn P50a: ASPLIST ->
+     ASP .
+ 
+sem
+ASP.igram = ASPLIST.igram $
+ASPLIST.sattr = SecondAttr(ASP.sattr, ASPLIST.iattr) $
+semend
+ 
+syn P50b: ASPLIST<0> ->
+     ASP ASPLIST<1> .
+ 
+sem
+ASP.igram = ASPLIST<0>.igram $
+ASPLIST<1>.igram = ASPLIST<0>.igram $
+ASPLIST<1>.iattr = SecondAttr(ASP.sattr, ASPLIST<0>.iattr) $
+ASPLIST<0>.sattr = ASPLIST<1>.sattr $
+semend
+ 
+(*=================================================================*)
+ 
+syn P51: ASP ->
+     ident<1> NSIDLIST colonsy ident<2> ATTRKIND .
+ 
+sem
+NSIDLIST.igram = ASP.igram $
+NSIDLIST.iident = ident<1> $
+ASP.sattr = SpecAttr(ASP.igram, NSIDLIST.sattr, ident<2>, ATTRKIND.sdir) $
+semend
+
+(*=================================================================*)
+ 
+syn P52a: ATTRKIND ->
+     inheritedsy .
+ 
+sem
+ATTRKIND.sdir = MakeInherited $
+semend
+ 
+syn P52b: ATTRKIND ->
+     synthesizedsy .
+ 
+sem
+ATTRKIND.sdir = MakeSynthesized $
+semend
+ 
+(*=================================================================*)
+ 
+syn P53: TPART ->
+     TERMDEFLIST semicsy . 
+ 
+sem
+TERMDEFLIST.igram = TPART.igram $
+TPART.sgram = TPART.igram $
+semend
+ 
+(*=================================================================*)
+ 
+syn P54a: TERMDEFLIST ->
+     TERMDEF .
+ 
+sem
+TERMDEF.igram = TERMDEFLIST.igram $
+TERMDEFLIST.sgram = TERMDEF.sgram $
+semend
+ 
+syn P54b: TERMDEFLIST<0> ->
+     TERMDEF TERMDEFLIST<1> .
+ 
+sem
+TERMDEF.igram = TERMDEFLIST<0>.igram $
+TERMDEFLIST<1>.igram = TERMDEF.sgram $
+TERMDEFLIST<0>.sgram = TERMDEFLIST<1>.sgram $
+semend
+ 
+(*=================================================================*)
+                                                                (*BIS HIERHER!*)
+ 
+syn P55a: TERMDEF ->
+     ident .
+ 
+sem
+TERMDEF.sgram = EnterTerm(TERMDEF.igram, ident) $
+semend
+ 
+syn P55b: TERMDEF ->
+     ident semsy .
+ 
+sem
+TERMDEF.sgram = EnterSemTerm(TERMDEF.igram, ident) $
+semend
+ 
+(*=================================================================*)
+ 
+syn P56: PRODPART ->
+     productionssy PRODLIST .
+ 
+sem
+PRODLIST.igram = PRODPART.igram $
+PRODPART.sgram = PRODLIST.sgram $
+semend
+ 
+(*=================================================================*)
+ 
+syn P57a: PRODLIST ->
+     PROD .
+ 
+sem
+PROD.igram = PRODLIST.igram $
+PRODLIST.sgram = PROD.sgram $
+semend
+ 
+syn P57b: PRODLIST<0> ->
+     PROD PRODLIST<1> .
+ 
+sem
+PROD.igram = PRODLIST<0>.igram $
+PRODLIST<1>.igram = PROD.sgram $
+PRODLIST<0>.sgram = PRODLIST<1>.sgram $
+semend
+ 
+(*=================================================================*)
+ 
+syn P58: PROD ->
+     synsy ident colonsy SRULE periodsy SEMANTIK .
+ 
+sem
+SRULE.igram = PROD.igram $
+SEMANTIK.igram = SRULE.sgram $
+SEMANTIK.irule = CreateProd(PROD.igram, ident, SRULE.rlist) $
+PROD.sgram = SEMANTIK.sgram $
+semend
+ 
+(*=================================================================*)
+ 
+syn P59: SRULE ->
+     ident POSNR arrowsy RHS .
+ 
+sem
+RHS.igram = SRULE.igram $
+RHS.ilist = CreateProdpos(SRULE.igram, ident, POSNR.pnr) $
+SRULE.rlist = RHS.rlist $
+SRULE.sgram = SRULE.igram $
+semend
+ 
+(*=================================================================*)
+ 
+syn P60a: POSNR ->
+     .
+ 
+sem
+POSNR.pnr = NoPos $
+semend
+ 
+syn P60b: POSNR ->
+    lesssy number greatersy .
+ 
+sem
+POSNR.pnr = number $
+semend
+ 
+(*=================================================================*)
+ 
+syn P61a: RHS ->
+     .
+ 
+sem
+RHS.rlist = RHS.ilist $
+semend
+ 
+syn P61b: RHS ->
+     RHSLIST .
+ 
+sem
+RHSLIST.igram = RHS.igram $
+RHSLIST.ilist = RHS.ilist $
+RHS.rlist = RHSLIST.rlist $
+semend
+ 
+(*=================================================================*)
+ 
+syn P62a: RHSLIST ->
+     ident POSNR .
+ 
+sem
+RHSLIST.rlist = PrefixProdpos(RHSLIST.igram, ident, POSNR.pnr, 
+                                                    RHSLIST.ilist) $
+semend
+ 
+syn P62b: RHSLIST<0> ->
+     ident POSNR RHSLIST<1> .
+ 
+sem
+RHSLIST<1>.igram = RHSLIST<0>.igram $
+RHSLIST<1>.ilist = PrefixProdpos(RHSLIST<0>.igram, ident, POSNR.pnr,
+                                                       RHSLIST<0>.ilist) $
+RHSLIST<0>.rlist = RHSLIST<1>.rlist $
+semend
+ 
+(*=================================================================*)
+ 
+syn P63a: SEMANTIK ->
+     .
+
+sem
+SEMANTIK.sgram = NoRules(SEMANTIK.igram, SEMANTIK.irule) $
+semend
+
+syn P63b: SEMANTIK ->
+     semsy AUXPART AUXirule EVALRULE dollarsy EVALRULELIST semendsy .
+
+(* AUXirule uebernimmt die Stelle eines Auxiliarys !! *)
+(* AUXirule.srule = AUXirule.irule                    *) 
+
+sem                (* auxiliarys arule : productIndex;*)
+AUXPART.igram = SEMANTIK.igram $
+EVALRULE.irule = AUXirule.srule $
+EVALRULE.igram = SEMANTIK.igram $
+EVALRULELIST.ialist = EVALRULE.slist $
+EVALRULELIST.igram = SEMANTIK.igram $
+AUXirule.irule = AddAuxInf(SEMANTIK.igram, SEMANTIK.irule, 
+                                               AUXPART.auxl) $
+EVALRULELIST.irule = AUXirule.srule $
+SEMANTIK.sgram = EnterRules(SEMANTIK.igram, AUXirule.srule,
+                                           EVALRULELIST.slist) $
+semend
+ 
+(*=================================================================*)
+
+(* Oliver 8.11.89  added *)
+
+syn P63c: AUXirule ->
+     .
+
+sem
+AUXirule.srule = AUXirule.irule  $
+semend 
+
+(*=================================================================*)
+ 
+syn P64a: AUXPART ->
+     auxiliaryssy ATTRDEFLIST semicsy .
+ 
+sem
+ATTRDEFLIST.igram = AUXPART.igram $
+AUXPART.auxl = ATTRDEFLIST.auxl $
+semend
+ 
+syn P64b: AUXPART ->
+     .
+ 
+sem
+AUXPART.auxl = NoAux $
+semend
+ 
+(*=================================================================*)
+ 
+syn P65a: ATTRDEFLIST ->
+     ATTRDEF .
+ 
+sem
+ATTRDEF.igram = ATTRDEFLIST.igram $
+ATTRDEFLIST.auxl = ATTRDEF.auxl $
+semend
+ 
+syn P65b: ATTRDEFLIST<0> ->
+     ATTRDEF ATTRDEFLIST<1> .
+ 
+sem
+ATTRDEF.igram = ATTRDEFLIST<0>.igram $
+ATTRDEFLIST<1>.igram = ATTRDEFLIST<0>.igram $
+ATTRDEFLIST<0>.auxl = PrefixAux(ATTRDEF.auxl, ATTRDEFLIST<1>.auxl) $
+semend
+ 
+(*=================================================================*)
+ 
+syn P66: ATTRDEF ->
+     ident<1> colonsy ident<2> .
+ 
+sem
+ATTRDEF.auxl = CreateAux(ATTRDEF.igram, ident<1>, ident<2>) $
+semend
+ 
+(*=================================================================*)
+ 
+syn P67a: EVALRULELIST ->                     (* EVALRULE nach P63b *)
+     .
+ 
+sem
+EVALRULELIST.slist = EVALRULELIST.ialist $
+semend
+ 
+syn P67b: EVALRULELIST<0> ->
+     EVALRULE dollarsy EVALRULELIST<1> .
+ 
+sem
+EVALRULE.igram = EVALRULELIST<0>.igram $
+EVALRULE.irule = EVALRULELIST<0>.irule $
+EVALRULELIST<1>.igram = EVALRULELIST<0>.igram $
+EVALRULELIST<1>.irule = EVALRULELIST<0>.irule $
+EVALRULELIST<1>.ialist = EVALRULE.slist $
+EVALRULELIST<0>.slist = PrefixRule(EVALRULELIST<0>.ialist,EVALRULELIST<1>.slist)$
+semend
+ 
+(*=================================================================*)
+ 
+syn P68: EVALRULE ->
+     EVALRLS issy EVALRRS .
+ 
+sem
+EVALRLS.igram = EVALRULE.igram $
+EVALRRS.igram = EVALRULE.igram $
+EVALRULE.slist = CrtRule(EVALRULE.igram, EVALRLS.alist, EVALRRS.q) $
+EVALRLS.irule = EVALRULE.irule $
+EVALRRS.irule = EVALRULE.irule $
+semend
+ 
+(*=================================================================*)
+ 
+syn P69a: EVALRLS ->
+     ATTRAUFTR .
+ 
+sem
+ATTRAUFTR.igram = EVALRLS.igram $
+ATTRAUFTR.irule = EVALRLS.irule $
+EVALRLS.alist = ATTRAUFTR.alist $
+semend
+ 
+syn P69b: EVALRLS ->
+     lparsy ATTRAUFTR commasy ATTRAUFTRLIST rparsy .
+ 
+sem
+ATTRAUFTR.igram = EVALRLS.igram $
+ATTRAUFTRLIST.igram = EVALRLS.igram $
+ATTRAUFTR.irule = EVALRLS.irule $
+ATTRAUFTRLIST.irule = EVALRLS.irule $
+EVALRLS.alist = PrefAuftr(ATTRAUFTR.alist, ATTRAUFTRLIST.alist) $
+semend
+ 
+(*=================================================================*)
+ 
+syn P70a: ATTRAUFTRLIST ->
+     ATTRAUFTR .
+ 
+sem
+ATTRAUFTR.igram = ATTRAUFTRLIST.igram $
+ATTRAUFTR.irule = ATTRAUFTRLIST.irule $
+ATTRAUFTRLIST.alist = ATTRAUFTR.alist $
+semend
+ 
+syn P70b: ATTRAUFTRLIST<0> ->
+     ATTRAUFTR commasy ATTRAUFTRLIST<1> .
+ 
+sem
+ATTRAUFTR.igram = ATTRAUFTRLIST<0>.igram $
+ATTRAUFTRLIST<1>.igram = ATTRAUFTRLIST<0>.igram $
+ATTRAUFTR.irule = ATTRAUFTRLIST<0>.irule $
+ATTRAUFTRLIST<1>.irule = ATTRAUFTRLIST<0>.irule $
+ATTRAUFTRLIST<0>.alist =
+    PrefAuftr(ATTRAUFTR.alist,ATTRAUFTRLIST<1>.alist) $
+semend
+ 
+(*=================================================================*)
+ 
+syn P71a: ATTRAUFTR ->
+     ident POSNR .
+ 
+sem
+ATTRAUFTR.funct =
+           fCrtSemAuftr(ATTRAUFTR.igram, ATTRAUFTR.irule, ident, POSNR.pnr) $
+ATTRAUFTR.alist =
+           aCrtSemAuftr(ATTRAUFTR.igram, ATTRAUFTR.irule, ident, POSNR.pnr) $
+semend
+ 
+syn P71b: ATTRAUFTR ->
+     ident<1> POSNR periodsy ident<2> .
+ 
+sem
+ATTRAUFTR.funct = NoFunct $
+ATTRAUFTR.alist = CrtAuftr(ATTRAUFTR.igram, ATTRAUFTR.irule,
+                                            ident<1>, POSNR.pnr, ident<2>) $
+semend
+ 
+(*=================================================================*)
+ 
+syn P72a: EVALRRS ->
+     ATTRAUFTR .
+ 
+sem
+ATTRAUFTR.igram = EVALRRS.igram $
+EVALRRS.q = CrtMakeid(EVALRRS.igram, ATTRAUFTR.alist, ATTRAUFTR.funct) $
+ATTRAUFTR.irule = EVALRRS.irule $
+semend
+ 
+syn P72b: EVALRRS ->
+     ident lparsy ATTRAUFTRLIST rparsy .
+ 
+sem
+ATTRAUFTRLIST.igram = EVALRRS.igram $
+EVALRRS.q = CrtQuelle(EVALRRS.igram, ident, ATTRAUFTRLIST.alist) $
+ATTRAUFTRLIST.irule = EVALRRS.irule $
+semend
+
+(*=================================================================*)
+
+grammarend

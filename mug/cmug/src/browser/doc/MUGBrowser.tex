@@ -1,0 +1,1277 @@
+\documentstyle[12pt, a4, german]{report}
+\begin{document}
+\pagestyle{headings}
+
+\input tumlogo
+\input tumabakus.sty
+
+\title{\thispagestyle{empty}
+\parbox{2 cm}{ \abakus{2 cm}}
+\parbox{9 cm}{
+\begin{center}
+{\Huge Institut f\"ur Informatik} \\
+{\large Der Technischen Universit\"at M\"unchen} \\
+{\sf {\normalsize Univ.\ Prof.\ Dr.\ J. Eickel}}
+\end{center}}
+\parbox{3 cm}{\oTUM{3 cm}}  \\
+\vspace{4 cm}{\Huge MUGBrowser V1.0} \\
+	     {\large Fortgeschrittenenpraktikum} \\
+\vspace{1 cm}{\large Betreuung: R. H\"ollerer}
+}
+\author{Michael Guntersdorfer\\Matrikelnr.\ 1355430 \and Peter M\"uller\\Matrikelnr.\ 1457193}
+\date{3.5.1995}
+\maketitle
+
+\tableofcontents
+\newpage
+
+\chapter{Aufgabenstellung}
+
+Ziel des Fortgeschrittenenpraktikums war die Erweiterung des MUG-Systems um ein Visualisierungswerkzeug f\"ur Sytaxb\"aume.
+
+Das \"ubersetzererzeugende System der TU M\"unchen, MUG, generiert Compiler f\"ur Programmiersprachen, deren Syntax und Semantik durch attributierte
+Grammatiken spezifiziert wird. Bei der Analyse eines Quellprogramms wird aus den Produktionen dieser Grammatik ein abstrakter Syntaxbaum aufgebaut.
+Die Auswertung der Attribute l\"angs dieses Baumes ergibt in Verbindung mit der Ausf\"uhrung von semantischen Aktionen die \"Ubersetzung des Programms
+von der Quell- in die Zielsprache.
+
+Um nun die Spezifiktation von Compilern durch attributierte Grammatiken zu erleichtern, soll im Rahmen einer Erweiterung des MUG-Systems eine Umgebung
+geschaffen werden, die das Erstellen und Testen der Compilerbeschreibung erleichtert. Die erste Ausbaustufe dieses Projekts umfa\ss{}t dabei ein
+Werkzeug, das die vom Compiler erstellten und ausgewerteten Syntaxb\"aume inklusive aller Attribute und semantischen Aktionen am Bildschirm darstellt.
+Das Programm tr\"agt den Namen {\bf MUGBrowser}.
+
+Insbesondere schlie\ss{}t die Aufgabenstellung folgende Punkte mit ein:
+\begin{itemize}
+\item{Ver\"anderung des MUG, so da\ss{} beim \"Ubersetzungvorgang neben dem \"ubersetzten Programm auch Informationen \"uber den Syntaxbaum in einer Datei
+abgelegt werden}
+\item{Darstellung des abstrakten Syntaxbaumes am Bildschirm}
+\item{Anzeige von Attributwerten, sofern diese von einem einfachen Datentyp sind}
+\item{Vorbereitungen zur sp\"ateren Erweitertung des Programms}
+\item{Ausf\"uhrliche Dokumentation von Programm und Quell\-text, um die Wei\-ter\-f\"uhrung des Projekts zu erleichtern}
+\end{itemize}
+
+Um die praktische Anwendung des MUGBrowsers vor allem f\"ur Studenten im Praktikum des \"Ubersetzerbaus so einfach wie m\"oglich zu gestalten, sollte
+sich die Darstellung der B\"aume an der in der Vorlesung {\it \"Ubersetzerbau} von Prof. Dr. J. Eickel verwandten Notation orientieren. Auch die im
+Styleguide vorgeschlagenen Richtlinien zur Benennung von Attributen sind zum Teil dieser Vorlesung entnommen.
+
+
+\pagestyle{myheadings}
+\markright{KAPITEL 2. \hspace{1 mm}SCHNITTSTELLE}
+
+\chapter{Die Schnittstelle zwischen MUG und MUGBrowser}
+
+Um den MUGBrowser betreiben zu k\"onnen, m\"ussen, wie bereits in der Einleitung erw\"ahnt, Informationen \"uber den abstrakten Sytaxbaum in einer Datei
+abgelegt werden.
+
+Durch die Einf\"uhrung einer definierten Schnittstelle f\"ur diese Datei wird zum einen der Browser universell einsetzbar, da er somit auch
+Ableitungsb\"aume attributierter Grammatiken aus anderen Bereichen visualisieren kann, zum anderen k\"onnen neben dem Kennedy-Warren-Auswerter sp\"ater
+auch noch andere Teile des MUG so ver\"andert werden, da\ss{} sie eine Datei der gew\"unschten Form erzeugen.
+
+\section{Definition der Schnittstelle}
+
+Die Ausgabedatei f\"ur den Syntaxbaum ist in verschiedene S\"atze gegliedert. Jeder Satz beginnt mit einem Buchstaben, der die Art der nun folgenden
+Information angibt. Die existierenden Satzarten gibt folgende Tabelle wider.
+
+\bigskip
+\begin{tabular}{|c|l|}
+\hline
+\bf{Satzart} & \bf{Bedeutung} \\
+\hline
+H & \underbar{H}eader --- Dateianfang \\
+T & \underbar{T}railer --- Dateiende \\
+V & \underbar{V}ater --- Produktionsanfang \\
+S & \underbar{S}ohn \\
+P & \underbar{P}roduktionsende \\
+A & \underbar{A}ttribut \\
+G & Ar\underbar{g}ument --- Attribut oder Terminal \\
+E & Listen\underbar{e}nde --- Ende einer Attribut- oder Argumentliste \\
+F & \underbar{F}unktion --- Semantische Aktion \\
+\hline
+\end{tabular}
+\bigskip
+
+Alle S\"atze haben die gleiche L\"ange, mit Ausnahme, des Attributsatzes, auf den stets der Attributwert folgt. Dessen L\"ange variiert in Abh\"angingkeit vom
+verwendeten Datentyp.
+
+Um die Anordnung der verschiedenen S\"atze innerhalb der Datei zu beschreiben, werden folgende Bezeichnungen eingef\"uhrt:
+
+\medskip
+$ \bar A := [ A G \vrule A F G^* E G^* E ] $
+
+$ \bar V := V \bar A^* E \bar A^* E$
+
+$ \bar S := S \bar A^* E $
+\medskip
+
+Auf einen Attributsatz A folgt entweder ein G-Satz, falls das Attribut aus einer Zuweisung von einem anderen Attribut oder einem Terminal berechnet
+wird, oder die Beschreibung einer semantischen Aktion, falls das aktuelle Attribut ein Ergebnis dieser Aktion ist. Semantische Aktionen werden durch
+einen F-Satz beschrieben, auf den  zwei Argumentlisten folgen, die jeweils mit einem E-Satz abgeschlossen werden. Die erste enth\"alt dabei die
+Ergebnisse, die zweite die Parameter der semantischen Aktion. Leere Listen sind durch einen E-Satz gekennzeichnet. Der Wert des Attributs
+wird unmittelbar nach dem A-Satz abgespeichert. F\"ur ihn wurde keine spezielle Satzart eingef\"uhrt.
+
+Die Beschreibung eines Vaterknotens durch einen V-Satz wird immer gefolgt von zwei Attributlisten, die wiederum durch einen E-Satz abgeschlossen
+werden. In diesen Listen sind Hilfsattribute (Auxiliaries) und synthetisierte (derived) Attribute des Vaters beschrieben. Geerbte (inherited)
+Attribute sind den S-S\"atzen zugeordnet.
+
+Beim Schreiben der Datei wird der Syntaxbaum nun in {\it depth-first}-Strategie durchlaufen. Nach dem Headersatz folgt die $\bar V$-Information des
+Axioms. Anschlie\ss{}end die $\bar S$-Informationen der S\"ohne, von denen jeder, mit Ausnahme von terminalen Symbolen, wieder von einer $\bar
+V$-Information gefolgt wird usw. Ist eine Produktion mit allen darunterliegende Ableitungsb\"aumen gespeichert, so erscheint nach der letzten $\bar
+S$-Einheit ein P-Satz in der Datei. Das Dateiende wird schlie\ss{}lich durch einen Trailersatz gekennzeichnet.
+
+Eine detailierte Beschreibung der in den einzelnen S\"atzen enthaltenen Information gibt der folgende Abschnitt wider.
+
+\section{Die Datenstruktur}
+
+Alle im vorangegangenen Abschnitt besprochenen S\"atze sind zur leichteren Handhabung in der union satz\_info zusammengefa\ss{}t.
+Diese union wird in die Ausgabedatei geschrieben bzw. von dort gelesen.
+
+\begin{small}\begin{verbatim}
+union satz_info
+	{
+	struct header   h;
+	struct trailer  t;
+	struct vater    v;
+	struct sohn     s;
+	struct prod_end p;
+	struct attribut a;
+	struct argument g;
+	struct end_attr e;
+	struct funktion f;
+	};
+\end{verbatim}\end{small}
+
+Einige der S\"atze enthalten Information \"uber das Element, das sie repr\"asentieren, wie z.B. V-, S- und A-S\"atze. Andere wiederum bewirken durch ihre
+blo\ss{}e Existenz eine Steuerung der Browsers. Zu dieser Art z\"ahlen unter anderen E- und P-S\"atze. Eine Erweiterung dieser Strukturen f\"ur sp\"atere
+Ausbaustufen des Browsers ist jedoch denkbar. Da die Zugriffe auf die Datei \"uber die umfassende union vollzogen werden, kann eine solche \"Anderung
+ohne weitreichende Konsequenzen erfolgen.
+
+\subsection{Der Headersatz}
+
+Der Headersatz enth\"alt im Augenblick lediglich den Namen der gelesenen Datei.
+
+\begin{small}\begin{verbatim}
+struct header
+	{
+	char filename[L_FILENAME];
+	};
+\end{verbatim}\end{small}
+
+\subsection{Der Trailersatz}
+
+Der Trailersatz dient der Erkennung des Dateiendes. Er enth\"alt keine Information.
+
+\begin{small}\begin{verbatim}
+struct trailer
+	{
+	char dummy;
+	};
+\end{verbatim}\end{small}
+
+\subsection{Der Vatersatz}
+
+Der V-Satz zeigt nicht nur den Beginn einer neuen Produktion an, er enth\"alt zugleich Namen und Identifikationsnummer des Vaterknotens. Diese Nummer ist mit
+der von MUG vergebenen Nummer identisch.
+
+\begin{small}\begin{verbatim}
+struct vater
+	{
+	char symbol[L_SYMBOL];
+	int id;
+	};
+\end{verbatim}\end{small}
+
+\subsection{Der Sohnsatz}
+
+Neben den Informationen \"uber Namen und Identifikationsnummer des Knotens enth\"alt der S-Satz zudem einen Eintrag, der bei Terminalen auf {\it wahr} gesetzt
+ist. Die Identifikationsnummer ist wie beim V-Satz von MUG \"ubernommen. Daraus resultiert, da\ss{} ein Knoten unterschiedliche Nummern hat, je nachdem, ob er
+als Vater oder als Sohn angesprochen wird.
+
+\begin{small}\begin{verbatim}
+struct sohn
+	{
+	char symbol[L_SYMBOL];
+	int id;
+	int is_terminal;
+	};
+\end{verbatim}\end{small}
+
+\subsection{Der Produktionsende-Satz}
+
+Der P-Satz zeigt das Ende einer Produktion an. Er tr\"agt keine weitere Information.
+
+\begin{small}\begin{verbatim}
+struct prod_end
+	{
+	char dummy;
+	};
+\end{verbatim}\end{small}
+
+\subsection{Der Attributsatz}
+
+Attributs\"atze enthalten Daten \"uber die Art des Attributs (Auxiliary, inherited, derived), den Attributnamen, den Typ der Variable als Text (z.B. {\it
+char}), die L\"ange des Wertebereichs in Byte, sowie einen Eintrag, der angibt ob sich das Attribut aus einem anderen Attribut bzw. einem Terminal oder aus
+einer semantischen Aktion berechnet.
+
+\begin{small}\begin{verbatim}
+struct attribut
+	{
+	char art;
+	char attr[L_ATTRIBUT];
+	char typ[L_ATTR_TYP];
+	int wertlen;
+	int is_copy;
+	};
+\end{verbatim}\end{small}
+
+\subsection{Der Argumentsatz}
+
+Als Argumente werden Attribute und Terminale gespeichert, die als Parameter f\"ur eine semantische Aktion oder als rechte Seite einer Zuweisung fungieren.
+G-S\"atze enthalten den Namen des betroffenen Knotens, sowie, falls es sich um ein Attribut handelt, dessen Namen und Art.
+
+\begin{small}\begin{verbatim}
+struct argument
+	{
+	char attr[L_ATTRIBUT];
+	char art;
+	char symbol[L_SYMBOL];
+	int id;
+	};
+\end{verbatim}\end{small}
+
+\subsection{Der Listenende-Satz}
+
+Wie der P-Satz, erf\"ullt auch der E-Satz seine Aufgabe durch seine blo\ss{}e Existenz. Er tr\"agt daher keine weitere Information.
+
+\begin{small}\begin{verbatim}
+struct end_attr
+	{
+	char dummy;
+	};
+\end{verbatim}\end{small}
+
+\subsection{Der Funktionssatz}
+
+Im F-Satz werden die Daten \"uber eine semantische Aktion abgelegt. Sie bestehen aus dem Namen der Aktion und einer Identifikationsnummer, die von MUG
+vergeben wird.
+
+\begin{small}\begin{verbatim}
+struct funktion
+	{
+	char aktion[L_SEMACTION];
+	int id;
+	};
+\end{verbatim}\end{small}
+
+\pagestyle{headings}
+
+\chapter{\"Anderungen am MUG}
+
+Der erste Abschnitt der Arbeit an diesem Fortgeschrittenenpraktikum bestand nun darin, Teile des MUG so zu ver\"andern, da\ss{} die damit erzeugten Compiler
+neben dem Programm in Zielsprache auch die im vorangegangenen Abschnitt beschriebene Datei mit den Informationen \"uber den Syntaxbaum erzeugen. Da der
+Kennedy-Warren Auswerter der m\"achtigste der drei Attributauswerter des MUG ist, wurde er f\"ur die Modifikationen herangezogen.
+
+Eine grobe \"Ubersicht \"uber die relevanten Dateien gibt folgende Tabelle wider:
+
+\bigskip
+\begin{tabular}{|l|p{8cm}|}
+\hline
+\bf{ge\"anderte Datei} & \bf{\"Anderung} \\
+\hline
+kwgen.c & Generierung der Ausgabefunktionen f\"ur den Sytnaxbaum               \\
+agkombi.c & Durchreichen des Quellprogrammnamens \\
+\hline
+\bf{neue Datei} & \bf{Funktion}            \\
+\hline
+browse\_len.h & Definition der Arrayl\"angen \\
+browse\_ds.h & Definition der Datenstruktur\\
+browse\_proc.c & Allgemeine Ausgabefunktionen \\
+\hline
+\end{tabular}
+\bigskip
+
+Alle \"Anderungen in den MUG-Quelltexten sind durch Kommentare der Form {\it CHANGE for MUGbrowser} gekennzeichnet.
+
+\section{Kennedy-Warren Auswerter}
+
+Das Modul {\it kwgen.c} wurde so modifiziert, da\ss{} bei Ausf\"uhrung des Kennedy-Warren Generators zus\"atzlich die beiden Dateien {\it phase\_Browse.c} und
+{\it phase\-\_Brow\-se\-Wan\-dere.c} erzeugt werden. Dabei steht {\it phase} f\"ur den Phasennamen des Compilers.
+
+Die Datei {\it phase\_Browse.c} enth\"alt f\"ur jede Produktion der Grammatik eine Ausgabefunktion. Diese rufen wiederum zentrale Ausgabefunktionen
+auf, die im Header {\it browse\_proc.c} definiert sind. Diese Aufrufe bewirken dann die Erstellung der gew\"unschten Sytnaxbaum-Datei. Aufgebaut wird
+{\it phase\_Browse.c} durch folgende Funktionen: \begin{itemize} \item{CREATEBROWSE} \item{BROWSE\_print\_argument} \item{BROWSE\_print\_sem}
+\item{BROWSE\_print\_aux} \item{BROWSE\_print\_attr} \end{itemize}
+
+\"Ahnlich wie im File {\it phase\_Wandere.c} wird durch die Funktion {\it CREATBROWSEWANDERE} im Modul {\it phase\_BrowseWandere.c} eine
+Funktionstabelle erzeugt, die die in {\it phase\_Browse.c} definierten Funktionen enth\"alt und zur Steuerung der Wanderung durch den Syntaxbaum genutzt
+wird. Die Tabelle hat folgenden Aufbau:
+
+\begin{small}\begin{verbatim}
+void ((*phaseBrowseTab[])()) =
+	{
+	0L,
+	phase_prodname1,
+	phase_prodname2,
+	...
+	};
+\end{verbatim}\end{small}
+
+Die Arrayindices entsprechen dabei den Produktionsnummern von MUG. Der erste Eintrag bleibt leer, da MUG nur Nummern gr\"o\ss{}er 0 vergibt. Der Name
+der Funktionen innerhalb der Tabelle setzt sich aus dem Phasennamen des Compilers und aus der eindeutigen Bezeichnung der betroffenen Produktion
+zusammen.
+
+Anders als in {\it phase\_Wandere.c} existiert in {\it phase\_BrowseWandere.c} keine spezielle Funktion zum Durchwandern des Baums, da die Funkionen
+zur Ausgabe von Produktionen selbst zu ihren S\"ohnen verzweigen.
+
+Die Ver\"anderungen in der Funktion {\it GENAUSWERTER} bewirken, da\ss{} die beiden besprochenen Browser-Dateien in den Kennedy-Warren Auswerter des
+Compilers eingebunden werden. Nach der \"Ubersetzung des Quellprogramms, also der Auswertung der Attribute, wird dann die Ausgabe des
+Syntaxbaums angesto\ss{}en. Diese bewirkt, da\ss{} eine Datei mit dem Namen {\it prog.browse} angelegt wird, wobei {\it prog} den Namen des \"ubersetzten
+Programms ohne Endung darstellt.
+
+\section{Weitere \"Anderungen}
+
+Um der neuen Ausgabedatei einen sinnvollen Namen geben zu k\"onnen, mu\ss{} der Name des Quellprogramms bis zum Kennedy-Warren Auswerter durchgereicht
+werden. Hierf\"ur wurden \"Anderungen in den Moduln {\it agkombi.c} und {\it kwgen.c} vorgenommen.
+
+\chapter{Das Front-End des Browsers}
+
+Kernst\"uck des Fortgeschrittenenpraktikums ist der MUGBrowser, das Visualisierungswerkzeug f\"ur attributierte Sytaxb\"aume. Das Programm kann in zwei gro\ss{}e
+Bereiche, ein Front-End und ein Back-End, gegliedert werden. Dies erm\"oglicht zum einen eine saubere Trennung zwischen dem Aufbau der Datenstrukturen
+und der graphischen Ausgabe, was wiederum der einfachen Erweiterbarkeit dient. Zum anderen konnte so die Aufgabe gut auf die beiden Praktikanten
+aufgeteilt werden.
+Das Front-End stellt im einzelnen folgende Funktionalit\"at zur Verf\"ugung:
+
+\begin{itemize}
+\item{Scannen und Parsen der Syntaxbaum-Datei}
+\item{Aufbau des Baums als Datenstruktur}
+\item{Berechnung des Layouts}
+\item{Bereitstellen der Datenstruktur f\"ur das Back-End}
+\item{Verwalten der Konfigurationsdatei}
+\end{itemize}
+
+Die verschiedenen Punkte werden im folgenden detailiert besprochen.
+
+\section{Der Aufruf}
+
+Beim Aufruf des MUGBrowsers mu\ss{} als Parameter der Name der Syntaxbaum-Datei angegeben werden. Die Endung {\it .browse} kann entfallen.
+Optional kann mit den Parametern {\it -c configfile} eine Konfigurationsdatei angegeben werden, die eine Zuordnung von Attributnamen zu graphischen
+Symbolen enth\"alt. Eine genaue Beschreibung der Konfigurationsm\"oglichkeiten folgt in einem sp\"ateren Abschnitt. Wird der MUGBrowser ohne oder mit
+falschen Parametern gestartet, so erscheint eine Befehlsschablone der Form
+\begin{small}\begin{verbatim}
+	USAGE: MUGBrowser [-c config-file] file[.browse]
+\end{verbatim}\end{small}
+
+\section{Die Datenstruktur des Browsers}
+
+Um die Information des Syntaxbaum effizient speichern zu k\"onnen, wurde eine Mischung von Geflechten aufgebaut. Herzst\"uck ist ein Baum, in dem jeder
+Knoten beliebig viele S\"ohne haben kann. Jedes Baumelement enth\"alt drei Listen von Attributen, in denen geerbte, synthetisierte und Hilfsattribute
+getrennt gespeichert werden. Jeder nicht-terminale Knoten enth\"alt eine Liste von S\"ohnen, sowie eine Liste von semantischen Aktionen, die in der
+Produktion, dessen Vater der aktuelle Knoten ist, benutzt werden. Semantische Aktionen enthalten wiederum zwei Argumentlisten, die Parameter und
+Ergebnisse der Aktion aufnehmen. Die Definition aller vom Front-End verwendeten Datenstrukturen befindet sich in der Datei {\it browse\_types.h}.
+
+Im Anschlu\ss{} findet sich eine Beschreibung der wichtigsten Elemente der Datenstruktur.
+
+\subsection{Das Baumelement}
+
+Baumelemente enthalten neben Zeigern auf die S\"ohne, die in einer Liste gesammelt sind, auch einen Zeiger auf den \"ubergeordneten Knoten, da ja alle Knoten mit Ausnahme des Axioms als Sohn in einer Liste auftauchen. Somit kann der Baum in jeder Richtung
+durchwandert werden:
+\begin{itemize}
+\item{Von oben nach unten \"uber die Liste der S\"ohne}
+\item{Von unten nach oben \"uber den Zeiger auf den Vater}
+\item{Horizontal innerhalb einer Produktion \"uber den Zeiger auf das Listenelement der Sohnliste und von da \"uber Vorg\"anger und Nachfolger in der
+doppelt verketteten Liste}
+\end{itemize}
+
+Da sich die Datenstruktur nicht an Produktionen, sondern an Knoten orientiert, mu\ss{}te ein Weg gefunden werden, Hilfsattribute
+und semantische Aktionen einem Baumknoten zuzuordnen. Um eine eindeutige Abbildung von Produktionen auf Knoten zu erhalten, wurden alle
+semantischen Aktionen und Hilfsattribute dem Vater der Produktion zugewiesen.
+
+Terminale besitzen, da sie semantische Bedeutung haben k\"onnen, eine Liste ({\it InputList}) mit Verweisen auf semantische Aktionen und Attribute, denen
+sie als Eingabe dienen. Dies erleichtert dem Back-End die Darstellung der Abh\"angigkeiten.
+
+Die \"ubrigen Eintr\"age in der Struktur dienen der Berechnung des Layouts.
+
+\begin{small}\begin{verbatim}
+typedef struct Tree_Elem
+  {
+  char symbol[L_SYMBOL];     /* Name des Symbols                 */
+  int x;                     /* Layoutinformation                */
+  int y;
+  int breite_rechts;
+  int breite_links;
+  int baumhoehe;
+  int vater_id;              /* Identifikationsnummern von MUG   */
+  int sohn_id;
+  int is_terminal;           /* Kennzeichnung fuer Blaetter      */
+  struct Tree_Elem *vater;   /* Vater des Knotens                */
+  TEPList soehne;            /* Liste der Soehne                 */
+  TEPLEP elem_of;            /* Zeiger auf Listenelement, in dem */
+                             /* sich dieses Baumelement befindet */
+  AList iattr;               /* inherited Attribute              */
+  AList dattr;               /* derived Attribute                */
+  AList aattr;               /* Auxiliaries                      */
+  SemList aktionen;          /* alle Aktionen der Produktion     */
+  InputList input_to;        /* nur fuer Terminals               */
+  } TE, *TEP, Tree;
+\end{verbatim}\end{small}
+
+Es ist zu beachten, da\ss{} auch nicht-terminale Symbole eine leere Liste von S\"ohnen haben k\"onnen. Ein Beispiel hierf\"ur ist eine leere Parameterliste, die
+durch eine Produktion der Form {\it parlist $\rightarrow$ .} beschrieben werden kann.
+
+\subsection{Die Attributliste}
+
+Wie nahezu alle Listen in den Datenstrukturen des Front-Ends ist auch die Attributliste als doppelt verkettete Liste aufgebaut. Obwohl dies nicht
+unbedingt erforderlich ist, erleichtert es den Umgang mit der Liste. Stellvertretend f\"ur alle Listenk\"opfe soll hier die Attributliste kurz
+dargestellt werden.
+
+\begin{small}\begin{verbatim}
+typedef struct AList
+  {
+  int anzahl;
+  ALEP first;
+  ALEP last;
+  } AList;
+\end{verbatim}\end{small}
+
+Alle Listen tragen in ihrem Kopf neben den Zeigern auf das erste und das letzte Element eine Z\"ahler, der die Anzahl der enthaltenen Listenelemente
+angibt. Dies erleichtert die Berechnung des Layouts.
+
+Elemente der Attributliste enthalten neben den Zeigern auf Vorg\"anger und Nachfolger in der Liste und der Layoutinformation auch einen Zeiger
+auf einen Speicherbereich, in dem der Wert des Attributs gespeichert ist. Die L\"ange dieses Bereichs in Bytes steht ebenfalls im Attributlistenelement.
+
+Um dem Back-End das Ziehen der Verbindungen zu erm\"oglichen ist neben der schon bekannten {\it InputList} auch entweder ein Zeiger auf ein anderes
+Attribut oder ein Zeiger auf eine semantische Aktion enthalten, je nachdem ob der Wert des Attributs aus einem anderen Attribut oder aus einer semantischen Aktion resultiert.
+
+\begin{small}\begin{verbatim}
+typedef struct AList_Elem
+  {
+  struct AList_Elem *prev;
+  struct AList_Elem *next;
+
+  char attr[L_ATTRIBUT];
+  int x;                     /* Layoutinformation                */
+  int y;
+  int image;
+  char art;                  /* 'I', 'D', 'A'                    */
+  char typ[L_ATTR_TYP];      /* C-Typ, z.B. "int"                */
+
+  int wertlen;               /* Laenge des Wertebereichs in Bytes*/
+  char *wert;                /* Zeiger auf den Wertebereich      */
+
+                             /* Wie wird das Attribut berechnet? */
+  struct ArguList_Elem *copy_of;
+  struct SemList_Elem  *result_of;
+
+  InputList input_to;        /* Wo wird das Attribut verwendet?  */
+  struct Tree_Elem *node;    /* hierzu gehoert das Attribut      */
+  } ALE, *ALEP;
+\end{verbatim}\end{small}
+
+\subsection{Die Liste der semantischen Aktionen}
+
+Semantische Aktionen enthalten neben der \"ublichen Information zwei Argumentlisten, die die Parameter und Ergebnisse der Aktion aufnehmen. Die Elemente
+der Argumentlisten enthalten entweder einen Zeiger auf ein Attribut oder auf ein Terminal, also ein Baumelement. In der Struktur f\"ur
+semantische Aktionen sind die Ergebnisse mit Namen und zugeh\"origem Knoten neben der Argumentliste auch noch in einer {\it NameList} gespeichert. Sie
+dient der Unterscheidung verschiedener Aufrufe der gleichen semantischen Aktion. Dies ist notwendig, da nicht nur f\"ur jede Aktion eine Struktur
+existiert, sondern f\"ur jeden Aufruf.
+
+\begin{small}\begin{verbatim}
+typedef struct SemList_Elem
+  {
+  struct SemList_Elem *prev;
+  struct SemList_Elem *next;
+
+  char aktion[L_SEMACTION];
+  int x;                     /* Layoutinformation                */
+  int y;
+  int x_min;
+  int x_max;
+  int id;                    /* Identifikationsnummer von MUG    */
+  ArguList argumente;        /* Parameter                        */
+  ArguList results;          /* Ergebnisse                       */
+  NameList result_name;      /* Zur Unterscheidung               */
+  } SemLE, *SemLEP;
+\end{verbatim}\end{small}
+
+
+\section{Baumaufbau}
+
+Neben der Layoutberechnung ist der Aufbau des Baumes die Hauptaufgabe des Front-Ends. Hierzu wird die vom Compiler erzeugte Syntaxbaum-Datei
+eingelesen und die Information in die oben beschriebene Datenstruktur eingetragen. Dabei ergibt sich das Problem, da\ss{} z.B. semantische Aktionen Verweise
+auf Attribute haben k\"onnen, die zum Zeitpunkt der Eintragung der semantischen Aktion noch nicht bekannt sind. Um umfangreiches "`Nachklappern"' zu
+vermeiden, wurde das Problem auf die gleiche Weise gel\"ost, wie in vielen \"Ubersetzern, die bei Vorw\"artsdeklarationen auf die gleiche Problematik
+sto\ss{}en: Die Syntaxbaum-Datei wird in zwei P\"assen eingelesen.
+Dieser Mechanismus wurde au\ss{}erdem genutzt, um den Aufbau der Datenstruktur mit der Berechnung des Layouts zu verschr\"anken. So wird ein weiterer Durchlauf
+durch den Baum vermieden. In den folgenden beiden Abschnitten wird jedoch nur der Aufbau des Baumes beschrieben, die Berechnung des Layouts folgt sp\"ater.
+
+\subsection{Pass 1}
+
+Im ersten Pass wird der Baum aufgebaut, ohne Verkn\"upfungen zwischen den unterschiedlichen Eintragungen herzustellen. Es erfolgt also die Konstruktion
+des Syntaxbaums mit der Eintragung der Attribute und semantischen Aktionen. Zu jeder Aktion wird die oben beschriebene {\it NameList} erzeugt, Aktionen
+mit mehreren Ergebnissen, die daher mehrmals auftauchen, werden zu einer verschmolzen.
+
+\subsection{Pass 2}
+
+Der zweite Pass dient nun haupts\"achlich dazu, Verkn\"upfungen zwischen den im ersten Pass eingetragenen Elementen herzustellen. Bei Attributen wird
+eingetragen, wie sie berechnet werden, und wo sie als Eingabe dienen. Semantische Aktionen erhalten die Argumentlisten f\"ur Parameter und Ergebnisse,
+bei terminalen Baumelementen wird die {\it InputList} gef\"ullt.
+
+\section{Layoutberechnung}
+
+Wie bereits angegeben, ist die Berechnung des Layouts mit dem Aufbau des Baumes verschr\"ankt. Auch die Layouterstellung mu\ss{} in zwei Durchl\"aufen
+geschehen, da z.B. die Plazierung einer semantischen Aktion von der Position weiter unten im Baum liegender Attribute abh\"angt.
+
+Alle Eckdaten des Layouts, wie der Ursprung des Koordinatensystems und die Gr\"o\ss{}e des graphischen Elemente, sind in der Datei {\it browse\_const.h} als
+{\it \#define}-Anweisungen zu finden. Eine Beeinflussung des Layouts ist daher leicht m\"oglich, ohne die Prozeduren zu manipulieren.
+
+\subsection{Plazierung der Baumelemente}
+
+Die Positionierung der Knoten und Bl\"atter des Baumes erfolgt in drei Schritten. Der Baum wird ja, wie im vorangegangenen Abschnitt beschrieben, in
+{\it depth-first}-Strategie aufgebaut. Einem Blatt werden dabei die y-Koordinate, die sich aus der Tiefe im Baum ergibt, und als x-Koordinate ein
+festgelegter Startwert zugewiesen. Beim Abschlu\ss{} einer Produktion, also nach gelesenem P-Satz, werden dann alle S\"ohne mit ihren darunterliegenden
+Teilb\"aumen so verschoben, da\ss{} zwischen benachbarten Teilb\"aumen der in {\it browse\_const.h} festgelegte Mindestabstand gewahrt ist. Da jedoch
+Kollisionen nicht nur zwischen benachbarten Teilb\"aumen, sondern h\"aufig auch zwischen weiter entfernten auftreten, wird eine weitere Schleife
+durchlaufen, bei der im Falle einer Kollision die Anordnung der Knoten verbreitert wird. Sind alle S\"ohne einer
+Produktion mit ihren darunterliegenden B\"aumen plaziert, wird der Vater \"uber den S\"ohnen zentriert. Im dritten Schritt wird dann der komplett
+angeordnete Baum so verschoben, da\ss{} die kleinste auftretende x-Koordinate den Wert {\it X\_START} nicht unterschreitet. Das komplette Layout der
+Baumelemente erfolgt im ersten Pass des Baumaufbaus.
+
+\subsection{Plazierung der Attribute}
+
+Um ein st\"andiges Verschieben der Attributpositionen zu vermeiden, werden diese im ersten Pass nur relativ zum zugeh\"origen Baumknoten bestimmt. Im
+zweiten Pass, wenn die Positionen der Baumelemente feststehen, k\"onnen dann diese relativen Koordinaten in absolute umgerechnet werden.
+Bei der Anordnung der Attribute spielt der Begriff der {\it korrespondierenden Attribute} eine zentrale Rolle. Welche Attributpaare von MUGBrowser
+als korrespondierend angesehen werden, ist im Kapitel {\it Styleguide} beschrieben.
+
+\subsubsection{Synthetisierte (derived) Attribute}
+
+Synthetisierte Attribute befinden sich rechts neben dem zugeh\"origen Baumknoten. Sie werden, soweit jene existieren, in der gleichen Reihenfolge wie
+beim Vater angeordnet. Das hat zur Folge, da\ss{} sich bei der graphische Anzeige nur selten Verbindungen zwischen Attributen kreuzen, da ein Attribut h\"aufig Einflu\ss{} auf wieder das gleiche Attribut nimmt. Neu auftretende
+derived Attribute werden anschlie\ss{}end positioniert.
+
+\subsubsection{Geerbte (inherited) Attribute}
+
+Wird ein derived Attribut positioniert, so wird gleichzeitig \"uberpr\"uft, ob sich in der Liste der inherited Attribute ein korrespondierendes
+Attribut befindet. Ist das der Fall, so wird das geerbte spiegelbildlich zum synthetisierten links vom Baumknoten abgelegt. Diese Anordnung bewirkt
+wiederum eine \"ubersichtliche meist \"uberschneidungsfreie Darstellung. Noch nicht plazierte inherited Attribute werden, soweit m\"oglich, in der
+gleichen Reihenfolge wie beim Vater angeordnet.
+
+\subsubsection{Hilfsattribute (Auxiliaries)}
+
+Hilfsattribute werden normalerweise nicht in Knotenn\"ahe plaziert. Sie dienen meist der Aufnahme von Ergebnissen aus semantischen Aktionen. Um eine
+\"ubersichtliche Darstellung zu erreichen, werden sie deshalb neben der semantischen Aktion positioniert, deren Ergebnis sie zugewiesen bekommen. Die
+Koordinaten h\"angen also von denen der semantischen Aktionen ab, die erst in Pass 2 bestimmt werden. Sollten wirklich Auxiliaries auftauchen, die keiner
+semantischen Aktion zugeordnet werden k\"onnen, so stehen diese rechts von den derived Attributen.
+
+\subsection{Plazierung der semantischen Aktionen}
+
+Um unn\"otig lange und damit un\"ubersichtliche Abh\"angigkeitspfeile zu vermeiden, sollten semantische Aktionen in N\"ahe der Attribute und Terminale stehen, die als
+Parameter oder Ergebnis eine Rolle spielen. Die Positionierung kann daher erst im zweiten Pass erfolgen. Die Anordnung der Aktionen erfolgt in zwei
+Schritten. Im ersten wird die Aktion ohne R\"ucksicht auf Kollisionen einfach durch Mittelwertbildung in der Mitte aller relevanten Attribute und
+Terminale plaziert. Im zweiten Schritt wird dann \"uberpr\"uft, ob Aktionen \"uber die Grenzen der Produktion hinausragen, oder ob Kollisionen zwischen
+semantischen Aktionen stattfinden. In beiden F\"allen wird versucht, die Aktion so zu verschieben, da\ss{} das Problem beseitigt wird. Dies geschieht in
+einem etwas komplizierten Verfahren: Aktionen werden immer nur entlang der Koordinatenachsen verschoben, also niemals schr\"ag. Bei einer Kollision
+werden die vier M\"oglichkeiten des Verschiebens durchgespielt und die beste ausgew\"ahlt. Als beste M\"oglichkeit wird dabei angesehen, wenn keine
+Kollision mehr auftritt. Findet in jeder Richtung eine Zusammensto\ss{} statt, so wird die Kollision mit eine Aktion mit hoher laufender Nummer bevorzugt.
+Dieser Algorithmus liefert im {\it average case} gute Ergebnisse. Theoretisch k\"onnen jedoch bei der Verschiebung der Aktionen Zyklen auftreten.
+Diese werden durch einen Z\"ahler erkannt. Eine ansprechende Plazierung der Aktion ist in diesem Fall nicht m\"oglich. Er trat jedoch auch bei
+umfangreichen Syntaxb\"aumen im Test nie auf.
+
+\section{Die Schnittstelle zum Back-End}
+
+Die vom Front-End aufgebauten Syntaxb\"aume nehmen schon bei kleineren Quellprogrammen recht gro\ss{}e Ausma\ss{}e an. Eine Darstellung des kompletten Baums am
+Bildschirm wird daher nur in sehr wenigen F\"allen m\"oglich sein. Das Back-End mu\ss{} deshalb dem Benutzer eine M\"oglichkeit bieten, die Anzeige wie ein
+Fenster \"uber den Baum zu verschieben, um alle Teile des Baum betrachten zu k\"onnen. Um diese Aufgabe in akzeptabler Zeit ausf\"uhren zu k\"onnen, mu\ss{} dem
+Back-End eine Datenstruktur bereitgestellt werden, die einen schnellen Zugriff auf die relevanten Baumelemente erlaubt, so da\ss{} bei einer Verschiebung
+des Fensters nicht der ganze Baum durchlaufen werden mu\ss{}.
+
+Vor dem Aufruf des Back-Ends wird daher eine spezielle nach X-Koordinaten geordnete Liste aufgebaut, die alle Elemente, also Knoten, Attribute und semantische
+Aktionen in aufsteigender Reihenfolge enth\"alt. Die Elemente der Liste haben folgende Form:
+
+\begin{small}
+\begin{verbatim}
+typedef struct x_list_elem
+    {
+    struct x_list_elem *next_min;   /* Aufsteigend sortiert     */
+    struct x_list_elem *next_max;   /* Aufsteigend sortiert     */
+
+    int x_min;                      /* Beschreibung der 4 Ecken */
+    int y_min;
+    int x_max;
+    int y_max;
+    char art;                       /* 'A', 'T', 'S'            */
+    union xunion
+        {
+        TEP t_element;              /* Knoten und Blaetter      */
+        ALEP a_element;             /* Attribute                */
+        SemLEP s_element;           /* semantische Aktionen     */
+        } info;
+    } XLE, *XLEP;
+\end{verbatim}
+\end{small}
+
+Die Liste enth\"alt neben dem Zeiger auf das graphische Element und seinen vier Eckkoordinaten vor allem eine doppelte Verkettung. Dadurch ist es
+m\"oglich, die Liste gleichzeitig auf unterschiedliche Weise sortiert zu haben, einmal nach den linken x-Koordinaten, einmal nach den rechten. Dies
+erm\"oglicht dem Back-End einen sehr schnellen Zugriff auf alle Elemente, die sich innerhalb des aktuellen Fensters befinden.
+
+\section{Konfigurationsm\"oglichkeiten}
+
+Um die Darstellung des Syntaxbaums an eigene Bed\"urfnisse oder die Konventionen einer Vorlesung bzw. eines Praktikums anpassen zu k\"onnen, besteht die
+M\"oglichkeit, den Attributen bestimmte graphische Symbole zuzuordnen. Diese Einstellung kann \"uber die Bedienoberfl\"ache vorgenommen und in einer Datei,
+der sog. Konfigurationsdatei, gespeichert werden. Beim Aufruf des MUGBrowsers kann \"uber die Option {\it-c file} eine Konigurationsdatei angegeben
+werden. Auch von der Oberfl\"ache aus ist ein Laden gespeicherter Einstellungen m\"oglich.
+
+\subsection{Interne Arbeitsweise}
+
+In der Datenstruktur f\"ur Attribute werden die zugeordneten graphischen Symbole (Images) durch Nummern gekennzeichnet. Das Back-End \"ubernimmt dann die
+Umsetzung der Imagenummer in das Symbol. Um diese Zuordnung konfigurierbar zu machen reicht es also aus, Attributnamen und Imagenummern paarweise in
+einer Liste zu speichern. Die Elemente dieser {\it ANList} haben folgende Form:
+
+\begin{small}
+\begin{verbatim}
+typedef struct Attrnamen_elem
+    {
+    struct Attrnamen_elem *next;
+
+    char attr[L_ATTRIBUT];
+    char prefix[4];
+    int nr;
+    } ANLE, *ANLEP;
+\end{verbatim}
+\end{small}
+
+Wird beim Aufruf des MUGBrowsers keine Konfigurationsdatei angegeben, so wird die {\it ANList} automatisch mit Zuordnungen vorbelegt. Diese k\"onnen jedoch
+\"uber die Bedienoberfl\"ache ver\"andert werden. Beim Speichern der Konfigurationsdatei werden einfach die Paare aus Attributnamen und Imagenummer in der
+Datei abgelegt.
+
+\chapter{Das Back-End des Browsers}
+
+Das Back-End des MUG Browsers stellt die Schnittstelle zum Benutzer dar. Es umfa\ss{}t eine Applikation {\it MUG Browser}, die ein Betrachten des
+errechneten Baums m\"oglich macht. Die Applikation enth\"alt u.~a.\ Funktionen zur benutzergerechten Konfiguration von Attribut-Icon-Paaren sowie
+Funktionen f\"ur gezieltes Suchen im Baum.
+
+\section{Die Bedienung des Back-Ends}
+
+\subsection{Allgemeines zur Bedienung}
+
+Nach Aufruf des MUG Browsers erfolgt nach einigen anderen Meldungen die Ausgabe "`visualizing \ldots"'. Sie k\"undigt den Start der Applikation {\it MUG
+Browser} an. Die Applikation pr\"asentiert sich dem Benutzer in Form eines Windows, das in gewohnter X-Windows-Manier zu bedienen ist. (Bedienung der
+Scrollbars, \"Offnen und Schlie\ss{}en des Windows sowie Umgang mit Menus und Buttons siehe X-Windows-Dokumentation.) Es sei noch die Bedeutung der
+unterschiedlichen Gestalten des Cursors erkl\"art:
+
+\bigskip
+\begin{tabular}{|l|p{6.9cm}|}
+\hline
+normaler X-Windows Pfeil     &   keine Funktionalit\"at  \\
+X-Windows Scrollbar Pfeil    &   entspr. Scrollbar Funktionalit\"at   \\
+wei\ss{}er MUG Browser Pfeil   &   spezielle Funktionalit\"at in unterschiedlichen Fenstern  \\
+schwarzer MUG Browser Pfeil  &   Men\"u, Men\"u-Entry oder Button     \\
+\hline
+\end{tabular}
+\bigskip
+
+
+\subsection{Die Men\"us}
+
+\subsubsection{Das {\it Configure}-Men\"u}
+
+Das {\it Configure}-Men\"u umfa\ss{}t alle Funktionen zur Modifikation sowie zum Laden und Speichern der Attribut-Icon-Paare. Bei Aufruf des Browsers wird
+jedem Attribut automatisch ein Icon zugewiesen. Diese "`zuf\"allige"' Konfiguration kann nun modifiziert und die so erzeugte neue Konfiguration
+gespeichert und sp\"ater wieder geladen werden. Bei mehrmaligem Aufrufen mit derselben Grammatik empfiehlt es sich, dieselbe Konfiguration wieder zu
+laden.
+
+\bigskip
+\begin{tabular}{|l|p{10.2cm}|}
+\hline
+Men\"upunkt               & Funktion      \\
+\hline
+Load     &
+Bei Aufruf der Funktion {\it Load} erscheint ein sog. Dialogfenster, in das der Name des Konfigurationsfiles eingegeben wird. Durch Anklicken des
+Buttons {\it Load} wird dann die entsprechende Konfiguration geladen. Mit {\it Exit} kann die Funktion abgebrochen werden. \\ Save & Die Funktion
+{\it Save} funktioniert genau wie {\it Load} (siehe oben), jedoch wird hier mit dem Button {\it Save} die aktuelle Konfiguration gespeichert. \\
+Default & Bei Aufruf der Funktion {\it Default} wird die urspr\"ungliche automatisch erzeugte Konfiguration wieder geladen. \\ Modify & Bei Aufruf der
+Funktion {\it Modify} erscheint ein neues dreigeteiltes Fenster: Im obersten Drittel befinden sich die Buttons {\it Next}, {\it Previous}, {\it Set}
+und {\it Exit}. Darunter befindet sich eine Textzeile. Sie enth\"alt einen Attributnamen und links daneben das entsprechende Icon. Zu beachten ist, da\ss{}
+ein und dasselbe Attribut bei unterschiedlichem Auftreten (also inherited, derived oder auxiliary) keine unterschiedlichen Images zur Repr\"asentation
+haben kann, obwohl diese unterschiedliche Namen haben. Im untersten Teil sind s\"amtliche 60 vom MUG Browser zur Verf\"ugung gestellten Icons dargestellt.
+Mit den Buttons {\it Next} und {\it Previous} kann man ein bestimmtes Attribut ausw\"ahlen. Durch Anklicken eines Icons im unteren Teil wird das
+aktuelle Icon durch das angeklickte ersetzt. Mit {\it Set} wird dieses dem Attribut zugewiesen. Mit {\it Exit} l\"a\ss{}t sich die Funktion wieder
+verlassen. \\ Actual & Bei Aufruf der Funktion {\it Actual} erscheint ein neues Fenster. Es enth\"alt die aktuelle Konfiguration. Links sind jeweils die
+Icons angezeigt. Rechts davon steht der Name des Icon und die dazugeh\"orige Klasse. Ganz rechts steht der Attributname ohne Pr\"afix, dem in eckigen
+Klammern die Form des Auftretens vorangstellt ist. Dabei steht "`i"' f\"ur inherited, "`d"' f\"ur derived und "`a"' oder "`-"' f\"ur auxiliary. Mit {\it Noticed}
+kann das Fenster wieder geschlossen werden. \\
+\hline \end{tabular}
+
+\subsubsection{Das {\it Find}-Men\"u}
+
+Das {\it Find}-Men\"u umfa\ss{}t Funktionen zum Suchen von einzelnen Baumelementen sowie die {\it Global-View}-Funktion.
+
+\bigskip
+\begin{tabular}{|l|p{10.0cm}|}
+\hline
+Men\"upunkt               & Funktion      \\
+\hline
+Node     &
+Bei Aufruf der Funktion {\it Node} erscheint ein Dialogfenster. Hier kann der Name des gesuchten Baumknotens eingegeben werden. Mit dem Button
+{\it Next Appearance} wird nun der n\"achste entsprechende Baumknoten angesprungen. Mit {\it Exit} kann die Funktion verlassen werden. \\ Attribute &
+Die Funktion {\it Attribute} funktioniert wie {\it Node}, jedoch wird hier nach einem Attribut gesucht. Zu beachten ist, da\ss{} der
+komplette Name des Attributs einschlie\ss{}lich des Pr\"afixes angegeben werden mu\ss{}. Es wird dann auch nur nach Attributen mit genau diesem Namen gesucht,
+d. h. sucht man nach einem inherited Attribut, so wird ein Auftreten als derived oder auxiliary nicht gefunden. \\ Function & Die Funktion
+{\it Function} funktioniert ebenfalls wie {\it Node} bzw. {\it Attribute}. In diesem Fall wird nach einer Funktion
+gesucht. \\ Global View & Bei Aufruf der Funktion {\it Global View} erscheint ein neues Fenster. Es enth\"alt den Baum in verkleinerter Form. Dabei sind
+nur die Kanten des Baums dargestellt. Diese Darstellung soll helfen, einen \"Uberblick \"uber den gesamten Baum zu erhalten. Mit {\it Noticed} kann das
+Fenster wieder geschlossen werden. \\ \hline \end{tabular}
+
+\subsubsection{Das {\it Show}-Men\"u}
+
+Das {\it Show}-Men\"u dient zur Ver\"anderung der Zeichenmaske. Teile des Baums, die im Moment nicht von Interesse sind, k\"onnen damit von der Darstellung
+ausgeschlossen werden, um eine gr\"o\ss{}ere \"Ubersichtlichkeit zu erzielen.
+
+\bigskip
+\begin{tabular}{|l|p{9.8cm}|}
+\hline
+Men\"upunkt               & Funktion      \\
+\hline
+Nodes &
+Mit der Funktion {\it Nodes} kann die Darstellung der Baumknoten ein- und ausgeschaltet werden. Bei Aufruf dieser Funktion wird der aktuelle Wert
+einfach "`umgeschaltet"', d.~h.\ steht er auf {\it on}, so wird er auf {\it off} gestellt, und andersherum. Zu beachten ist, da\ss{} bei ausgeschalteten
+Baumknoten auch keine Kanten mehr dargestellt werden. Das Grundger\"ust des Baums verschwindet also komplett und es ist nur noch die Attributierung
+(falls eingeschaltet) sichtbar. \\ Edges & Die Funktion {\it Edges} funktioniert wie {\it Nodes}, jedoch schaltet sie nur die
+Darstellung der Kanten des Baums um. Bei ausgeschalteten Kanten werden die Knoten also weiterhin dargestellt. \\ Attributes & Mit der Funktion
+{\it Attributes} wird die Darstellung der Attribute umgeschaltet. Sind die Attribute ausgeschaltet, so werden auch Abh\"angigkeiten zu den Attributen
+nicht mehr dargestellt. \\ Functions & Mit der Funktion {\it Functions} wird die Darstellung der semantischen Aktionen umgeschaltet. Wie bei den
+Attributen werden auch hier im ausgeschaltetem Zustand keine Abh\"angigkeiten zu den semantischen Aktionen mehr dargestellt. \\
+Dependencies & Mit der Funktion {\it Dependencies} wird die Darstellung der Abh\"angigkeiten umgeschaltet. \\ Copies & Mit der Funktion {\it Copies}
+wird die Darstellung von sog. Kopien umgeschaltet. Gemeint ist damit eine Unterklasse von Abh\"angigkeiten, die die simple Weitergabe von Attributwerten
+zwischen zwei Attributen repr\"asentiert. \\ Actual & Mit der Funktion {\it Actual} kann man Einsicht auf den momentanen Zustand der Maske nehmen. Zu
+diesem Zweck erscheint ein neues Fenster, das mit {\it Noticed} wieder geschlossen werden kann. \\ \hline \end{tabular}
+
+
+
+\subsubsection{Das {\it Monitortype}-Men\"u}
+
+Das {\it Monitortype}-Men\"u dient zur Auswahl des richtigen Monitortyps. Je nach angeschlossenem Monitor kann eine bestimmte Farbgebung f\"ur die
+Baumelemente gew\"ahlt werden. (Der Hintergrund bleibt immer wei\ss{}.)
+
+\bigskip
+\begin{tabular}{|l|p{9.9cm}|}
+\hline
+Men\"upunkt               & Funktion      \\
+\hline
+Black/White &
+Mit der Funktion {\it Black/White} wird der Browser auf Schwarz/Wei\ss{}-Monitor gestellt. Alle Baumelemente werden schwarz dargestellt. \\
+Greyscale &
+Mit der Funktion {\it Greyscale} wird der Browser auf Graustufenmonitor gestellt. Baumknoten und -kanten werden schwarz dargestellt, Attribute,
+Funktionen und Abh\"angigkeiten in helleren Graustufen. \\ Color & Mit der Funktion {\it Color} wird der Browser auf Farbmonitor gestellt. Knoten und
+Kanten werden schwarz dargestellt, Attribute und Abh\"angigkeiten in rot und Funktionen in gr\"un. \\ Actual & Bei Aufruf der Funktion {\it Actual}
+erscheint ein neues Fenster mit Angabe des aktuell ausgew\"ahlten Monitortyps. Mit {\it Noticed} kann das Fenster wieder geschlossen werden. \\ \hline
+\end{tabular}
+
+
+\subsubsection{Weitere Kommandos}
+
+\bigskip
+\begin{tabular}{|l|p{7.3cm}|}
+\hline
+Kommando               & Funktion      \\
+\hline
+Quit-Button &
+Bei Bet\"atigen des {\it Quit}-Buttons erscheint ein neues Dialogfenster. Mit {\it Confirm} wird der MUG Browser beendet, {\it Cancel} bricht die
+Funktion ab. \\ Information-Button & Bei Bet\"atigen des {\it Information}-Buttons erscheint ein Fenster mit Informationen \"uber die Versionsnummer, die
+Autoren und den Entstehungszeitraum. Mit {\it Noticed} kann es wieder geschlossen werden. \\ Pop-Up-Informations-Windows & Klickt man ein Element des
+Baums (Knoten, Attribut oder Funktion) direkt an, so erscheint ein sog. Pop-Up-Fenster mit Informationen \"uber dieses Element. Mit {\it Noticed} kann
+es wieder geschlossen werden. \\ \hline \end{tabular}
+
+\subsubsection{Informationen \"uber Knoten}
+
+Klickt man einen Baumknoten an, so erscheint ein Fenster mit folgenden Informationen:
+
+\bigskip
+\begin{tabular}{|l|l|}
+\hline
+Name         &   Name des Knotens  \\
+Type         &   Knotentyp: Node (Knoten) oder Leaf (Terminal, Blatt) \\
+predecessor  &   Vaterknoten oder {\it None} beim Wurzelknoten      \\
+successor(s) &   Liste der S\"ohne oder {\it None} bei Terminals    \\
+\hline
+\end{tabular}
+\bigskip
+
+\subsubsection{Informationen \"uber Attribute}
+
+Klickt man ein Attribut an, so erscheint eine Fenster mit folgenden Informationen:
+
+\bigskip
+\begin{tabular}{|l|p{10.1cm}|}
+\hline
+Name         &   Name des Attributs   \\
+Appearance   &   Art des Auftretens: inherited, derived oder auxiliary  \\
+Type         &   C-Typ des Attributs: z. B. char, int, ...     \\
+Value        &   Wert (Inhalt) des Attributs      \\
+Input        &   Attribut oder semantische Aktion, aus dem/der sich das Attribut errechnet   \\
+Output       &   Liste von Attributen und/oder semantischen Aktionen, in die das Attribut einflie\ss{}t   \\
+\hline
+\end{tabular}
+\bigskip
+
+\subsubsection{Informationen \"uber Funktionen}
+
+Klickt man eine semantische Aktion an, so erscheint ein Fenster mit folgenden Informationen:
+
+\bigskip
+\begin{tabular}{|l|l|}
+\hline
+Name           & Name der semantischen Aktion     \\
+Return type(s) & Liste der R\"uckgabeparameter    \\
+Parameter(s)   & Liste der Eingabeparameter      \\
+\hline
+\end{tabular}
+\bigskip
+
+\section{Die Implementierung des Back-Ends}
+
+\subsection{Files}
+
+Das Back-End umfa\ss{}t folgende Files:
+
+\bigskip
+\begin{tabular}{|l|p{10.4cm}|}
+\hline
+visualize.c  &   Hauptprogramm mit der Funktion {\it show\_tree}, die vom Front-End aufgerufen wird   \\
+visualize.h  &   Headerfile zu {\it visualize.c}                                                   \\
+\hline
+\end{tabular}
+\bigskip
+
+Aus dem Front-End werden die folgenden Headerfiles benutzt:
+
+\bigskip
+\begin{tabular}{|l|p{9.6cm}|}
+\hline
+browse\_const.h & enth\"alt Konstanten- und Makrodefinitionen   \\
+browse\_types.h & enth\"alt Typdeklaration der Schnittstelle zwischen Front- und Back-End     \\
+configure.h     & enth\"alt die Funktionsk\"opfe der im Front-End enthaltenen Funktionen bzgl. der Attribut-Icon-Konfiguration \\
+\hline
+\end{tabular}
+\bigskip
+
+Weiter werden die folgenden Standard-, X-Windows- und X-Athena-Widgets-Libraries ben\"utzt:
+
+Standard:
+
+\bigskip
+\begin{tabular}{|l|l|}
+\hline
+stdlib.h   &     C Standard Library   \\
+stdio.h    &     Standard Input/Output Library   \\
+malloc.h   &     Library mit Speicherallokierungsfunktionen \\
+\hline
+\end{tabular}
+\bigskip
+
+X-Windows:
+
+\bigskip
+\begin{tabular}{|l|l|}
+\hline
+Xatom.h       &  atomare X Elemente    \\
+Intrinsics.h  &  X Intrinsics      \\
+StringDefs.h  &  X String Definitionen \\
+Shell.h       &  X Shell Umgebung    \\
+\hline
+\end{tabular}
+\bigskip
+
+X-Athena-Widgets:
+
+\bigskip
+\begin{tabular}{|l|l|}
+\hline
+Cardinal.h    &  Typdefinition f\"ur Cardinal   \\
+Command.h     &  Commandbutton-Widget           \\
+Dialog.h      &  Dialogfenster-Widget          \\
+Form.h        &  Form-Widget                     \\
+Simple.h      &  Simple-Widget (Superklasse aller Widgets)  \\
+SimpleMenu.h  &  Men\"u-Widget                            \\
+SmeBSB.h      &  Men\"u-Element-"`Bitmap String Bitmap"'-Widget\\
+SmeLine.h     &  Men\"u-Element-"`Trennlinie"'-Widget    \\
+MenuButton.h  &  Men\"ubutton-Widget     \\
+Viewport.h    &  Viewport-Widget   \\
+Scrollbar.h   &  Scrollbar-Widget  \\
+\hline
+\end{tabular}
+\bigskip
+
+Au\ss{}erdem werden noch 118 Icon-Files aus dem MUGBrowser-Verzeichnis icons inkludiert. Diese enthalten u.~a.\ die Bitmaps der Icons zur Darstellung von Attributen.
+
+Im Folgenden wird nur auf die Files {\it visualize.c} und {\it visualize.h} eingegangen. F\"ur die Headerfiles aus dem Front-End sei auf die
+vorangegangenen Kapitel verwiesen. F\"ur die ben\"utzten Libraries sei auf die entsprechenden Dokumentationen verwiesen.
+
+\subsection{Der Aufruf}
+
+Das Back-End wird \"uber die Funktion {\it show\_tree} aufgerufen. Diese ben\"otigt die folgenden Parameter:
+
+\bigskip
+\begin{tabular}{|l|p{9.2cm}|}
+\hline
+TEP Wurzel           &   Zeiger auf die Baumwurzel   \\
+int max\_x           &   Maximale X-Position des gelayouteten Baums  \\
+int max\_y           &   Maximale Y-Position des gelayouteten Baums  \\
+ANList *an\_liste    &   Attributliste (mit Image-Zuweisungen)       \\
+x-list *x\_liste     &   Nach X-Koordinaten geordnete doppelt verpointerte Liste der Baumelemente; das Back-End operiert auf dieser Struktur   \\
+\hline
+\end{tabular}
+\bigskip
+
+\subsection{Der Widgets-Baum}
+
+Das Back-End erstellt nach Aufruf eine Applikation zur Kommunikation mit dem Benutzer. Diese wurde mit Hilfe des X-Athena-Widgets-Sets implementiert. Daf\"ur wird folgende baumartige Struktur von Widgets verwendet:
+
+\bigskip
+\begin{tabular}{|l|l|}
+\hline
+Name:Art des Widgets     &                               Bemerkung     \\
+\hline
+root:Application                                   &     Applikation {\it MUG Browser}           \\
+\hspace{0.5cm}        entire:Form                                &     Form Widget enth\"alt alle weiteren \\
+\hspace{0.5cm}                menu1:SimpleMenu                   &     Men\"u {\it Configure}                  \\
+\hspace{1.0cm}                        menu1entry1:SmeBSB         &     Entry {\it Load}                        \\
+\hspace{1.0cm}                        menu1entry2:SmeBSB         &     Entry {\it Save}                        \\
+\hspace{1.0cm}                        menu1entry3:SmeBSB         &     Entry {\it Default}                     \\
+\hspace{1.0cm}                        menu1entry4:SmeBSB         &     Entry {\it Modify}                     \\
+\hspace{1.0cm}                        menu1entry5:SmeLine        &     Trennlinie                         \\
+\hspace{1.0cm}                        menu1entry6:SmeBSB         &     Entry {\it Actual}                     \\
+\hspace{0.5cm}                $[loaddialog:Dialog]$                &     Funktion {\it Load}                    \\
+\hspace{1.0cm}                        $[lyesbutton:Command]$       &                                       \\
+\hspace{1.0cm}                        $[lnobutton:Command]$        &                                       \\
+\hspace{0.5cm}                $[savedialog:Dialog]$                &     Funktion {\it Save}                    \\
+\hspace{1.0cm}                        $[syesbutton:Command]$       &                                       \\
+\hspace{1.0cm}                        $[snobutton:Command]$        &                                      \\
+\hspace{0.5cm}                $[modifydialog:Dialog]$              &     Funktion {\it Modify}                 \\
+\hspace{1.0cm}                        $[previousbutton:Command]$   &                                      \\
+\hspace{1.0cm}                        $[nextbutton:Command]$       &                                      \\
+\hspace{1.0cm}                        $[setbutton:Command]$        &                                       \\
+\hspace{1.0cm}                        $[exitbutton:Command]$       &                                      \\
+\hspace{0.5cm}                $[configuredialog:Dialog]$           &     Funktion {\it Actual}                  \\
+\hspace{1.0cm}                        $[cbutton:Command]$          &                                      \\
+\hspace{0.5cm}                menu1button:MenuButton             &     Men\"ubutton {\it Configure}          \\
+\hspace{0.5cm}                menu2:SimpleMenu                   &     Men\"u {\it Find}                     \\
+\hspace{1.0cm}                        menu2entry1:SmeBSB         &     Entry {\it Node}                       \\
+\hspace{1.0cm}                        menu2entry2:SmeBSB         &     Entry {\it Attribute}                 \\
+\hspace{1.0cm}                        menu2entry3:SmeBSB         &     Entry {\it Function}                 \\
+\hspace{1.0cm}                        menu2entry4:SmeLine        &     Trennlinie                         \\
+\hspace{1.0cm}                        menu2entry5:SmeBSB         &     Entry {\it Global View}                \\
+\hspace{0.5cm}                $[findndialog:Dialog]$               &     Funktion {\it Node}                    \\
+\hspace{1.0cm}                        $[nappbutton:Command]$       &                                       \\
+\hspace{1.0cm}                        $[nexbutton:Command]$        &                                       \\
+\hspace{0.5cm}                $[findadialog:Dialog]$               &     Funktion {\it Attribute}                \\
+\hspace{1.0cm}                        $[aappbutton:Command]$       &                                        \\
+\hspace{1.0cm}                        $[aexbutton:Command]$        &                                        \\
+\hspace{0.5cm}                $[findfdialog:Dialog]$               &     Funktion {\it Function}                 \\
+\hspace{1.0cm}                        $[fappbutton:Command]$       &                                       \\
+\hspace{1.0cm}                        $[fexbutton:Command]$        &                                      \\
+\hspace{0.5cm}                $[gvdialog:Dialog]$                  &     Funktion {\it Global View}            \\
+\hspace{1.0cm}                        $[gbutton:Command]$          &                                      \\
+\hspace{1.0cm}                        $[gviewport:Viewport]$       &                                      \\
+\hspace{1.5cm}                                $[gsimple:Simple]$   &                                     \\
+\hline
+\end{tabular}
+
+\begin{tabular}{|l|l|}
+\hline
+\hspace{0.5cm}                menu2button:MenuButton             &     Men\"ubutton {\it Find}               \\
+\hspace{0.5cm}                menu3:SimpleMenu                   &     Men\"u {\it Show}                     \\
+\hspace{1.0cm}                        menu3entry1:SmeBSB         &     Entry {\it Nodes}                     \\
+\hspace{1.0cm}                        menu3entry2:SmeBSB         &     Entry {\it Edges}                     \\
+\hspace{1.0cm}                        menu3entry3:SmeBSB         &     Entry {\it Attributes}                \\
+\hspace{1.0cm}                        menu3entry4:SmeBSB         &     Entry {\it Functions}                 \\
+\hspace{1.0cm}                        menu3entry5:SmeBSB         &     Entry {\it Dependencies}              \\
+\hspace{1.0cm}                        menu3entry5b:SmeBSB        &     Entry {\it Copies}                   \\
+\hspace{1.0cm}                        menu3entry6:SmeLine        &     Trennlinie                        \\
+\hspace{1.0cm}                        menu3entry7:SmeBSB         &     Entry {\it Actual}                    \\
+\hspace{0.5cm}                $[showdialog:Dialog]$                &     Funktion {\it Actual}                 \\
+\hspace{1.0cm}                        $[sbutton:Command]$          &                                     \\
+\hspace{0.5cm}                menu3button:MenuButton             &     Men\"ubutton {\it Show}              \\
+\hspace{0.5cm}                menu4:SimpleMenu                   &     Men\"u {\it Monitortype}             \\
+\hspace{1.0cm}                        menu4entry1:SmeBSB         &     Entry {\it Black/White}              \\
+\hspace{1.0cm}                        menu4entry2:SmeBSB         &     Entry {\it Greyscale}                \\
+\hspace{1.0cm}                        menu4entry3:SmeBSB         &     Entry {\it Color}                    \\
+\hspace{1.0cm}                        menu4entry4:SmeLine        &     Trennlinie                        \\
+\hspace{1.0cm}                        menu4entry5:SmeBSB         &     Entry {\it Actual}                    \\
+\hspace{0.5cm}                $[monitordialog:Dialog]$             &     Function {\it Actual}                  \\
+\hspace{1.0cm}                        $[mbutton:Command]$          &                                      \\
+\hspace{0.5cm}                menu4button:MenuButton             &     Men\"ubutton {\it Monitortype}         \\
+\hspace{0.5cm}                quitbutton:Command                 &     Commandbutton {\it Quit}              \\
+\hspace{0.5cm}                $[quitsure:Dialog]$                  &     Funktion {\it Quit}                     \\
+\hspace{1.0cm}                        $[qbutton1:Command]$         &                                         \\
+\hspace{1.0cm}                        $[qbutton2:Command]$         &                                          \\
+\hspace{0.5cm}                infobutton:Command                 &     Commandbutton {\it Information}           \\
+\hspace{0.5cm}                $[infodialog:Dialog]$                &     Funktion {\it Information}              \\
+\hspace{1.0cm}                        $[ibutton:Command]$          &                                         \\
+\hspace{0.5cm}                drawarea:Viewport                  &     Viewport \"uber Syntaxbaum           \\
+\hspace{1.0cm}                        inside:Simple              &     Syntaxbaum Window                     \\
+\hspace{0.5cm}                $[nodeinfo:Dialog]$                  &     Pop-Up-Info \"uber Knoten             \\
+\hspace{1.0cm}                        $[nbutton:Command]$          &                                           \\
+\hspace{0.5cm}                $[attrinfo:Dialog]$                  &     Pop-Up-Inof \"uber Attribut            \\
+\hspace{1.0cm}                        $[abutton:Command]$          &                                           \\
+\hspace{0.5cm}                $[funcinfo:Dialog]$                  &     Pop-Up-Inof \"uber semantische Aktion  \\
+\hspace{1.0cm}                        $[fbutton:Command]$          &                                            \\
+\hline
+\end{tabular}
+\bigskip
+
+Die in eckigen Klammern "`$["' und "`]$"' angegebenen Widgets existieren nur, solange die entsprechende Funktion aktiv ist.
+
+\subsection{Die verwendeten Widgettypen}
+
+Im Folgenden werden die verwendeten Widgettypen im Einzelnen angesprochen. Grunds\"atzlich unterscheidet man zwei Klassen von Widgets:
+\begin{enumerate}
+\item{Einfache Widgets ohne S\"ohne. \newline
+   hier: Simple, SmeBSB, SmeLine, MenuButton, Command, Scrollbar. }
+\item{Komplexe Widgets mit S\"ohnen.   \newline
+   hier: Dialog, Form, SimpleMenu, Viewport.  }
+\end{enumerate}
+
+Eine weitgehende Beschreibung der Widgets bleibt aus, da diese aus der X-Athena-Widgets-Dokumentation entnommen werden kann. Es wird also vor allem
+auf deren Verwendung im {\it MUG Browser}-Back-End eingegangen.
+
+\subsubsection{Das {\it Form}-Widget}
+
+Das {\it Form}-Widget stellt einen Bereich dar, in dem weitere Widgets nach bestimmten Gesichtspunkten angeordnet werden k\"onnen (siehe
+X-Athena-Widgets-Dokumentation). Im Falle des MUG Browser Back-Ends wurde es als oberstes Widget {\it entire} in der Hierarchie (gleich unter dem
+Applikations-Widget {\it root}) eingesetzt. Es enth\"alt s\"amtliche Men\"us, Buttons sowie das darunterliegende Fenster zur Darstellung des Baums. Die
+Anordnung dieser Widgets wurde mit den {\it XawChain \ldots}-Parametern realisiert (siehe X-Athena-Widgets-Dokumentation).
+
+\subsubsection{Das {\it SimpleMenu}-Widget}
+
+Das {\it SimpleMenu}-Widget stellt das Vaterwidget f\"ur eine beliebige Anzahl von {\it SmeBSB}- oder {\it SmeLine}-Widgets dar. Es wurde f\"ur s\"amtliche
+Men\"us ({\it menu1}, {\it menu2}, {\it menu3} und {\it menu4}) verwendet.
+
+\subsubsection{Das {\it SmeBSB}-Widget}
+
+{\it SmeBSB} steht f\"ur "`Simple Menu Entry Bitmap String Bitmap"'. Es stellt ein Entry eines Men\"us dar, das durch einen String und eine Bitmap links
+und rechts repr\"asentiert wird. Im Falle des MUG Browsers wurden die Bitmaps weggelassen und nur der String verwendet.
+
+\subsubsection{Das {\it SmeLine}-Widget}
+
+{\it SmeLine} steht f\"ur "`Simple Menu Entry Line"' und stellt eine Trennlinie in einem Men\"u dar. Es dient lediglich zur optischen Aufbereitung und
+Erh\"ohung der \"Ubersichtlichkeit, ruft aber im Gegensatz zu einem normalen Men\"u-Entry ({\it SmeBSB}) keine Funktion auf. Es ist also auch nicht
+anklickbar.
+
+\subsubsection{Das {\it Dialog}-Widget}
+
+Das {\it Dialog}-Widget stellt ein Dialogfenster dar, das wiederum andere Widgets enthalten kann. Es wird als sog. Pop-Up-Fenster verwendet falls eine
+Funktion mit Hilfe eines Men\"u-Entries oder Commandbuttons aufgerufen wurde, die eine Kommunikation mit dem Benutzer notwendig macht oder zus\"atzliche
+Informationen darstellt.
+
+\subsubsection{Das {\it Command}-Widget}
+
+Das {\it Command}-Widget stellt einen Commandbutton dar, also einen Button, mit dem eine bestimmte Funktion aufgerufen wird. Im MUG Browser Back-End
+sind das die Buttons {\it Quit} und {\it Information} in der Men\"uleiste sowie s\"amtliche Buttons in den Dialogfenstern.
+
+\subsubsection{Das {\it MenuButton}-Widget}
+
+Das {\it MenuButton}-Widget ist eine Unterklasse des {\it Command}-Widgets. Es stellt einen Button mit spezieller Funktion dar: Es wird keine
+beliebige Funktion sondern ein Men\"u vom Widgettyp {\it SimpleMenu} aufgerufen. Im MUG Browser Back-End sind das die Buttons {\it Configure}, {\it
+Find}, {\it Show} und {\it Monitortype}.
+
+\subsection{Die graphische Darstellung des attributierten Syntaxbaums}
+
+Im Folgenden wird auf die Implementierung der graphischen Darstellung des Syntaxbaums eingegangen. Dabei werden s\"amtliche diesbez\"ugliche Funktionen betrachtet.
+
+\subsubsection{Funktions\"ubersicht}
+
+Die folgenden Funktionen werden im Rahmen der graphischen Darstellung des Syntaxbaums ben\"utzt:
+
+\bigskip
+\begin{tabular}{|l|p{9.0cm}|}
+\hline
+selectbw        & schaltet die Farbpalette auf Schwarz/Wei\ss{}-Monitor \\
+selectgrey      & schaltet die Farbpalette auf Graustufenmonitor \\
+selectcolor     & schaltet die Farbpalette auf Farbmonitor \\
+shownodes       & schaltet die Darstellung der Knoten an/aus \\
+showedges       & schaltet die Darstellung der Kanten an/aus \\
+showattributs   & schaltet die Darstellung der Attribute an/aus \\
+showfunctions   & schaltet die Darstellung der semantischen Aktionen an/aus \\
+showdependencies & schaltet die Darstellung der Abh\"angigkeiten an/aus \\
+showcopies      & schaltet die Darstellung der direkten Weitergabe (Kopie) von Attributwerten an/aus \\
+draw\_attribut  & zeichnet ein Attribut \\
+draw\_semaction & zeichnet eine semantische Aktion \\
+draw\_node      & zeichnet einen Baumknoten \\
+draw\_edge      & zeichnet eine Kante \\
+draw\_dep\_aa   & zeichnet einen Abh\"angigkeitspfeil zwischen zwei Attributen \\
+draw\_dep\_sa   & zeichnet einen Abh\"angigkeitspfeil von einer semantischen Aktion zu einem Attribut \\
+draw\_dep\_as   & zeichnet einen Abh\"angigkeitspfeil von einem Attribut zu einer semantischen Aktion \\
+draw\_dep\_ts   & zeichnet einen Abh\"angigkeitpfeil von einem Baumblatt zu einer semantischen Aktion \\
+minimize        & berechnet den g\"unstigsten X-Wert bei einer Abh\"angigkeit in  vertikaler Richtung zweier sich in X-Richtung \"uberlagernder
+Baumelemente. Dadurch entstehen senkrechte Pfeile mit minimaler L\"ange. \\
+draw\_dep\_arrow & zeichnet einen Abh\"angigkeitspfeil\\
+draw\_line      & zeichnet eine Linie und spart dabei die von Baumelementen belegten Bereiche aus \\
+redraw\_request & verarbeitet eine Zeichenanfrage des X-Windows-Eventhandlers \\
+new\_area       & l\"oscht und zeichnet den Baum in einem bestimmten Bereich neu \\ redraw\_area & zeichnet den Baum in einem
+bestimmten Bereich neu \\
+\hline
+\end{tabular}
+\bigskip
+
+\subsubsection{Die Funktionen}
+
+Es folgt die Beschreibung der Funktionen im Einzelnen.
+
+\bigskip
+\begin{tabular}{|l|p{9.0cm}|}
+\hline
+Funktion & Beschreibung \\
+\hline
+selectbw &
+Die Funktion {\it selectbw} schaltet die globale Variable {\it opts.monitortype} auf 0. Au\ss{}erdem werden die grapischen Kontexte {\it dparms.gc\_red}
+und {\it dparms.gc\_green} auf den schwarzen Pixel {\it black.pixel} geschaltet. \\ selectgrey & Die Funktion {\it selectgrey} schaltet die globale
+Variable {\it opts.monitortype} auf 1. Au\ss{}erdem wird der graphische Kontext {\it dparms.gc\_red} auf den hellgrauen Pixel {\it light\_grey.pixel}
+und der graphische Kontext {\it dparms.gc\_green} auf den dunkelgrauen Pixel {\it dark\_grey.pixel} geschaltet. \\ selectcolor & Die Funktion {\it
+selectcolor} schaltet die globale Variable {\it opts.monitortype} auf 2. Au\ss{}erdem wird der graphische Kontext {\it dparms.gc\_red} auf den roten
+Pixel {\it red.pixel} und der graphische Kontext {\it dparms.gc\_green} auf den gr\"unen Pixel {\it green.pixel} geschaltet. \\ shownodes & Die
+Funktion {\it shownodes} schaltet die Darstellung der Knoten in der Maske um. Dazu wird die globale Variable {\it opts.nodes} auf 0 bzw. 1 gestellt.
+\\ showedges & Die Funktion {\it showedges} schaltet die Darstellung der Kanten in der Maske um. Dazu wird die globale Variable {\it opts.edges} auf 0
+bzw. 1 gestellt.\\ showattributs & Die Funktion {\it showattributs} schaltet die Darstellung der Attribute in der Maske um. Dazu wird die globale
+Variable {\it opts.attributs} auf 0 bzw. 1 gestellt. \\ showfunctions & Die Funktion {\it showfunctions} schaltet die Darstellung der semantischen
+Aktionen in der Maske um. Dazu wird die globale Variable {\it opts.sem\_actions} auf 0 bzw. 1 gestellt. \\ showdependencies & Die Funktion {\it
+showdependencies} schaltet die Darstellung der Abh\"angigkeitspfeile in der Maske um. dazu wird die globale Variable {\it opts.dependencies} auf 0 bzw.
+1 gestellt. \\ showcopies & Die Funktion {\it showcopies} schaltet die Darstellung der direkten Weitergabe (Kopie) von Attributen in der Maske um.
+Dazu wird die globale Variable {\it opts.copies} auf 0 bzw. 1 gestellt. \\
+\hline
+\end{tabular}
+
+\begin{tabular}{|l|p{9.0cm}|}
+\hline
+draw\_attribut & Die Funktion {\it draw\_attribut} bekommt als Parameter
+einen Zeiger auf ein Attribut {\it ALEP attr}. Dieses Attribut wird nun mit Hilfe der X-Windows-Funktion {\it XPutImage} gezeichnet. Die entsprechende
+Imagenummer stellt die Funktion {\it get\_image} des MUG Browser Front-Ends zu Verf\"ugung. Vorher wird noch die Maske \"uberpr\"uft: Sind die Attribute
+(globale Variable {\it opts.attributs}) ausgeschaltet oder sind die semantischen Aktionen ({\it opts.sem\_actions}) ausgeschaltet und es handelt sich
+um ein Hilfsattribut, so wird das Attribut nicht gezeichnet.\\
+draw\_semaction & Die Funktion {\it draw\_semaction} bekommt als
+Parameter einen Zeiger auf eine semantische Aktion {\it SemLEP semaction}. Diese semantische Aktion wird nun mit Hilfe der X-Windows-Funktionen {\it
+XDrawRectangle} und {\it XDrawImageString} gezeichnet. Vorher wird wiederum die Maske \"uberpr\"uft: Sind semantische Aktionen ({\it opts.sem\_actions})
+ausgeschaltet, so wird nicht gezeichnet. \\
+draw\_node & Die Funktion {\it draw\_node} bekommt als Parameter einen Zeiger auf einen Baumknoten {\it
+TEP Node}. Dieser Knoten wird ebenfalls mit Hilfe der X-Windows-Funktionen {\it XDrawRectangle} und {\it XDrawImageString} gezeichnet. Wie gehabt wird
+vorher die Maske \"uberpr\"uft: Sind Knoten ({\it opts.nodes}) ausgeschaltet, so wird nicht gezeichnet. \\
+draw\_edge & Die Funktion {\it draw\_edge}
+bekommt als Parameter zwei Knoten {\it TEP node1} und {\it TEP node2}, wobei der erste der Vaterknoten ist. Diese Knoten werden nun mit Hilfe der
+X-Windows-Funktion {\it XDrawLine} oder mit der Funktion {\it draw\_line} gezeichnet, je nachdem ob die Maske semantische Aktionen
+(und somit dazwischenliegende Elemente) zul\"a\ss{}t oder nicht. Erneut wird vorher die Maske \"uberpr\"uft: Sind Kanten ({\it opts.edges}) oder Knoten ({\it
+opts.nodes}) ausgeschaltet, so wird in beiden F\"allen nicht gezeichnet, da auch eine Darstellung von Kanten ohne Knoten wenig sinnvoll ist. \\
+\hline
+\end{tabular}
+
+\begin{tabular}{|l|p{9.0cm}|}
+\hline
+draw\_dep\_aa & Die Funktion {\it draw\_dep\_aa} bekommt als Paramter zwei Attribute {\it ALEP attr1} und {\it ALEP attr2}. Mit Hilfe der Funktion
+{\it draw\_dep\_arrow} wird ein Abh\"angigkeitspfeil von Attribut {\it attr1} nach Attribut {\it attr2} gezeichnet. Befinden sich die
+Attribute auf gleicher H\"ohe (Y-Koordinate), so mu\ss{} um den dazwischenliegenden Baumknoten herumgezeichnet werden. In diesem Fall wird ein Teil des
+Pfeiles mit der X-Windows-Funktion {\it XDrawLine} bzw. mit der Funktion {\it draw\_line} gezeichnet, je nachdem ob semantische
+Aktionen in der Maske eingeschaltet sind oder nicht. Die vorherige \"Uberpr\"ufung der Maske gestaltet sich in diesem Fall etwas komplizierter: Nat\"urlich
+wird nicht gezeichnet, wenn Abh\"angigkeiten ({\it opts.dependencies}) ausgeschaltet sind. Aber auch im Falle von ausgeschalteten Kopien ({\it
+opts.copies}) wird nicht gezeichnet, da es sich hier um die simple Weitergabe von Attributwerten handelt. Sind Attribute ({\it opts.attributs})
+ausgeschaltet, so wird ebenfalls nicht gezeichnet, da Abh\"angigkeitspfeile ohne Attribute keinen Sinn machen. Handelt es sich bei mindestens einem der
+beiden Attribute um ein Hilfsattribut (auxiliary) und sind semantische Aktionen abgeschaltet ({\it opts.sem\_actions}), so wird wieder nicht
+gezeichnet, da in diesem Fall Hilfsattribute nicht dargestellt werden.\\
+draw\_dep\_sa & Die Funktion {\it draw\_dep\_sa} bekommt als Parameter eine
+semantische Aktion {\it SemLEP semaction} und ein Attribut {\it ALEP attr}. Mit Hilfe der Funktion {\it draw\_dep\_arrow} wird ein
+Abh\"angigkeitspfeil von der semantischen Aktion zum Attribut gezeichnet. Im Falle von ausgeschalteten Abh\"angigkeiten ({\it opts.dependencies}),
+Attributen ({\it opts.attributs}) oder semantischen Aktionen ({\it opts.sem\_actions}) wird nicht gezeichnet. \\
+draw\_dep\_as & Die Funktion {\it
+draw\_dep\_as} funktioniert genau wie {\it draw\_dep\_sa}. Es wird lediglich vom Attribut zur semantischen Aktion, also in
+umgekehrter Richtung, gezeichnet. \\
+\hline
+\end{tabular}
+
+\begin{tabular}{|l|p{9.0cm}|}
+\hline
+draw\_dep\_ts & Die Funktion {\it draw\_dep\_ts} bekommt als Parameter einen terminalen Baumknoten (Blatt) {\it
+TEP terminal} und eine semantische Aktion {\it SemLEP semaction}. Mit Hilfe der Funktion {\it draw\_dep\_arrow} wird ein
+Abh\"angigkeitspfeil vom Terminal zur semantischen Aktion gezeichnet. Nicht gezeichnet wird bei ausgeschalteten Abh\"angigkeiten ({\it
+opts.dependencies}), Knoten ({\it opts.nodes}) oder semantischen Aktionen ({\it opts.sem\_actions}).\\
+minimize & Die Funktion {\it minimize} bekommt
+als Parameter die X-Koordinaten von zwei sich in X-Richtung \"uberlappenden Baumelementen {\it int x1min}, {\it int x1max}, {\it int x2min} und {\it int
+x2max}. Sie berechnet eine geeignete X-Koordinate, an der ein vertikaler Abh\"angigkeitspfeil plaziert werden kann.\\ draw\_dep\_arrow & Die Funktion
+{\it draw\_dep\_arrow} bekommt die Koordinaten von zwei durch einen Abh\"angigkeitspfeil zu verbindenden Baumelementen {\it int x1}, {\it int y1}, {\it
+int x2} und {\it int y2}. Au\ss{}erdem bekommt sie eine Liste der in der entsprechenden Produktion liegenden semantischen Aktionen {\it SemList *list}.
+Sie verbindet nun die Koordinaten (x1, y1) und (x2, y2) mit Hilfe eines Abh\"angigkeitspfeiles. Sind semantische Aktionen eingeschaltet ben\"utzt sie dazu
+die Funktion {\it draw\_line}. \\
+draw\_line & Die Funktion {\it draw\_line} bekommt die gleichen Parameter wie {\it
+draw\_dep\_arrow}. Zus\"atzlich bekommt sie die Farbe {\it int color}, die entweder {\it RED} oder {\it BLACK} sein kann. Sie
+zeichnet eine Linie in der gew\"unschten Farbe, wobei sie von semantischen Aktionen belegte Bereiche ausspart. \\
+redraw\_request & Die Funktion {\it
+redraw\_request} wird immer dann aufgerufen, wenn ein Teil des Baums neu gezeichnet werden mu\ss{}. Sie berechnet aufgrund der Daten des
+X-Windows-Eventhandlers den entsprechenden Bereich und ruft dann die Funktion {\it redraw\_area} auf. \\ new\_area & Die Funktion
+{\it new\_area} zeichnet einen bestimmten Bereich komplett neu, d. h. er wird vorher gel\"oscht. Dazu ben\"utzt sie die X-Windows-Funktion {\it
+XClearArea}. Anschlie\ss{}end ruft sie {\it redraw\_area} auf. \\
+\hline
+\end{tabular}
+
+\begin{tabular}{|l|p{9.0cm}|}
+\hline
+redraw\_area & Die Funktion {\it redraw\_area} bekommt als Parameter
+die Koordinaten des neu zu zeichnenden Bereichs {\it int xmin}, {\it int xmax}, {\it int ymin} und {\it int ymax}. Das Zeichnen erfolgt nun in zwei
+P\"assen: Im ersten Pass werden alle "`soliden"' Elemente, d. h. Knoten, Attribute und semantische Aktionen, gezeichnet. Dabei orientiert sich die
+Funktion an dem durch die \"ubergebenen Parameter definierten Bereich. Im zweiten Pass werden Abh\"angigkeiten und Kanten gezeichnet. In diesem Fall wird
+das komplette sichtbare Fenster, definiert durch die globalen Variablen {\it dparms.r\_xmin}, {\it dparms.r\_xmax}, {\it dparms.r\_ymin} und {\it
+dparms.r\_ymax}, neu gezeichnet. \\ \hline \end{tabular}
+
+\chapter{Styleguide}
+
+Um eine optimale Darstellung den Syntaxbaumes zu erhalten, sollten unten stehende Regeln ber\"ucksichtigt werden. Eine Verletzung des Styleguides
+verhindert zwar nicht die Erstellung einer Ausgabe, die Ergebnisse sind dann jedoch nicht so ansprechend wie bei Beachtung.
+
+\section{Attributnamen}
+
+Bei der Anordnung der Attribute pr\"uft der MUGBrowser auf korrespondierende inherited und derived Attribute. Zwei Attribute korrespondieren, wenn ihre
+Namen bis auf das erste Zeichen \"ubereinstimmen. Das erste Zeichen sollte der Kennzeichung der drei Attributarten dienen. Zum Beispiel w\"are denkbar,
+die Namen aller inherited mit einem i, die dervied mit einem d und die Auxliaries mit einem a beginnen zu lassen. Der Rest des Namens dient der
+Bezeichnug des Attributs. So k\"onnte zum Beispiel ein Symboltabellenattribut die Namen {\it iSymTab}, {\it dSymTab} und {\it aSymTab} tragen.
+
+Gleiche Attribute sollten gleiche Namen haben, da verschiedene Bezeichner nicht nur Verwirrung stiften, sondern auch das Layout des Syntaxbaums
+beeintr\"achtigen. Gleichzeitige Verwendung von {\it iSymboltable}, {\it iSymTab} und {\it iST} ist also zu vermeiden!
+
+\section{Namen von semantischen Aktionen}
+
+Der Platzbedarf einer semantischen Aktion im Baum h\"angt von der L\"ange ihres Namens ab. Vor allem f\"ur h\"aufig angewandte Aktionen, wie zum Beispiel
+der Erh\"ohung eines Attributwerts, sollten deshalb etwas k\"urzere Namen erhalten. Bezeichungen wie {\it Entry\_of\_Parameters\_into\_SymbolTable} f\"uhren
+zu unsch\"onen Ergebnissen.
+
+\section{On-Line Styleguide}
+
+Im MUG Browser Verzeichnis befindet sich eine ASCII-Datei "`Styleguide"', die eine Reihe von Konventionen zur benennung von Attributen vorschl\"agt
+(siehe dort).
+
+\chapter{Erweiterungsm\"oglichkeiten}
+
+\section{Allgemeine Erweiterungsm\"oglichkeiten}
+
+Durch die modulare Aufteilung des MUG Browsers bieten sich ein Vielzahl von Anwendungen, bei denen das Front- oder Back-End unabh\"angig voneinander verwendet werden kann. So k\"onnte man an das Front-End statt der Visualisierung auf dem Bildschirm durch das
+
+
+
+ Back-End ein Modul zur Druckausgabe anh\"angen. Andersherum k\"onnte man das Back-End auch f\"ur die Ausgabe von anderen B\"aumen verwenden, die eine \"ahnliche Darstellung haben.
+Da sich auch innerhalb des Front-Ends eine Schnittstelle befindet, n\"amlich die vom modifizierten MUG erzeugten Daten, k\"onnte man als Eingabe auch einen anderen \"Ubersetzergenerator verwenden. \"Uberall dort, wo eine attributierte Grammatik erzeugt wird, kan
+
+
+
+n der MUG Browser als Visualisierungswerkzeug dienen.
+
+\section{Erweiterungsm\"oglichkeiten des Back-Ends}
+
+Einfache Erweiterungen des Back-Ends w\"aren z. B. zus\"atzliche Informationen in den Pop-Up-Fenstern. So k\"onnte man z. B. bei jedem Knoten zus\"atzlich eine Liste der zugeh\"origen inherited und derived Attribute angeben. Grunds\"atzlich ist die Angabe fast jeder
+
+
+
+ Information m\"oglich, da s\"amtliche verf\"ugbaren Informationen statisch in der Datenstruktur des Baums vorhanden sind.
+Eine weitere einfache Erweiterung w\"are das Wegschalten von einzelnen bestimmten Attributen, Funktionen oder Knoten, also eine Erweiterung der Maske.
+Es m\"u\ss{}ten nur die Abfragen am Anfang der Funktionen {\it draw\_attribut}, {\it draw\_semaction}, {\it draw\_node}, {\it draw\_edge},
+{\it draw\_dep\_aa}, {\it draw\_dep\_sa}, {\it draw\_dep\_as} und {\it draw\_dep\_ts} erweitert werden. Weiterf\"uhrende Erweiterungen sind z. B. das
+Editieren der Grammatik mit Hilfe das Back-Ends. Dazu m\"u\ss{}te das Back-End Eintr\"age und Ver\"anderungen in der Datenstruktur des Syntaxbaums vornehmen.
+Gr\"o\ss{}ere Umst\"ande ergeben sich, wenn das Layout des Baums neu errechnet werden mu\ss{}, wenn z. B. ein Knoten gel\"oscht oder eingef\"ugt wird. Dazu sollte
+eine Funktion zum Updaten des Layouts eingef\"ugt werden. Vom Layouten des ganzen Baums, wie es beim Aufruf des MUG Browsers passiert, wird abgeraten,
+da das sehr zeitaufwendig ist. Eine weitere umfangreiche Erweiterung stellt die Einbindung einer Druckfunktion innerhalb des Back-Ends dar.
+
+\end{document}
+
+

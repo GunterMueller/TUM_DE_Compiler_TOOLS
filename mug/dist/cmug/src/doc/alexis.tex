@@ -1,0 +1,2060 @@
+\documentstyle[11pt,german]{report}
+\author{F.~Eiberle, B.~Smith}
+\font\bigbold=cmbx10 scaled \magstep5
+\title{Technische Universit"at M"unchen\break Institut f"ur Informatik\break Lehrstuhl
+Prof. Dr. J. Eickel \break \break \break
+{\bf Fortgeschrittenenpraktikum}\break \break
+{\bigbold ALEXIS\break Benutzerhandbuch}\break
+\break Betreuer: R.~H"ollerer}
+\date{11.7.1991}
+\addtolength{\textheight}{5\baselineskip}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt plus 2pt minus 1pt}
+\frenchspacing
+\sloppy
+\hyphenation{LEXEMES}
+\hyphenation{ALEXIS}
+\hyphenation{makros}
+\begin{document}
+\maketitle
+\begin{abstract}
+ALEXIS ist ein universeller Scannergenerator. Von ihm erzeugte Scanner k"onnen sowohl 
+zusammen mit einem Parser als auch im Stand-Alone-Betrieb verwendet werden. Er erzeugt 
+deterministische Automaten, so da"s die Geschwindigkeit des Scannens unabh"angig von 
+der Komplexit"at des Scanners ist. Als Eingabesprache dienen regul"are Ausdr"ucke. Ist 
+der l"angste passende Ausdruck im Eingabetext identifiziert, so wird eine vom Benutzer 
+spezifizierte Aktion ausgef"uhrt. Dies Technik erm"oglicht weitgehende Unabh"angigkeit
+von umgebenden Programmen, wie z.B. Parsern.\hfill \break
+In diesem Handbuch soll zun"achst die Eingabesprache dieses Generators beschrieben
+werden, bevor auf die Eigenschaften des Standard-Backends eingegangen wird. Schlie"slich
+wird die Anpassung des Generators an das
+CMUG-System\footnote{{\bf M}odularer {\bf "U}bersetzer {\bf G}enerator des Instituts 
+f"ur Informatik der TU-M"unchen} beschrieben.\hfill \break
+ALEXIS selbst wurde ebenfalls mit dem CMUG-System generiert. Dabei wird der Scanner
+f"ur die Eingabesprache von ALEXIS mittels Bootstrap erzeugt. Eine Beschreibung dieses
+Scanners findet sich weiter hinten.
+\end{abstract}
+\tableofcontents
+\chapter{Die Eingabesprache}
+Als Eingabesprache f"ur ALEXIS dient eine Liste von regul"aren Ausdr"ucken, die jeweils
+optional mit einer Aktion verbunden werden k"onnen. Die Aktion wird in der Zielsprache
+des Generators spezifiziert. In dieser Version ist das C. Wird ein Token eindeutig
+erkannt, so f"uhrt ALEXIS die zugeh"orige Aktion aus. Die Aktion wird dabei erst
+ausgef"uhrt, {\bf nachdem} ein Token eindeutig erkannt wurde.Der Benutzer kann 
+spezifizieren, ob der Scanner anschlie"send den Eingabetext weiter bearbeitet, 
+oder die Kontrolle an ein aufrufendes Programm, z.B. einen Parser zur"uckgeben 
+soll. Um die Eingabesprache lesbar zu gestalten, werden sowohl f"ur die regul"aren
+Ausdr"ucke, als auch f"ur die Aktionen Makromechanismen angeboten, die bei h"aufigen
+Wiederholungen gleicher oder "ahnlicher Texte verwendet werden k"onnen.\hfill \break 
+Im Folgenden werden zun"achst Syntax und Semantik der regul"aren Ausdr"ucke
+beschrieben, anschlie"send die Makrotechnik f"ur solche Ausdr"ucke. Der zweite Teil
+des Kapitels besch"aftigt sich mit der Spezifizierung der Aktionen. Es folgt eine
+kurze Einf"uhrung zur Nutzung von Includes f"ur die Scanner-Generierung. Den Abschlu"s
+bilden Beispiele, die diese M"oglichkeit verdeutlichen.
+
+\vfill \eject 
+\section{Konventionen}
+\subsection{Trennung von Anweisungen und Schl"usselworten}
+Bei der Trennung von Anweisungen in ALEXIS-Programmen sind folgende F"alle zu
+unterscheiden:
+\subsubsection{Trennung von Schl"usselworten in ALEXIS-Programmen}
+Schl"usselworte werden bei ALEXIS durch {\it White-Spaces\/} getrennt. Dies k"onnen
+sein:
+
+\medskip
+
+\begin{itemize}
+\item Ein oder mehrere Leerzeichen
+\item Ein oder mehrere Zeilenvorsch"ube
+\item Kommentare
+\end{itemize}
+
+\medskip
+
+Diese Elemente k"onnen in beliebiger Folge aneinandergereiht werden. F"ur Kommentare
+gibt es zwei verschiedene Formen, die auch gemischt werden k"onnen:
+
+\medskip
+
+\hskip 1truecm $\lbrace$ Kommentartext $\rbrace$
+
+oder
+
+\hskip 1truecm (* Kommentartext *)
+
+\medskip
+
+Es ist zu beachten, da"s ein Kommentar nur durch die Zeichenkombination beendet werden
+kann, die zu der er"offnenden Kombination geh"ort. Dies er"offnet die M"oglichkeit
+Kommentare bis zur Tiefe eins zu schachteln. Kommentare der form $\lbrace$ Kommentar
+(* anderer Kommentar *) noch etwas $\rbrace$ sind also zul"assig.
+\subsubsection{Trennung von Anweisungen in ALEXIS-Programmen}
+F"ur die Trennung von Deklarationen und Statements, die zum eigentlichen
+ALEXIS-Programm geh"oren, gelten die folgenden Anhaltspunkte:
+
+\medskip
+
+\begin{itemize}
+\item Im Deklarationsteil, also in dem Teil, der vor dem Schl"usselwort LEXEMES steht,
+werden keine Trennzeichen ben"otigt.
+\item Die einzelnen Definitionen von Tokens im eigentlichen ALEXIS-Programm werden mit
+Semikolon getrennt.
+\end{itemize}
+\subsubsection{Trennung in Anweisungen der Zielsprache}
+F"ur die Trennungen von Anweisungen in Programmfragmenten, die in der Zielsprache
+geschrieben sind, und die zwischen den Delimitern {\it prog\/} und {\it progend\/}
+stehen, gelten die Regeln der Zielsprache, da diese Programmfragmente identisch in das
+sp"ater von ALEXIS generierte Programm "ubernommen werden. Syntaxfehler in einem
+Programmfragment f"uhren also direkt zu Syntaxfehlern im von ALEXIS generierten
+Programm und werden nicht von ALEXIS, sondern erst vom C-Compiler erkannt.
+\subsection{Darstellung von Identifikatoren}
+Identifikatoren m"ussen in ALEXIS-Programmen mit einem Buchstaben beginnen und d"urfen
+danach Ziffern und auch Underscores enthalten. Die signifikante L"ange von
+Identifikatoren ist nicht beschr"ankt, Gro"s- und Kleinschreibung werden ignoriert.
+
+\medskip
+
+Beispiele:
+
+\begin{tabular}{ll}
+'17Rubel'&ist kein Identifikator, weil das Wort mit einer Ziffer anf"angt.\\ 
+&\\
+'Rubel\_17'&ist g"ultiger Identifikator und ist mit 'ruBeL\_17' identisch.\\
+\end{tabular}
+
+\medskip
+
+\section{Aufbau von ALEXIS-Programmen}
+Ein ALEXIS-Programm besteht aus vier Teilen:
+\begin{itemize}
+
+\medskip
+
+\item Programmkopf
+\item Optionen
+\item Deklarationen
+\item Tokenspezifikation
+\end{itemize}
+
+\medskip
+
+Das Programm beginnt grunds"atzlich mit dem Programmkopf und endet immer mit der
+Tokenspezifikation. Dazwischen k"onnen sich Optionen und Deklarationen in beliebiger
+Folge abwechseln. An jeder Stelle des Programms, au"ser im Programmkopf l"a"st sich
+au"serdem eine INCLUDE-Anweisung einf"ugen, die bewirkt, da"s ALEXIS an dieser Stelle
+den Text aus einer anderen Datei einf"ugt. Dadurch lassen sich sowohl
+Makro-Bibliotheken , als auch modulare Programme "ubersichtlich und sicher
+implementieren.
+\subsection{Programmkopf}
+Der Programmkopf hat die Sytax
+
+\medskip
+
+\hskip 1truecm SCANNER $<$name$>$ ;
+
+\medskip
+
+Der Scannername dient lediglich als Kommentar und hat keine weitere Bedeutung.
+\subsection{Optionen}
+Die Optionen dienen dazu, einzelne Aspekte der Generierung gezielt entsprechend den
+Anforderungen zu steuern. In dieser Version stehen die folgenden Optionen zur
+Verf"ugung, die sp"ater genauer erkl"art sind:
+
+\medskip
+
+\begin{itemize}
+\item IgnoreCase
+\item Minimize
+\end{itemize}
+
+\medskip
+
+Optionen k"onnen in beliebiger Reihenfolge angegeben werden, auch an mehreren
+verschiedenen Stellen im Programm. Ihre Syntax ist:
+
+\medskip
+
+\hskip 1truecm OPTIONS $option_1$ ... $option_n$ OPTIONEND ;
+\subsection{Deklarationen}
+ALEXIS kennt drei Arten von Deklarationen, n"amlich:
+
+\medskip
+
+\begin{itemize}
+\item Lexikalische Makros
+\item Aktionsmakros
+\item Spezielle Aktionen
+\end{itemize}
+
+\medskip
+
+Die Deklarationen k"onnen in beliebiger Reihenfolge stehen. Deklarationen k"onnen
+aber auch redefiniert werden. Dies kann bei der Verwendung von Includes mit Makros
+sinnvoll sein. Damit diese M"oglichkeit nicht zu Fehlern f"uhrt, wird jedoch bei der
+Redefinition eine Warnung abgesetzt. Weitere Informationen zu den Deklarationen, und
+deren Anwendung befindet sich in gesonderten Abschnitten dieses Handbuches.   
+\subsection{Tokenspezifikation}
+In diesem Teil wird der eigentliche Scanner beschrieben. Er besteht aus einer nicht
+leeren Liste von Deklarationen der Form
+
+\medskip
+
+\hskip 0.5truecm LEXEMES
+
+\hskip 1truecm $<$regexpr$>$ -$>$ $<$aktion$>$ ; 
+
+\hskip 2truecm : 
+
+\hskip 2truecm : 
+
+\hskip 1truecm $<$regexpr$>$ -$>$ $<$aktion$>$ ;
+
+\hskip 0.5truecm LEXEMESEND
+
+\medskip
+
+Dabei ist $<$regexpr$>$ ein regul"arer Ausdruck, der ein Token beschreibt, und
+$<$aktion$>$ eine Deklaration f"ur ein Programmst"uck, das dann ausgef"uhrt wird,
+wenn ein String erkannt wurde, der von $<$regexpr$>$ gematcht wird. Die Syntax und 
+genaue Semantik dieser beiden Teile sind im folgenden beschrieben, insbesondere 
+auch die M"oglichkeit, statt eines Programmst"uckes auch ein (parametrisiertes)
+Makro anzugeben.
+
+{\bf Achtung:} Es wird stehts das in Aufschreibungsreihenfolge {\it erste\/} passende
+Token angenommen. Deshalb muss z.B. die Deklaration f"ur Identifier nach der Deklaration
+aller g"ultigen Schl"usselworte stehen, da sonst z.B. das ALEXIS-Token {\it BEGIN\/} 
+als Identifier angesehen wird, weil es dessen Definition ebenfalls matcht. 
+\section{Aufbau regul"arer Ausdr"ucke}
+Die Spezifikation eines Scanners mit ALEXIS geschieht durch eine Anzahl von regul"aren
+Ausdr"ucken. Der generierte Scanner zerlegt den Eingabetext in diese Tokens.\hfill\break
+ALEXIS ist in der Lage, alle Zeichenfolgen zu erkennen, die sich mit Hilfe einer
+Chomsky-3-Grammatik darstellen lasssen. Das Programm selbst enth"alt keinerlei
+Beschr"ankung f"ur die L"ange der Tokens, sie ist lediglich durch den Speicherplatz 
+beschr"ankt, der vom Compiler f"ur den Heap zur Verf"ugung gestellt wird.\hfill\break
+Dieser Abschnitt beschreibt die m"oglichen regul"aren Ausdr"ucke und ihre Semantik.
+\vfill \eject
+\subsection{Pr"azedenz der Operatoren}
+F"ur den Aufbau regul"arer Ausdr"ucke gilt die folgende Pr"azedenz der Operatoren:
+
+\medskip
+
+\begin{tabular}{ll}
+0&Alternative \\
+1&Konkatenation \\
+2&Wiederholungsoperatoren \\
+3&Zeichen(folgen),Mengen,Klammerausdr"ucke,allbut-Operator\\
+\end{tabular}
+
+\medskip
+
+Je h"oher eine Nummer ist, desto st"arker ist die Bindung. So werden Wiederholungfunktionen
+z.B. vor Konkatenationen berechnet und diese vor Alternativen. Bei zwei Operationen der
+gleichen Priorit"atsstufe wird von links nach rechts ausgewertet. Die vorgegebene Priorit"at
+l"a"st sich mit Hilfe von Klammern durchbrechen, bzw. lassen sich die Ausdr"ucke
+geklammert oft klarer darstellen.  
+\subsection{Zeichen und Zeichenfolgen}
+ALEXIS bietet die M"oglichkeit Zeichen und Zeichenfolgen direkt anzugeben. Daf"ur stehen vier
+verschiedene syntaktische Konstrukte zur Verf"ugung mit denen sich atomare regul"are 
+Ausdr"ucke bilden lassen:
+
+\medskip
+
+\begin{tabular}{ll}
+Einzelnes Zeichen&'A'\\
+Zeichencode&CHR(41)\\
+Anf"uhrungszeichen&' ' ' '\\
+Zeichenkette&'Zeichenkette'\\
+\end{tabular}
+
+\medskip
+
+Sowohl einzelne Zeichen, als auch Zeichenketten stehen zwischen Hochkommas, wobei 
+das Hochkomma selbst mit einem zweiten Hochkomma maskiert werden mu"s. 
+Schl"usselw"ortern und Makros werden hingegen nicht von Hochkommas begrenzt.
+
+Aus jedem dieser Konstrukte wird von ALEXIS ein endlicher Automat erzeugt. Einzelne Zeichen
+und Zeichenfolgen sind also normale regul"are Ausdr"ucke, die mit allen anderen 
+Ausdr"ucken verkn"upft werden. 
+\subsection{Mengen}
+Auch Zeichenmengen stellen f"ur ALEXIS atomare Elemente dar. Sie k"onnen lediglich komplementiert
+werden, weitere Operationen wie Vereinigung oder Schnittmengenbildung stehen nicht zur
+Verf"ugung. Die Vereinigung l"a"st sich aber einfach durch den Alternativ-Operator $\mid$
+simulieren.
+\vfill \eject
+Um Mengen darzustellen, m"ussen die einzelnen Zeichen oder ein Zeichenbereich angegeben
+werden. Dabei k"onnen Zeichen sowohl direkt als auch mit Hilfe ihres Codes angegeben werden:
+
+\medskip
+
+\begin{tabular}{ll}
+Separate Angabe&['a','f','1',chr(10)]\\
+Bereichsangabe&['a'..'z']\\
+Gemischte Angaben&['A'..'Z','a'..'z','\_']\\
+&[chr(0)..' ','a'..chr(128)]\\
+\end{tabular}
+
+\medskip
+
+Mengen k"onnen komplementiert werden. Dies ist besonders dann praktisch, wenn alle
+Zeichen au"ser einer kleinen Anzahl akzeptiert werden sollen:
+
+\medskip
+
+\begin{tabular}{ll}
+not[chr(10)]&Akzeptiert alles au"ser EOLN\\
+\end{tabular}
+
+\medskip
+
+Mengen werden in regul"are Automaten "ubersetzt, k"onnen also verwendet werden, wie 
+jeder andere regul"are Ausdruck. Ihre Verwendung empfiehlt sich, um die Zeit, die
+ALEXIS zur Generierung des Automaten ben"otigt kurz zu halten. Ob Mengen oder andere
+atomare Ausdr"ucke verwendet werden, hat jedoch keinen Einflu"s auf das Ergebnis der
+Generierung.
+\subsection{Konkatenation}
+Die Konkatenation zweier regul"arer Ausdr"ucke $R_1$ und $R_2$ bewirkt, da"s der 
+resultierende Ausdruck die Konkatenation der beiden Ausdr"ucke $R_1 \circ R_2$
+beschreibt. ALEXIS besitzt keinen eigenen syntaktischen Operator f"ur die
+Konkatenation. Zwei Ausdr"ucke, die konkateniert werden sollen, werden einfach
+hintereinander geschrieben.
+
+\medskip
+
+\begin{tabular}{ll}
+'Hallo' chr(10)&Die Kette 'Hallo' am Ende einer Zeile\\
+\end{tabular}
+
+\medskip
+
+Bei der Konkatenation k"onnen Mehrdeutigkeiten entstehen. Diese sind in Kapitel
+1.3.8 beschrieben.
+\subsection{Alternativen}
+Zwei regul"are Ausdr"ucke k"onnen so verkn"upft werden, da"s das Ergebnis beide
+Ausdr"ucke akzeptiert. Die Alternativ-Operation wird bei ALEXIS durch das
+Zeichen '$\mid$' ausgedr"uckt:
+
+\medskip
+
+\begin{tabular}{ll}
+'0' $\mid$ '9'&akzeptiert 0 oder 9\\
+'Hallo' $\mid$ chr(10)&Entweder 'Hallo' oder Zeilenwechsel\\
+'A' $\mid$ 'B' $\mid$ 'C'&ist identisch mit ['A'..'C']\\
+\end{tabular}
+
+\medskip
+
+Diese Funktion kann z.B. benutzt werden, um verschiedene lexikalische Schreibweisen
+des gleichen Symbols zu kennzeichnen. Beispiel ist die Definition 'le' $\mid$ 
+'$<=$' f"ur das Kleinergleich-Zeichen in einigen Programmiersprachen. Auch die
+Alternativ-Konstruktion kann zu mehrdeutigen Ergebnissen f"uhren.
+\subsection{Wiederholungsfunktionen}
+Mit den Wiederholungsfunktionen wird ein Satz von Operationen zur Verf"ugung
+gestellt, die mehrfache Vorkommnisse eines gegebenen regul"aren Ausdrucks
+kennzeichnen. Sie alle k"onnen zu mehrdeutigen Ergebnissen f"uhren:
+\subsubsection{Stern-Operation}
+Die Stern-Operation dient dazu, beliebig viele Vorkommnisse eines regul"aren
+Ausdrucks zu spezifizieren. Diese Operation l"a"st auch zu, da"s der Ausdruck
+"uberhaupt nicht eintritt. Sie wird durch den Postfix-Operator '*' gekennzeichnet:
+
+\medskip
+
+\begin{tabular}{ll}
+'x'*&0-mal oder "ofter ein x\\
+$['A'..'Z']*$&0-mal oder "ofter ein Gro"sbuchstabe\\
+\end{tabular}
+
+\medskip
+
+Da der resultierende Ausdruck auch die leere Zeichenkette enth"alt, sollte diese
+Operation nicht auf ein ganzes Token angewendet werden. Durch die Konkatenation mit
+einem Ausdruck, der nicht die L"ange 0 haben kann, ist sicherzustellen, da"s das
+Token nicht leer ist, wie das folgende Beispiel illustriert:
+
+\medskip
+
+\begin{tabular}{ll}
+{\bf Unzul"assig}&['A'..'Z','0'..'9']*\\
+{\bf Zul"assig}&['A'..'Z']['A'..'Z','0'..'9']*\\
+\end{tabular}
+
+\medskip
+
+Im ersten Fall w"urde immer dann, wenn keines der anderen Token gematcht werden
+kann, die oben spezifizierte Aktion ausgef"uhrt und dann dem Aufrufer des Scanners
+ein leerer String geliefert. Da die Eingabe aber nicht verbraucht wurde, kommt der
+Scanner in einen station"aren Zustand, terminiert also nicht, weil das Token immer
+wieder geliefert wird.
+
+Man beachte in diesem Beispiel noch, da"s der Stern-Operator st"arker bindet, als
+die Konkatenation. Er wirkt sich also nur auf die zweite Menge aus, nicht auf den
+gesamten Ausdruck. 
+\subsubsection{Plus-Operation}
+Die Plus-Operation entspricht der Stern-Operation, l"a"st aber {\it keine\/} leeren
+Zeichenfolgen zu. Sie verlangt also ein oder mehr Vorkommen eines regul"aren
+Ausdrucks. Diese Operation wird durch den Postfix-Operator '+' spezifiziert:
+
+\medskip
+
+\begin{tabular}{ll}
+['0'..'9']+&akzeptiert Dezimalzahlen mit f"uhrenden Nullen\\
+\end{tabular}
+
+\medskip
+
+Bei der Plus-Operation handelt es sich um eine Kurzschreibweise f"ur \break {\it expr
+(expr *)\/}. ALEXIS wandelt einen Ausdruck, der mit dem Plus-Operator gebildet
+wurde jedoch in eine effizientere Interndarstellung um, so da"s die Generierung
+schneller abl"auft.
+\subsubsection{Options-Operation}
+Mit dieser Operation werden optionale Ausdr"ucke spezifiziert. Sie bildet also
+einen Ausdruck, der entweder die leere Zeichenfolge oder aber das Argument einmal
+akzeptiert. Ein nachgestelltes Fragezeichen '?' spezifiziert diesen Operator:
+
+\medskip
+
+\begin{tabular}{ll}
+'optional'?&leere Folge oder Zeichenfolge 'optional'\\
+$['0'..'9']+$('.')?&Dezimalzahl mit optionalem Punkt\\
+\end{tabular}
+
+\medskip
+
+Auch hier ist wieder zu beachten, da"s der Options-Operator st"arker bindet als die
+Konkatenation, so da"s keine Klammern erforderlich sind. Da der resultierende
+Ausdruck auch die leere Zeichenkette akzeptiert, darf die Operation nicht auf ein
+komplettes Token angewendet werden. Durch die Konkatenation mit einem Ausdruck, der
+nicht die L"ange 0 haben kann, ist sicherzustellen,da"s das Token nicht leer ist (vgl.
+Stern-Operation).
+\subsubsection{Anzahl-Operation}
+Die Anzahl-Operation ist die komplexeste und zugleich universellste
+Wiederholungsfunktion. ALEXIS bietet hiermit die M"oglichkeit, zu jedem beliebigen
+regul"aren Ausdruck anzugeben, wie oft er sich wiederholen soll. Dazu kann der
+Benutzer die Anzahl der Wiederholungen oder - alternativ dazu - eine untere und/oder
+eine obere Grenze angeben. Fehlt die untere Grenze, so wird sie auf Null gesetzt, fehlt
+die obere, so nimmt ALEXIS unendlich an. Alle Alternativen werden durch das
+Postfixsymbol '\#' eingeleitet:
+
+\medskip
+
+\begin{tabular}{lll}
+feste Anzahl&('0'$\mid$'L')\#8&8-mal 0 oder L\\
+beide Grenzen&('0'$\mid$'L')\#8,32&8 bis 32-mal 0 oder L\\
+nur obere Grenze&('0'$\mid$'L')\#,8&bis zu 8-mal 0 oder L\\
+nur untere Grenze&('0'$\mid$'L')\#8,&8-mal oder "ofter 0 oder L\\
+\end{tabular}
+
+\medskip
+
+Diese Operationen sind sehr speicherintensiv. Sollen komplexe Ausdr"ucke wiederholt
+werden, so kann es schnell zu einem Speicher"uberlauf des Generators kommen. Au"serdem
+ben"otigen diese Konstruktionen relativ viel Generierungszeit. Es ist daher
+empfehlenswert, diese Art von Ausdr"ucken nur einzusetzen, wenn sie unverzichtbar
+sind. H"aufig lassen sich solche Konstrukte jedoch durch geeignete semantische
+Aktionen umgehen.
+\subsection{Allbut-Operation}
+Diese Operation dient dazu, vollst"andige regul"are Ausdr"ucke zu komplementieren,
+nicht nur einzelne Zeichenmengen. Sie erzeugt einen Automaten der genau diejenigen
+Zeichenfolgen akzeptiert, die den Argument-Ausdruck nicht enthalten. Eine solche
+Operation ist z.B. n"utzlich, wenn eine beliebig gestaltete Zeichenfolge mit einer
+gegebenen Sequenz beendet werden soll. Sie wird mit Hilfe des Operators
+{\it allbut(RegExpr)\/} spezifiziert. Allbut ist dabei ein vordefiniertes
+Schl"usselwort. Einige Beispiele zu seiner Anwendung:
+
+\medskip
+
+\begin{tabular}{ll}
+allbut('\}')&entspricht not['\}']*\\
+'/*' allbut('*/') '*/'&akzeptiert Kommentare in C\\
+'prog' allbut('progend') 'progend'&Definition der Aktionen f"ur ALEXIS\\
+\end{tabular}
+
+\medskip
+
+Es ist zu beachten, da"s {\it allbut\/} nicht in Anf"uhrungszeichen stehen darf, da es ein
+Schl"usselwort ist. Steht es in Anf"uhrungszeichen, so wird es von ALEXIS als
+Zeichenfolge interpretiert und f"uhrt zu einem unerw"unschten Ergebnis.
+
+Die Allbut-Konstruktion akzeptiert leere Zeichenfolgen, wenn der urspr"ungliche
+Ausdruck dies nicht getan hat. In diesem Falle darf sie nicht als Token verwendet
+werden. Die Konkatenation mit konstanten Zeichenfolgen, wie in den vorhergehenden
+Beispielen beseitigt das Problem. Wird allbut alleine, ohne einen folgenden Ausdruck
+eingesetzt, so besteht vor allem die Gefahr, da"s mit dem Allbut-Ausdruck die gesamte
+restliche Eingabe auf einmal gematcht wird.
+\subsection{Aufl"osung von Mehrdeutigkeiten}
+Bei der Verkn"upfung von regul"aren Ausdr"ucken kommt es meistens zu Mehrdeutigkeiten
+in der Definition. Au"serdem ist es m"oglich, da"s eine gegebene Zeichenreihe zu
+mehreren Tokens pa"st. Ein Beispiel soll das verdeutlichen:
+
+\medskip
+
+\begin{tabular}{ll}
+'begin'&\{ Token \#1 \}\\
+$['a'..'z']$+&\{ Token \#2 \}\\
+\end{tabular}
+
+\medskip
+
+Die Zeichenfolge 'begin' l"a"st sich nun als Vorkommnis von Token \#1 und von Token
+\#2 interpretieren. Hier tritt eine Mehrdeutigkeit zwischen zwei verschiedenen Token
+auf.
+\vfill \eject
+Aber auch die Folge 'abc' ist nicht eindeutig. Sie l"a"st sich auf die folgenden
+vier Arten interpretieren:
+
+\medskip
+
+\begin{tabular}{ll}
+'abc'&\{ 1 Vorkommnis  von Token \#2 \}\\
+'a' 'bc'&\{ 2 Vorkommnise von Token \#2 \}\\
+'a' 'bc'&\{ 2 Vorkommnise von Token \#2 \}\\
+'a' 'b' 'c'&\{ 3 Vorkommnise von Token \#2 \}\\
+\end{tabular}
+
+\medskip
+
+ALEXIS l"ost diese beiden Mehrdeutigkeiten mit zwei Mechanismen. Zun"achst betrachtet
+der Generator nur das jeweils l"angste Token. Im zweiten Beispiel w"are also die Folge
+'abc' das Token gewesen und ALEXIS h"atte nur ein Vorkommen dieses Tokens
+festgestellt. So gibt es keine Mehrdeutigkeiten innerhalb eines Tokens. Treten
+Konflikte zwischen zwei verschiedenen Token auf, so wird stets das in der Reihenfolge
+der Aufschreibung zuerst definierte Token gew"ahlt. Im ersten Beispiel w"are dies f"ur
+'begin' das Token \#1 gewesen.
+\subsection{Lexikalische Makroausdr"ucke}
+ALEXIS bietet die M"oglichkeit, h"aufig verwendete regul"are Ausdr"ucke zu sogenannten
+Makros zusammenzufassen. Solchen Makros wird ein Name zugewiesen, der wie ein atomares
+Element eines regul"aren Ausdrucks verwendet werden kann. F"ur den generierten Scanner
+macht es keinen Unterschied, ob bei der Spezifikation Makros verwendet wurden, oder ob
+die jeweiligen Ausdr"ucke explizit angegeben wurden. Beim Speichern der Makros wird
+der Automat jedoch von ALEXIS minimiert, so da"s der weitere Generierungsvorgang
+schneller abl"auft, insbesondere wenn das Makro h"aufiger verwendet wird.
+
+Diese Form der Makros, auch lexikalische Makros oder 'LexMakros' genannt, ist zu
+unterscheiden von den evtl. parametrisierten Aktionsmakros, die bei der Spezifikation
+von Aktionroutinen verwendet werden k"onnen. Diese zweite Form der Makros wid weiter
+unten beschrieben. 
+\subsubsection{Definition von LexMakros}
+Lexikalische Makros k"onnen "uberall im Definitionsteil des ALEXIS-Programmes
+definiert werden. Es kann auch mehrere LexMakro-Definitionsteile geben.
+\vfill \eject
+Der Definitionsteil eines LexMakros hat die folgende Form:
+
+\medskip
+
+\hskip 0.5truecm LEXMAKROS
+
+\hskip 1truecm $<lexmakroname_1>$ = $<$reg\_expr$>$ ; 
+
+\hskip 2truecm : 
+
+\hskip 2truecm : 
+
+\hskip 1truecm $<lexmakroname_n>$ = $<$reg\_expr$>$ ; 
+
+\hskip 0.5truecm MAKROEND
+
+\medskip
+
+Den einzelnen Lexmakronamen (Identifikatoren) werden durch diese Anweisungen die
+angegebenen regul"aren Ausdr"ucke zugeordnet. Das folgende Beispiel zeigt einige
+solcher Makrodefinitionen:
+
+\medskip
+
+\hskip 0.5truecm LEXMAKROS
+
+\hskip 1truecm digit = ['0'..'9']; 
+
+\hskip 1truecm letter = ['A'..'Z','a'..'z'];
+
+\hskip 0.5truecm MAKROEND
+
+\medskip
+
+Die regul"aren Ausdr"ucke k"onnen selbst wieder Makros enthalten, die jedoch bereits
+definiert sein m"ussen. Rekursive Makrodefinitionen sind somit nicht m"oglich.
+Beispiele f"ur Definitionen, die Makroaufrufe beinhalten, werden im n"achsten Kapitel
+gegeben.
+
+Makros k"onnen redefiniert werden, d.h. ein Ausdruck kann einem Namen zugewiesen
+werden, der bereits vergeben ist. In diesem Fall wird die alte Bindung an den Namen
+aufgel"ost und durch die neue Definition ersetzt. Diese Eigenschaft ist vor allem zur
+benutzerspezifischen "Anderung von Makros vorgesehen, die in Standard-Include-Files 
+definiert sind. Dem Thema Include-Files ist ein eigenes Kapitel gewidmet. Um zu
+vermeiden, da"s eine Redefinition unabsichtlich stattfindet, gibt ALEXIS in solchen
+F"allen eine Warnung aus.
+\subsubsection{Anwendung von LexMakros}
+Einmal definierte Makros k"onnen bis zum Ende der Spezifikation benutzt werden. Um sie
+anzuwenden reicht die Angabe ihres Namens {\it ohne\/} Anf"uhrungszeichen. Wird der
+Makroname in Anf"uhrungszeichen gesetzt, so interpretiert ihn ALEXIS als Zeichenfolge
+und nicht als Makroaufruf, was zu unerw"unschten Ergebnissen f"uhrt. Ein Makroaufruf
+ist ein atomarer regul"arer Ausdruck, er hat also die gleiche Wirkung, als w"urde man
+den Ausdruck, der mit dem Namen assoziiert ist, in Klammern direkt einsetzen.
+\eject
+Das folgende Beispiel zeigt die Verwendung der im vorigen Beispiel definierten Makros:
+
+\medskip
+
+\begin{tabular}{ll}
+digit+&\{ alle Dezimalzahlen \}\\
+letter(letter$\mid$digit)*&\{ alle Identifikatoren \}\\
+(letter$\mid$' ')+ '.'&\{ einfache S"atze \}\\
+\end{tabular}
+
+\medskip
+
+Wie bereits erw"ahnt k"onnen diese Aufrufe auch innerhalb einer Makrodefinition
+stehen. Dabei ist allerdings zu beachten, da"s ein Makroname erst nach der
+vollst"andigen Definition mit dem regul"aren Ausdruck assoziiert ist, also rekursive
+Makrodefinitionen nicht m"ogich sind. Ein Makroname kann dennoch in seiner eigenen
+Definition auftauchen, wenn es sich um eine Redefinition handelt. Von diesem Vorgehen
+wird jedoch wegen seiner Un"ubersichtlichkeit abgeraten. Das folgende Beispiel zeigt
+Makrodefinitionen, die sich aufeinander abst"utzen:
+
+\medskip
+
+\hskip 0.5truecm LEXMAKROS
+
+\hskip 1truecm digit = ['0'..'9']; 
+
+\hskip 1truecm hex\_digit = digit $\mid$ ['A'..'F','a'..'f'];
+
+\hskip 1truecm dez\_zahl = digit+;
+
+\hskip 1truecm hex\_zahl = '\$'hex\_digit+;
+
+\hskip 1truecm letter = ['A'..'Z','a'..'z'];
+
+\hskip 1truecm ident = (letter$\mid$'\_') (letter$\mid$digit$\mid$'\_')*;
+
+\hskip 1truecm tab = chr(9);
+
+\hskip 1truecm eoln = chr(10);
+
+\hskip 1truecm comment = ('\{' allbut('\}') '\}'  $\mid$  ('(*' allbut('*)') '*)'
+
+\hskip 1truecm white\_sp = (tab $\mid$ eoln $\mid$ ' ' $\mid$ comment ) +;
+
+\hskip 0.5truecm MAKROEND
+
+\medskip
+
+Wie die letzten vier Definitionen zeigen, lassen sich Makros auch einsetzen, um die
+Lesbarkeit und die Wartungsfreundlichkeit von Programmen zu verbessern.
+\subsection{Beispiele f"ur komplexe regul"are Ausdr"ucke}
+Dieses Kapitel zeigt Beispiele f"ur komplexe regul"are Ausdr"ucke, wie sie in
+Programmiersprachen vorkommen. Um die Texte lesbar zu machen wurde die Makrotechnik
+verwendet, schwierige Konstrukte sind mit Kommentaren erkl"art. Die Beispiele k"onnen
+direkt in ALEXIS-Programme eingebunden werden.
+\subsubsection{Strings}
+Die folgenden Definitionen legen die Syntax f"ur die Zeichenketten fest. Sie erkennen
+die folgenden Formen von Strings:
+
+\medskip
+
+\begin{tabular}{ll}
+Zeichenketten in Anf"uhrungszeichen&'Dies ist ein String'\\
+Angabe des Codes eines Zeichens&\#135\\
+Konkatenation davon&'Hallo'\#10'du da'\\
+\end{tabular}
+
+\medskip
+
+Soll in einer Zeichenkette ein Anf"uhrungszeichen stehen, so mu"s dieses doppelt
+geschrieben werden.
+
+\medskip
+
+\hskip 0.5truecm LEXMAKROS
+
+\hskip 1truecm str\_delim = ' ' ' ';  \{ ' ' ' ' ist die Syntax f"ur das Anf"uhrungszeichen
+\}
+
+\hskip 1truecm direkt\_str = str\_delim (allbut(str\_delim) $\mid$ str\_delim\#2)*
+str\_delim;
+
+\hskip 1truecm code\_str = '\#'(digit\#1,3);
+
+\hskip 0.5truecm MAKROEND
+
+\medskip
+
+\hskip 0.5truecm (direkt\_str $\mid$ code\_str)+
+
+\hskip 0.5truecm \{ Dies ist die eigentliche Definition des Strings \}
+\subsubsection{Zahlen}
+Dieses Beispiel zeigt Makros und regul"are Ausdr"ucke f"ur verschiedene Zahlenformate.
+Zahlen sind dabei Folgen von Dezimalziffern, vor denen eventuell ein Vorzeichen stehen
+kann. Flie"skommazahlen besitzen zus"atzlich einen Dezimalpunkt, dem weitere
+Dezimalziffern folgen k"onnen (aber nicht m"ussen) und/oder eine Exponentenangabe, die
+aus einem E und einer (nicht leeren) Folge von Dezimalziffern besteht. Hinter dem E
+kann ebenfalls ein Vorzeichen stehen.
+
+\medskip
+
+\hskip 0.5truecm LEXMAKROS
+
+\hskip 1truecm digit = ['0'..'9'];
+
+\hskip 1truecm vorz = ['+','-'];
+
+\hskip 1truecm exp = ['E','e'];
+
+\hskip 1truecm nat\_zahl = digit+;
+
+\hskip 1truecm ganz\_zahl = vorz? nat\_zahl;
+
+\hskip 0.5truecm MAKROEND
+
+\medskip
+\eject
+\hskip 0.5truecm \{ Beispiele f"ur regul"are Ausdr"ucke, die mit Hilfe obiger Makros
+definiert wurden \}
+
+\hskip 0.5truecm ganz\_zahl \{Definition einer ganzen Zahl \}
+
+\hskip 0.5truecm ganz\_zahl('.'nat\_zahl? $\mid$ (('.'nat\_zahl?)? exp ganz\_zahl))
+
+\hskip 0.5truecm \{ Definition einer Flie"skomma-Zahl \}
+\section{Aktionen--ein "Uberblick}
+Hat ALEXIS ein Token erkannt, so wird eine vom Benutzer spezifizierte Aktion
+ausgef"uhrt. Diese Aktion kann auch leer sein, so da"s "uberhaupt keine T"atigkeit
+stattfindet. Au"serdem kann bestimmt werden, ob der Scanner nach der Bearbeitung der
+Aktion die Kontrolle an das aufrufende Programm zur"uckgibt, oder weiterarbeitet. Wird
+der erzeugte Scanner als Vorgruppierer eines Parsers eingesetzt, so wird man die
+Kontrolle normalerweise nach jedem syntaktisch relevanten Token an den Aufrufer, also
+den Parser, zur"uckgegeben. Kommentare sind ein Fall f"ur Token, die typischer Weise
+nicht an den Parser hochgereicht, sondern vom Scanner weggefiltert werden.
+
+Zus"atzlich zu den Arbeitsaktionen, die nach dem Erkennen eines Tokens bearbeitet
+werden, kennt ALEXIS noch Initialisierungs- und Abschlu"sfunktionen, die vor bzw. nach
+dem Scannen bearbeitet werden sowie eine Fehleraktion, mit der der Benutzer die
+Reaktion des Scanners auf Textteile, die keinem Token entsprechen steuern kann. Um
+auch vorcompilierte Aktionen aus anderen Moduln einbinden zu k"onnen, steht ein
+External-Mechanismus zur Verf"ugung. Bei Arbeitsaktionen kann man ferner einen 
+Makromechanismus einsetzen, der auch einfache Parametrisierung zul"a"st.
+\subsection{Arbeitsaktionen}
+Hat ALEXIS das l"angste passende Token gefunden, so wird eine vom Benutzer
+spezifizierte Aktion ausgef"uhrt und die Kontrolle an die aufrufende Routine
+zur"uckgegeben. Der Benutzer kann aber angeben, da"s die Kontrolle beim Scanner
+verbleibt, also das n"achste Token gescannt wird. Die M"oglichkeit die Kontrolle beim
+Scanner zu belassen wird f"ur den Stand-Alone-Betrieb ben"otigt, sowie f"ur Token, die
+keine syntaktische Bedeutung haben, wie z.B. Spaces und Kommentare.
+
+ALEXIS benutzt zur "Ubergabe der Information an den Parser globale Variablen. Deshalb
+bestehen die Aktionen bei der Zusammenarbeit mit dem Parser vor allem aus der
+Aufbereitung der Token und der Belegung globaler Schnittstellenvariablen.
+\vfill \eject
+Syntaktisch werden Arbeitsaktionen folgenderma"sen deklariert:
+
+\medskip
+
+\begin{tabular}{ll}
+a)&$<$reg\_expr$> -> PROG <aktionstext>$ PROGEND;\\
+b)&IGNORE $<$reg\_expr$> -> PROG <aktionstext>$ PROGEND;\\
+c)&IGNORE $<$reg\_expr$> ->$ ;\\
+\end{tabular}
+
+\medskip
+
+Variante a) und b) spezifizieren jeweils die Aktion, die beim Erkennen des regul"aren
+Ausdrucks {\it reg\_expr\/} ausgef"uhrt werden soll. Bei Variante a) wird die
+Kontrolle nach dem Ausf"uhren an die aufrufende Prozedur zur"uckgegeben, bei Variante
+b) wird sofort das n"achste Token gesucht. Variante c) f"uhrt keine Aktion aus und
+bel"a"st die Kontrolle ebenfalls beim Scanner.
+
+ALEXIS selbst stellt keine besonderen Anforderungen an den 'aktionstext', au"ser da"s
+er nicht die Zeichenfolge {\it PROGEND\/} enthalten darf. Mit dem gegenwertig
+implementierten C-Backend ist es allerdings notwendig, da"s der Aktionstext ein
+Statement gem"a"s der C-Syntax darstellt, da sonst bei der "Ubersetzung des
+generierten Programmes ein Syntaxfehler auftritt.
+
+Statt 'PROG $<aktionstext>$ PROGEND' kann auch ein Makroaufruf stehen. Dieser Fall
+wird sp"ater behandelt.
+\subsection{Die Initialisierungsaktion}
+Normalerweise initialisiert das Laufzeitsystem von ALEXIS beim Start des Scanners alle
+ben"otigten Speicher. M"ussen globale Variablen, die von den Aktionsroutinen benutzt
+werden, initialisiert werden, so kann der Benutzer daf"ur die Initialisierungsaktion
+benutzen. Sie wird nach der Initialisierung der internen Variablen, aber vor dem
+Scannen des ersten Tokens aufgerufen. Um sie zu spezifizieren, mu"s im Definitionsteil
+des ALEXIS-Programmes die folgende Anweisung enthalten sein:
+
+\medskip
+
+\hskip 1truecm SCANINIT PROGSTR $<aktionstext>$ PROGEND ;
+
+\medskip
+
+Bez"uglich des Aktionstextes gilt: In einem Programm k"onnen mehrere
+Initialisierungsprozeduren angegeben werden. ALEXIS konkateniert dann die
+Programmtexte und fa"st sie zu einer Routine zusammen. Diese Eigenschaft ist
+insbesondere dazu gedacht, Initialisierungsroutinen aus Standard-Includes durch
+benutzerspezifische Aktionen zu erg"anzen. Um zu vermeiden, da"s solche
+Konkatenationen unbeabsichtigt stattfinden, gibt ALEXIS in diesen F"allen eine Warnung
+aus.
+\subsection{Die Abschlu"saktion}
+Normalerweise werden von ALEXIS alle n"otigen Aktionen eingeleitet, um den Scannerlauf
+ordnungsgem"a"s abzuschlie"sen. Insbesondere werden vom Laufzeitsystem ge"offnete
+Files wieder geschlossen und belegter Heap wird freigegeben. Wurden im Rahmen der
+benutzerspezifischen Aktionen Ma"snahmen getroffen, die wieder zur"uckgesetzt werden
+m"ussen, so kann dies mit Hilfe der Abschlu"saktion geschehen. Ebenso kann bei einem
+parser-gesteuerten Scanner hier ein EOF-Token "ubergeben werden. Die Abschlu"saktion
+wird vor der ALEXIS-Internen Abschlu"saktion, aber nach dem Scannen des letzten Tokens
+und der zugeh"origen Aktion aufgerufen. Um sie zu spezifizieren, mu"s im
+Definitionsteil des ALEXIS-Programmes die folgende  Anweisung enthalten sein:
+
+\medskip
+
+\hskip 1truecm SCANEND PROGSTR $<aktionstext>$ PROGEND ;
+
+\medskip
+
+Bez"uglich des Aktionstextes gilt das gleiche wie zuvor erw"ahnt. Die Abschlu"saktion
+kann ebenfalls mehrfach definiert werden, wobei die gleichen Regeln wie f"ur die
+Initialisierungsaktion gelten.
+\subsection{Die Fehleraktion}
+Trifft der von ALEXIS erzeugte Scanner im Eingabetext auf eine Zeichenfolge, die keinem
+der spezifizierten Tokens entspricht, so wird standardm"a"sig die Meldung {\it Zeile z
+Spalte s Datei fn : Unbekanntes Token $>Token<$\/} ausgegeben. Der Scanner verwirft
+dieses Zeichen und f"ahrt mit dem n"achsten Zeichen fort.
+
+W"unscht der Benutzer eine andere Fehlermeldung oder eine komplexere Behandlung des
+Fehlers, z.B eine spezielle Meldung an den Parser, so kann er die Ausgabe der Meldung
+durch die Fehleraktion ersetzen. Nicht modifizieren l"a"st sich jedoch das Verwerfen
+des Zeichens. Um eine Fehleraktion zu spezifizieren, mu"s im Definitionsteil des
+ALEXIS-Programmes die folgende Anweisung enthalten sein:
+
+\medskip
+
+\hskip 1truecm SCANERROR PROGSTR $<aktionstext>$ PROGEND ;
+
+\medskip
+
+Bez"uglich des Aktionstextes gilt: Die Fehleraktion kann redefiniert werden. Bei
+mehrfachem Auftreten dieser Anweisung ist die jeweils letzte g"ultig. Diese
+Eigenschaft erm"oglicht es, Fehlerroutinen aus Standard-Include-Files durch 
+benutzerspezifische Aktionen zu ersetzen. Um zu vermeiden, da"s Redefinitionen
+unbeabsichtigt stattfinden, gibt ALEXIS in solchen F"allen eine Warnung aus.
+\subsection{Externdeklarationen}
+Verwenden die Aktionroutinen globale Variablen, so m"ussen diese in den meisten
+Programmiersprachen zuvor deklariert werden. Auch kann es w"unschenswert sein, in
+Aktionen Routinen zu verwenden, die zuvor global definiert werden m"ussen. F"ur diese
+Zwecke dienen die Externdeklarationen. Sie sind lediglich formal Aktionen, werden aber
+von ALEXIS nicht aufgerufen. Um eine Externdeklaration zu spezifizieren, mu"s im
+Definitionsteil des ALEXIS-Programmes die folgende Anweisung enthalten sein:
+
+\medskip
+
+\hskip 1truecm EXTERNALS PROG $<aktionstext>$ PROGEND ;
+
+\medskip
+
+Auch hier kann der Aktionstext beliebig lang sein, darf jedoch nicht die Zeichenfolge
+'PROGEND' enthalten. Der Aktionstext mu"s f"ur das C-Backend der C-Syntax einer
+Deklarationssequenz entsprechen, da sonst bei der "Ubersetzung des generierten
+Programmes ein Syntaxfehler auftritt. Die Deklarationsaktion kann mehrfach definiert
+weren, da bei mehrfachem Auftreten dieser Anweisung die zugeh"origen Programmtexte
+konkateniert werden. Diese Eigenschaft ist insbesondere gedacht, um
+Deklarationsaktionen aus Standard-Include-Files durch benutzerspezifische
+Deklarationen zu erg"anzen. Um zu vermeiden, da"s Mehrfach-Definitionen unbeabsichtigt
+stattfinden, gibt ALEXIS in solchen F"allen eine Warnung aus.
+Die Routinen der Pufferverwaltung, die f"ur die Aktionen zug"anglich sind, werden
+automatisch eingebunden, so da"s sie hier nicht aufgef"uhrt werden. Eine genauere
+Beschreibung der verf"ugbaren Funktionen findet sich weiter hinten.
+\subsection{Aktionsmakros}
+H"aufig angegebene Aktionen k"onnen zu Makros zusammengefasst werden. Diese Makros
+werden bei der Generierung des Scanner-Programms expandiert, wobei auch ein einfacher
+Parametrisierungsmechanismus zur Verf"ugung steht. Aktionsmakros werden wie folgt
+beschrieben:
+
+\medskip
+
+\hskip 0.5truecm Deklaration von Makros:
+
+\hskip 0.5truecm ACTIONMAKROS
+
+\hskip 1truecm $<name>$ ($<formparlist>$) prog $<aktionstext>$ progend
+
+\hskip 0.5truecm MAKROEND
+
+\medskip
+
+\hskip 0.5truecm Benutzendes Auftreten:
+
+\hskip 0.5truecm $<RegExpr> -> <name>$ ($<parlist>$);
+
+\medskip
+
+Jeder Makroauruf wird expandiert (rein textuell) und kann in dem von ALEXIS
+generierten Programmteil mit Aktionen auch wieder gefunden werden. Ein Makro kann bis
+zu 9 Parameter haben. Werden mehr definiert, gibt ALEXIS eine Fehlermeldung aus.
+
+Beachte: Die rekursive Verwendung von Makros, also der Aufruf von Makros im Rumpf
+eines Makros ist nicht m"oglich! 
+\section{Die Generierungsoptionen}
+Mit Hilfe der Generierungsoptionen kann das Verhalten von ALEXIS in einigen Punkten 
+gesteuert werden. Sie beeinflu"sen vor allem die Art und Weise, wie regul"are
+Ausdr"ucke von ALEXIS interpretiert werden.
+\subsection{IgnoreCase}
+Ist die Option IgnoreCase gesetzt, so wird ein Scanner generiert, der Gro"s-
+und Kleinschreibung ignoriert. Das hei"st, da"s unabh"angig von der Schreibweise
+der Definition immer mehrere Schreibweisen zul"assig sind. Beispiel:
+
+\medskip
+
+\hskip 1truecm 'Program' $->$ code(10,1)
+
+\medskip
+
+Ohne die Option IgnoreCase mu"s in der Eingabe genau die angegebene Schreibweise
+f"ur 'Program' eingehalten werden, damit der Scanner das Token erkennt. Wird dagegen
+der Scanner mit der Option IgnoreCase generiert, so erkennt er auch 'program'
+'PROGRAM' oder 'PrOGrAm' als passende Muster f"ur 'Program'.
+\subsection{Minimize}
+ALEXIS kann die erzeugten deterministischen Automaten minimieren. Normalerweise
+erzeugt ALEXIS auch ohne Minimierer Automaten, deren Gr"o"se nur wenige Prozent
+"uber der theoretischen Mindestgr"o"se liegt. Durch einschalten der Option MINIMIZE
+wird der Automat auf seine theoretische Mindestgr"o"se optimiert, was jedoch nur
+auf den Speicherbedarf des erzeugten Scanners Auswirkungen hat, nicht auf dessen
+Laufzeit.
+
+Die Minimierung kostet allerdings w"ahrend der Generierung sowohl sehr viel Speicher,
+als auch Rechenzeit (ca. 40\% der Laufzeit). Daher wird empfohlen, diese Option
+nur bei sehr komplexen Automaten oder zur abschlie"senden Generierung eines Scanners
+zu aktivieren.  
+\section{Includes}
+\subsection{Einleitung}
+In ALEXIS-Programme k"onnen mit der Include-Anweisung andere Quellfiles eingebettet
+werden. Dies verbessert vor allem die "Ubersichtlichkeit, um Makrodefinitionen und
+Aktionsroutinen von der eigentlichen Scannerbeschreibung zu trennen. Au"serdem kann
+mit dem zur Verf"ugung gestellten Standard-Include-File {\it mugdefs.sci \/} auf einen
+standardisierten Satz von Makros und Aktionen zur"uckgegriffen werden, mit denen sich
+einfache Scanner f"ur Programmiersprachen wie MIMA schnell erstellen lassen. Eine
+Beschreibung findet sich in einem sp"ateren Kapitel.
+\subsection{Einbinden von Include-Files}
+Include-Files k"onnen entweder im Definitionsteil oder im Tokenvereinbarungsteil einer
+Scannerbeschreibung eingebettet werden. Die Syntax ist:
+
+\medskip
+
+\hskip 1truecm INCLUDE '$<filename>$'
+
+\medskip
+
+wobei $<filename>$ ein im aktuellen Dateipfad g"ultiger Dateiname sein mu"s.
+
+Es ist zu beachten, da"s das Include-File direkt in den Text eingef"ugt wird. Die
+Includes m"ussen daher so gestaltet sein, da"s sie komplette syntaktische Definitionen
+mit allen notwendigen Delimitern enthalten. Include-Direktiven k"onnen nicht an jeder
+Stelle innerhalb des Programmes stehen, sondern nur innerhalb der Definitionen oder
+innerhalb der Tokenbeschreibung. Im ersten Fall ist jedoch zu beachten, da"s das
+Include-File stets vollst"andige Deklarationen enthalten mu"s.
+
+\medskip
+
+\hskip 0.5truecm Beispiel:
+
+\hskip 0.5truecm Das folgende Include-File f"uhrt zu Syntax-Fehlern:
+
+\medskip
+
+\hskip 1truecm digit = ['0'..'9'];
+
+\hskip 1truecm vorz = ['+','-'];
+
+\hskip 1truecm exp = ['E','e'];
+
+\medskip
+
+\hskip 0.5truecm w"ahrend das folgende Include-File korrekt ist:
+
+\medskip
+
+\hskip 0.5truecm LEXMAKROS
+
+\hskip 1truecm digit = ['0'..'9'];
+
+\hskip 1truecm vorz = ['+','-'];
+
+\hskip 1truecm exp = ['E','e'];
+
+\medskip
+
+\hskip 0.5truecm ENDMAKRO
+\vfill\eject
+\section{Beispiele f"ur ALEXIS-Programme}
+\subsection{ALEXIS-Scanner zum Bootstrapen}
+Die folgende Scannerbeschreibung wird in dieser Form zum Bootstrapen des 
+ALEXIS-Compilers verwendet.
+
+\begin{verbatim}
+scanner Alexis
+ 
+options
+  minimize
+  ignorecase                  { Gross- und Kleinschreibung werden bei
+                                der Generierung des Automaten ignoriert,
+                                sodass der erzeugte Scanner auf sie
+                                keine Ruecksicht nimmt                  }
+optionend
+ 
+ 
+include 'mugdefs.sci'
+
+include 'alexis.sci'
+ 
+lexmakros
+ 
+  { Beginn der Makrodefinitionen: }
+ 
+    string  = '''' (not(.''''.)| '''''')+ '''';
+ 
+makroend
+ 
+ 
+  { Hier beginnt die eigentliche Scannerbeschreibung: }
+ 
+lexemes
+ 
+  ignore Ws+                   -> { White Space }  ;
+ 
+  'actionmakros'        ->  code( 1,1);
+  'allbut'              ->  code( 2,1);
+  '->'                  ->  code( 3,1);                 { arrowsy      }
+  '|'                   ->  code( 4,1);                 { barsy        }
+  'chr(' digit#1,3 ')'  ->  prog ReturnChr(TOKEN,32); progend;
+  '.)'                  ->  code( 6,1);                 { closebracksy }
+  ')'                   ->  code( 7,1);                 { closepsy     }
+  ','                   ->  code( 8,1);                 { commasy      }
+  '..'                  ->  code( 9,1);                 { doubledotsy  }
+  '='                   ->  code(10,1);                 { equalsy      }
+  '%' (.'1'..'9'.)      ->  prog Ret_Fpar(TOKEN,11); progend;  { formparsy    }
+  'ignore'              ->  code(13,1);
+  'include ' string     ->  prog IncludeFile(TOKEN,14); progend;
+ 
+  'ignorecase'          ->  code(15,1);
+  'minimize'            ->  code(15,2);
+ 
+  digit+                ->  retint(16);                 { integersy    }
+  'lexemes'             ->  code(17,1);
+  'lexemesend'          ->  code(18,1);
+  'lexmakros'           ->  code(19,1);
+  'makroend'            ->  code(20,1);
+  'not'                 ->  code(21,1);
+  '#'                   ->  code(22,1);                 { numbersy     }
+  'options'             ->  code(23,1);
+  'optionend'           ->  code(24,1);
+  '(.'                  ->  code(25,1);                 { openbracksy  }
+  '('                   ->  code(26,1);                 { openpsy      }
+  'prog' allbut('progend') 'progend'
+                        ->  prog Ret_Prog(TOKEN,27); progend;  { progstringsy }
+ 
+  '*'                   ->  code(28,1);                 { RegOps       }
+  '+'                   ->  code(28,2);
+  '?'                   ->  code(28,3);
+ 
+  'scanner'             ->  code(29,1);
+  ';'                   ->  code(30,1);                 { semicolonsy  }
+ 
+  'externals'           ->  code(31,1);                 { specialsy    }
+  'scanend'             ->  code(31,2);
+  'scanerror'           ->  code(31,3);
+  'scaninit'            ->  code(31,4);
+ 
+  string                ->  RetStr(32);                { stringsy }
+  ident                 ->  RetId(12);
+ 
+ 
+lexemesend
+\end{verbatim}
+\vfill \eject
+Das Standard-Include-File {\it mugdefs.sci\/}, da"s in Programmiersprachen
+g"angige Makros und R"uckgabeaktionen zur Verf"ugung stellt, wird sp"ater
+beschrieben. Das Include-File {\it alexis.sci\/} stellt Funktionen zur Verf"ugung, die
+nur f"ur ALEXIS selbst ben"otigt werden, wie eine ALEXIS-spezifische Fehleraktion,
+R"uckgabefunktionen f"ur formale Parameter, Strings zwischen {\it prog\/} und  
+{\it progend\/}, chars in der Form chr(x), sowie der Include-Mechanismus selbst:
+
+\begin{verbatim}
+ScanError
+prog
+  fehler_aktion();
+progend
+
+externals prog
+ 
+#include "actions.h"
+#include "buffer.h"
+#include "mugactio.h"
+ 
+ 
+void Ret_Fpar(Tok,Class)
+Token Tok;
+int Class;
+{ char tok[TOKMAX];
+
+  BUFGetToken( tok );
+  MACRetTok( Tok,Class, tok[1]-'0',tok );
+}
+ 
+ 
+void Ret_Prog( Tok,Class )
+Token Tok;
+int Class;
+{ char tok[TOKMAX];
+  char *help;
+
+  BUFGetToken( tok );
+  help=tok+4;                                   /* 'prog'     entfernen */  
+  help[strlen(help)-7]='\0';                    /* 'prog end' entfernen */
+
+  MACRetProcessedString(Tok,Class,help );
+}
+ 
+ 
+void IncludeFile( Tok,Class )
+Token Tok;
+int Class;
+  { 
+  char tok[TOKMAX];
+  char *help;
+
+  MACRetCC(Tok,Class,1);
+
+  BUFGetToken( tok );
+
+  help=tok+9;                      /*    'include ''' entfernen */
+  help[strlen(help)-1]='\0';       /*    ''''         entfernen */
+
+  BUFOpenBuffer( help );
+  }
+ 
+ 
+void ReturnChr( Tok,Class )
+Token Tok;
+int Class;
+  {
+  char tok[TOKMAX];
+  char *help;
+
+  int ord;
+
+  BUFGetToken( tok );
+  help=tok+4;                   /* 'chr(' entfernen */
+  help[strlen(help)-1]='\0';    /* ')'    entfernen */
+
+  for( ord=0;*help!='\0';++help )
+    {
+    ord=ord*10+ *help-'0';
+    }
+  *help=ord;                 /* !!!! Die Zeile stimmt, also Finger weg !!! */
+                 /* da stand naemlich anfangs ')', und dahinter steht '\0' */
+  MACRetProcessedString( Tok,Class,help );
+}
+ 
+ 
+void fehler_aktion()
+{ int z,s;
+  Quellort ort;
+
+  char tok[TOKMAX];
+
+  BUFGetPosition( &(ort.fname),&(ort.zeile),&(ort.spalte) );
+
+  BUFGetToken( tok );
+  if( strlen(tok)>1 )
+    wErrorf(&ort,"Unbekanntes Token >%s<\n",tok);
+  else
+    wErrorf(&ort,"Unbekanntes Token >#%d=%c<\n",*tok,*tok );
+}
+ 
+progend
+\end{verbatim}
+\vfill \eject
+\subsection{MIMA-Scanner f"ur PD"U-Praktikum im SS91}
+Die folgende MIMA-Scannerbeschreibung des PD"U-Praktikums im SS91 wurde direkt 
+aus der Beschreibung f"ur den parametrisierten Scanner umgesetzt.
+ 
+\begin{verbatim}
+scanner Mima
+options
+  ignorecase
+optionend
+
+include '/suneickel5/stud/eiberle/alexis/exec/mugdefs.sci'
+ 
+lexmakros
+   string  = '''' (not(.''''.)| '''''')+ '''';
+makroend
+
+lexemes
+
+  ignore Ws+         -> { White Space }  ;
+  
+  digit+             -> RetInt(2); 
+  ':='               -> Code(3,1);
+  ','                -> Code(5,1); 
+  ';'                -> Code(8,1);
+  '<'                -> Code(10,1);
+  '>'                -> Code(10,2);
+  '<='               -> Code(10,3);
+  '>='               -> Code(10,4);
+  '(.' | '['         -> Code(11,1);
+  '.)' | ']'         -> Code(12,1);
+  '='                -> Code(13,1);
+  '+'                -> Code(14,1);
+  '-'                -> Code(14,2);
+  '*'                -> Code(15,1);
+  '/'                -> Code(15,2);
+  '('                -> Code(16,1);
+  ')'                -> Code(17,1);
+  ':'                -> Code(26,1);
+  string             -> RetStr(32);
+
+  'begin'            -> Code(4,1);
+  'end'              -> Code(6,1);
+  'integer' | 'int'  -> Code(7,1);
+  'boolean' | 'bool' -> Code(7,2);
+  'false'            -> Code(9,1);
+  'true'             -> Code(9,2);
+  'less' | 'lt'      -> Code(10,1);
+  'greater' | 'gt'   -> Code(10,2);
+  'le'               -> Code(10,3);
+  'ge'               -> Code(10,4);
+  'ne'               -> Code(10,5);
+  'if'               -> Code(18,1);
+  'then'             -> Code(19,1);
+  'else'             -> Code(20,1);
+  'fi'               -> Code(21,1);
+  'while'            -> Code(22,1);
+  'do'               -> Code(23,1);
+  'od'               -> Code(24,1);
+  'const'            -> Code(25,1);
+  'array'            -> Code(27,1);
+  'call'             -> Code(28,1);
+  'return'           -> Code(29,1);
+  'procedure' | 'proc' -> Code(30,1);
+  'var'              -> Code(31,1);
+  'read'             -> Code(33,1);
+  'write'            -> Code(34,1);
+  'newline'          -> Code(35,1);
+  'program' | 'prog' -> Code(36,1);
+  ident              -> RetId(1);
+
+lexemesend
+\end{verbatim}
+\vfill \eject
+\chapter{Generierung eines Compilers mit ALEXIS und dem MUG-System am Beispiel von
+MIMA}
+ALEXIS kann sehr leicht zur Generierung von Compiler-Frontends mit dem MUG-System
+eingesetzt werden. ALEXIS ersetzt dabei einfach die Rolle des alten parametrisierten
+Scanners. Um ALEXIS mit dem MUG-System zu verwenden, mu"s lediglich eine
+Scannerbeschreibung f"ur die zu implementierende Programmiersprache erstellt werden,
+sowie ein ALEXIS-spezifisches Makefile verwendet werden, da"s den Compiler
+"ubersetzt und bindet.
+\section{Von ALEXIS zur Verf"ugung gestellte Dateien}
+Bei der Generierung von ALEXIS wird ALEXIS ins Verzeichnis \$(ALEXISHOME)/bin kopiert,
+sowie alle statischen Module die zum Erzeugen eines Scanner notwendig sind in der
+Bibliothek \$(ALEXISHOME)/lib/alexislib.a abgelegt. Bei der Generierung eines Scanners
+wird ferner das File {\it automat.c\/} ben"otigt, da es die generierten
+Automatentabellen includiert und somit nicht in der Bibliothek stehen darf.
+\section{Generierung}
+Zur Generierung des Scanners wird die Scannerbeschreibung mit Hilfe von ALEXIS
+"ubersetzt. Dabei werden die Dateien {\it actions.c\/} und {\it table.h\/} erzeugt.
+Aus diesen sowie der Datei {\it automat.c\/} besteht der dynamische Teil des Scanners,
+der compiliert und in die Bibliothek \$(LANG)scan.a gepackt wird. Der vollst"andige
+Scanner besteht somit aus den Bibliotheken \$(ALEXISHOME)/lib/alexislib.a sowie 
+\$(LANG)scan.a und mu"s nur noch mit den "ubrigen vom MUG-System generierten Dateien
+gebunden werden.
+Daf"ur sorgt das im folgenden abgedruckte Makefile
+\section{Makefile}
+\begin{verbatim}
+#
+# (c) copyright 1989,1991 by Technische Universitaet Muenchen, Germany
+#
+#      This product is part of CMUG
+#      CMUG is a part of the compiler writing system
+#      MUG (Modularer Uebersetzer-Generator, TU Muenchen)
+#
+# Permission to use, duplicate or disclose this software must be
+# obtained in writing. Requests for such permissions may be sent to
+#
+#      Prof. Dr. J. Eickel
+#      Institut fuer Informatik
+#      Technische Universitaet Muenchen
+#      Postfach  20 24 20
+#      Arcisstr. 21
+#      D-8000 Muenchen 2
+#      Germany
+#
+# No version of this implementation may be used or distributed for gain,
+# all listings must contain our copyright notice, and the headings
+# produced by MUG-Modules must contain the text "MUG" and "TU - Muenchen".
+#
+
+#
+# Makefile fuer ALEXIS V 2.0 (C-Version) von Bernhard Smith und Frank Eiberle
+#
+#
+LANG=alexis
+# Installationsorte der verwendeten Software
+#
+MUGHOME=/usr/proj/cmug
+COMMLIBHOME=/usr/proj/commlib
+UEBBAUHOME=/usr/proj/uebbau
+ALEXISHOME=/suneickel5/stud/eiberle/alexis
+#
+COMMLIB=$(COMMLIBHOME)/lib/libCommon.a
+#SATTRLIB = $(MUGHOME)/lib/libSattr.a
+PARSLIB=$(MUGHOME)/lib/libParser.a
+#PARSMOD=$(MUGHOME)/lib/ti_mainl.o
+SCANLIB=$(ALEXISHOME)/lib/alexislib.a
+CODABS=$(UEBBAUHOME)/lib/codab_mi.o
+MODUEBBAU=$(UEBBAUHOME)/lib/modUebbau1.o
+#
+INCLUDES = -I$(MUGHOME)/include -I$(COMMLIBHOME)/include \
+ -I$(UEBBAUHOME)/include -I. -I$(ALEXISHOME)/src/include -I./gen
+DEBUG=-g
+CFLAGS = $(DEBUG) $(INCLUDES)
+#CFLAGS =-ansi $(DEBUG) $(INCLUDES)
+#ALEXISFLAGS = -ansi $(INCLUDES) -I$(ALEXISHOME)/include
+LDFLAGS=$(DEBUG)
+
+#verwendete Kommandos
+CP=cp
+RM=rm -f
+MV=mv
+MKDIR=mkdir
+AR=ar rv
+RANLIB=ranlib
+
+#verwendeter C-Compiler
+# CC=gcc
+CC=/bin/cc
+# verwendete cmug-Generatoren
+#
+LALRGEN=$(MUGHOME)/bin/lrkgen
+TABCONV=$(MUGHOME)/bin/tabconv
+SCANGEN=$(ALEXISHOME)/bin/alexis
+KWGEN=$(MUGHOME)/bin/kwgen
+KOMBIN=$(MUGHOME)/bin/kombin
+#
+#
+ALEXMOD=mugactio.o alexerr.o readfunct.o autops.o autstack.o error.o eveset.o \
+	kompress.o maketab.o minimier.o quickset.o stateset.o var.o genactio.o \
+	alexsem.o strfunctions.o  
+
+.PHONY: all install clean realclean
+all: gen alexislib.a $(LANG)
+gen:
+	- $(MKDIR) gen
+install : all
+	- $(MKDIR) ../bin ../lib ../include
+	$(CP) alexis ../bin
+	$(CP) alexislib.a automat.c ../lib
+        ranlib ../lib/alexislib.a
+	$(CP) include/actions.h include/automat.h include/buffer.h include/cdebug.h \
+	      include/scan.h ../include
+
+#      *************** Compiler *******************
+$(LANG): gen/$(LANG)pars.o gen/$(LANG)scan.a $(ALEXMOD) gen/$(LANG)comp.o
+	$(CC) -o  $(LANG) $(LDFLAGS) $(PARSMOD) gen/$(LANG)pars.o \
+        alexislib.a \
+	gen/$(LANG)scan.a $(ALEXMOD) gen/$(LANG)comp.o $(MODUEBBAU) \
+	$(PARSLIB) alexislib.a $(COMMLIB) $(CODABS) gen/$(LANG)scan.a \
+	|| ( $(RM) $(LANG) && /bin/false)
+
+
+gen/$(LANG)pars.o: gen/$(LANG)pars.c 
+	$(CC) -c $(CFLAGS) gen/$(LANG)pars.c
+	$(MV) $(LANG)pars.o gen
+
+gen/$(LANG)scan.a: gen/table.h gen/actions.c
+	$(CC) -c $(CFLAGS) automat.c gen/actions.c 
+	$(AR) $(LANG)scan.a automat.o actions.o 
+	$(RANLIB) $(LANG)scan.a
+	$(RM) actions.o automat.o 
+	$(MV) $(LANG)scan.a gen 
+
+gen/$(LANG)comp.o: gen/$(LANG)comp.c include/AttrGlob.h
+	$(CC) -c $(CFLAGS) gen/$(LANG)comp.c
+	$(MV) $(LANG)comp.o gen
+
+gen/$(LANG)pars.c : gen/$(LANG).grm
+	$(LALRGEN) gen/$(LANG).grm gen/$(LANG)pars.tab
+	$(TABCONV) gen/$(LANG)pars.tab gen/$(LANG)pars.c
+
+gen/actions.c gen/table.h : $(LANG).scb
+	if [ -f $(SCANGEN) ] ; then \
+	        $(SCANGEN) $(LANG).scb ; \
+	        $(MV) table.h gen ; \
+	        $(MV) actions.c gen ; \
+	else \
+	   $(CP) actions.c.boot gen/actions.c ; \
+	   $(CP) table.h.boot gen/table.h ; \
+	fi
+
+gen/$(LANG)comp.c: gen/stamp-attrgen
+	cd gen ; $(KOMBIN) gtok $(LANG) $(LANG)
+
+gen/$(LANG).Desk gen/$(LANG).grm: gen/stamp-attrgen
+
+gen/stamp-attrgen: $(LANG).ag
+	cd gen ; $(KWGEN) ../$(LANG).ag
+	touch gen/stamp-attrgen
+
+alexislib.a: scan.o buffer.o symtab.o mugactio.o mugerr.o 
+	$(AR) alexislib.a scan.o buffer.o symtab.o mugactio.o mugerr.o 
+	$(RANLIB) alexislib.a
+
+clean:
+	$(RM) -R gen
+	$(RM) *.o 
+
+realclean: clean
+	$(RM) $(LANG) $(LANG)lib.a
+
+test: gen $(LANG)
+	@cd $(LANG)-programme ; \
+	for srcfile in *.$(LANG) ; do \
+	  ../$(LANG) $$srcfile && $(MV) codeaus `basename $$srcfile .$(LANG)`.ass \
+	    ||  ( $(RM) codeaus ; \
+	    $(MV) compiler.err `basename $$srcfile .$(LANG)`.err ) ; \
+	done
+
+
+.c.o:
+	$(CC) -g -c $(CFLAGS) $<
+	$(CP) $*.o gen
+\end{verbatim}
+\vfill \eject
+\chapter{Die Symboltabelle}
+Die Symboltabelle dient dazu, Identifikatoren, Strings, Zahlen und
+Schl"usselw"orter in einer Hashtabelle zu speichern. Die von ALEXIS zur
+Verf"ugung gestellte Symboltabelle ist also keine kellerartige Symboltabelle, wie
+sie in konventionellen, blockorientierten Programmiersprachen ben"otigt wird,
+sondern dient lediglich dazu, alle aufgetretenen Tokens als Zeichenfolgen zu
+speichern.
+
+Das Ziel einer derartigen Symboltabelle ist es, aus dem Klassencode
+(syntaktischer Wert) und dem Relativcode (semantischer Wert) den Klartext eines
+Tokens in Form einer Zeichenkette wiedergewinnen zu k"onnen. 
+
+Diese M"oglichkeit wird ben"otigt um Strings zur semantischen
+Weiterverarbeitung im Klartext zu bekommen oder um Fehlermeldungen zu
+erzeugen.
+
+
+\section{Funktionen der Symboltabelle}
+Die Funktionen der Symboltabelle gliedern sich in folgende Bereiche:
+
+\medskip
+
+\begin{itemize}
+\item Eintragen von Tokens
+\item Test auf Vorhandensein eines Eintrags
+\item Generieren und Speichern einer eindeutigen Nummer
+\item Decodieren von Token
+\item Markieren eines Tokens als ung"ultig 
+\item Verwaltungsfunktionen
+\end{itemize}
+\section{Datenstruktur eines Klartext-Tokens}
+Ein Klartext-Token wird als C-String dargestellt. Einschr"ankend bedeutet das,
+da"s ein Token keine '$\setminus$0'-Zeichen enthalten darf. Das ist in sofern keine
+Einschr"ankung, da"s Klartext niemals '$\setminus$0'-Zeichen enthalten sollte.
+
+Funktionen, die als Resultate Klartext-Token liefern, geben dem
+Aufrufer lediglich einen Zeiger auf dieses Token bereit. Um den
+Klartext weiterbenutzen zu k"onnen, mu"s der Programmierer eine Kopie
+diese Tokens anlegen.
+\section{Abspeichern eines Token}
+Soll einem Token ein fester Relativcode zugewiesen werden, so erfolgt dessen
+Eintrag in die Symboltabelle mit SYInstallEntry.
+
+\medskip
+
+\hskip 0.5truecm void SYInstallEntry( char *Token, int Class, int Rel );
+
+\medskip
+
+Mit SYInstallEntry wird Token unter dem Klassencode Code und dem Relativcode
+Rel in der Symboltabelle gespeichert. Es wird nicht "uberpr"uft, ob Token
+bereits in die Symboltabelle eingetragen wurde. Der Programmieren mu"s
+mit SYTestEntry (siehe unten) sicherstellen, da"s keine Mehrfacheintragungen
+erfolgen.
+\section{Test auf Vorhandensein eines Tokens}
+Mit SYTestEntry kann "uberpr"uft werden, ob ein Token mit gegebenem
+Klassencode und Relativcode bereits in der Symboltabelle vorhanden ist.
+
+\medskip
+
+\hskip 0.5truecm int SYTestEntry( int Class, int Rel );
+
+\medskip
+
+Ist unter dem gegebenen Klassen- und Relativcode bereits ein Eintrag
+vorhanden, so erfolgt als R"uckgabe ein Wert !=0.
+Ist noch kein Eintrag vorhanden, so ist die R"uckgabe ==0.
+\vfill \eject
+\section{Generieren und Speichern einer eindeutigen Nummer}
+Sollen die Relativcodes einer Tokenklasse nicht vom Programmierer vergeben
+werden, sondern vom System in von eins aufsteigender Folge erzeugt werden,
+dann erfolgt der Eintrag in die Symboltabelle mit SYGetIdNumber.
+
+\medskip
+
+\hskip 0.5truecm int SYGetIdNumber( char *Token, int Typ, int Class );
+
+\medskip
+
+Wird diese Funktion mit einem Token aufgerufen, das noch nicht in die
+Symboltabelle eingetragen wurde, so wird ein Eindeutiger Relativcode neu
+erzeugt und das Token wird unter dem angegebenen Klassen- und dem neu
+erzeugten Relativcode eingetragen. Der neu erzeugte Relativcode ist dabei um
+eins h"oher als der h"ochste zu diesem Zeitpunkt f"ur den angegebenen Typ
+vergebene. Als Typen sind die Werte 0 - 9 erlaubt (ENTRY\_TYPES). Folgende Werte sind
+bereits vordefiniert:
+
+\medskip
+
+\begin{tabular}{lll}
+Typ f"ur Identifier&TYP\_ID&0\\
+Typ f"ur Strings&TYP\_STR&1\\
+Typ f"ur Ganzzahlen&TYP\_NUM&2\\
+Typ f"ur Schl"usselw"orter&TYP\_KEY&3\\
+\end{tabular}
+
+\medskip
+
+Ist das Token bereits eingetragen, so liefert SYGetIdNumber den eindeutigen,
+zuvor f"ur dieses Token vergebenen Relativcode.
+\section{Decodieren von Token}
+Die Funktion SYDecSymtab dient dazu, aus gegebenem Klassencode und Relativcode
+den Klartext eines Tokens wiederzugewinnen.
+
+\medskip
+
+\hskip 0.5truecm char *SYDecSymtab( int Class, int Rel );
+
+\medskip
+
+Das Resultat ist ein Zeiger, der direkt auf den Eintrag in die  Symboltabelle
+verweist. Soll der Klartext des Tokens ver"andert werden, so mu"s das Token
+vorher kopiert werden.
+\section{Markieren eines Tokens als ung"ultig}
+Um bei syntaktischen Fehlern k"unstlich Token zu erzeugen, oder vorhandene
+Token als ung"ultig zu kennzeichnen, existiert SYSetInvalid.
+
+\medskip
+
+\hskip 0.5truecm void SYSetInvalid( int Class, int Rel );
+
+\medskip
+
+Existiert ein Eintrag zu dem gegebenen Klassen- und Relativcode, so wird
+der Klartext des Tokens auf den leeren String gesetzt.
+Ist kein Eintrag vorhanden, so wird zu dem Klassen- und Relativcode ein neuer
+Eintrag erzeugt, dessen Klartext dem Leerstring entspricht.
+Bemerkung:
+Als ung"ultig gekennzeichnete Token erkennt man an
+ 
+\medskip
+
+\hskip 0.5truecm SYDecSymtab( Class,Rel )[0]=='$\setminus$0' 
+
+\medskip
+
+und nicht an
+ 
+\medskip
+
+\hskip 0.5truecm SYDecSymtab( Class,Rel )=='''' 
+
+\medskip
+
+oder 
+
+\medskip
+
+\hskip 0.5truecm SYDecSymtab( Class,Rel )==NULL 
+
+\medskip
+\section{Verwaltungsfunktionen}
+Vor dem ersten Zugriff auf die Symboltabelle mu"s diese initialisiert
+werden. 
+
+\medskip
+
+\hskip 0.5truecm void SYInitSymtab( void );
+
+\medskip
+
+Ist das Arbeiten mit der Symboltabelle beendet, so k"onnen deren Strukturen
+freigegeben werden.
+
+\medskip
+
+\hskip 0.5truecm void SYExitSymtab( void );
+
+\medskip
+\chapter{Die Pufferverwaltung}
+Die Pufferverwaltung stellt die eigentliche Schnittstelle zwischen der
+Eingabedatei und dem Scannermodul dar. Ihre Funktionen gliedern sich in
+folgende Aufgabenbereiche:
+
+\medskip
+
+\begin{itemize}
+\item Dateien "offnen und Schlie"sen (include-Dateien)
+\item R"ucksetzmechanismen zum Tokenanfang f"ur den Automaten
+\item Auslesen von erkannten Token (Klartext)
+\end{itemize}
+
+\medskip
+
+Dem Benutzer werden von ALEXIS einige dieser Funktionen f"ur eigene Zwecke
+bereitgestellt.
+
+\medskip
+
+\begin{itemize}
+\item Realisierung von include-Dateien
+\item Einlesen eines Token im Klartext
+\item Ermitteln der Position eines Token
+\end{itemize}
+
+\medskip
+
+\section{Realisierung von include-Dateien}
+Soll in eine Eingabedatei an einer bestimmten Position eine Definitionsdatei
+(include-Datei) eingef"ugt werden, so l"a"st sich dieses mit BUFOpenBuffer
+realisieren.
+
+\medskip
+
+\hskip 0.5truecm void BUFOpenBuffer( char *FileName )
+
+\medskip
+
+Der angegebene Dateiname wird ab dieser Stelle als neue Eingabe betrachtet. Alle
+Scan-Funktionen lesen nun aus dieser Datei. Am Dateiende wird automatisch auf die
+urspr"ungliche Eingabe zur"uckgeschaltet. Die maximale Tiefe der Verschachtelung
+ist dabei auf 10 include-Ebenen beschr"ankt.
+
+Diese Funktion erm"oglicht die Realisierung von include-Dateien bei relativ
+geringem Aufwand. Der Benutzer definiert ein Token, das ein Schl"usselwort und
+eine Dateispezifikation enth"alt. Als zugeh"orige Aktion wird dann die
+BUFOpenBuffer-Prozedur aufgerufen. Dabei kann dem Parser ein Token
+"ubergeben werden (Realisierung von include-Dateien, die nur an durch
+die Grammatik bestimmten Stellen erlaubt sind), oder nicht (Allgemeiner Fall
+von include-Dateien).
+
+\medskip
+
+\hskip 0.5truecm Beispiel
+
+\hskip 0.5truecm ignore 'include ' ' ' filespec ' ' ' ' -$>$ prog IncludeFile(); progend;
+
+\medskip
+\section{Einlesen eines Token im Klartext}
+Um Aktionsroutinen den Zugriff auf Informationen "uber eingelesene Token zu
+erm"oglichen, stehen Prozeduren zur Verf"ugung. Sie beziehen sich alle auf das
+zuletzt erkannte Token (das Token also, das zu der entsprechenden
+Aktionsroutine gef"uhrt hat). Diese Funktionen d"urfen nicht mehrfach
+aufgerufen werden, da sie Seiteneffekte in der Pufferverwaltung zur Folge
+haben.
+
+\medskip
+
+\hskip 0.5truecm void BUFGetToken( char *Tok )
+
+\medskip
+
+Die Prozedur BUFGetToken kopiert das zuletzt erkannte Token an die durch Tok
+definierte Adresse. Der Aufrufer hat daf"ur zu sorgen, da"s Tok einen
+ausreichenden Speicherbereich spezifiziert.
+Der Aufruf erzeugt einen C-String mit abschlie"sendem '$\setminus$0'-Byte.
+
+\medskip
+
+\hskip 0.5truecm int BUFGetLength( void )
+
+\medskip
+
+Mit BUFGetLength kann die L"ange des erkannten Tokens ermittelt werden, um bei
+BUFGetToken einen ausreichend gro"sen Speicherbereich "ubergeben zu k"onnen.
+Das Resultat gibt die L"ange des Tokens ohne abschlie"sendes '$\setminus$0'-Byte zur"uck.
+\eject
+\section{Ermitteln der Position eines Token}
+
+\medskip
+
+\hskip 0.5truecm void BUFGetPosition( char **FileName, int *Zeile, int *Spalte )
+
+\medskip
+
+Mit dieser Funktion lassen sich Informationen "uber die Position eines Token
+in der Quelldatei ermitteln. Unter der Position des Token versteht man hier
+die Stellung des ersten Zeichens des Token.
+FileName mu"s dabei ein {\it Pointer auf einen Pointer\/} sein. (*FileName) zeigt
+nach dem Aufruf auf eine Speicherstelle, an der der Dateiname dauerhaft zu
+finden ist.
+\chapter{Die Scannerschnittstelle des CMUG-Systems}
+ALEXIS generiert einen Scanner, der der CMUG-Scannerschnittstelle gen"ugt.
+Die wichtigsten Aufrufe sind im folgenden beschrieben, genauere Informationen
+sind in der technischen Beschreibung des CMUG-Systems enthalten.
+Wenn nicht anders beschrieben, liefern die Funktionen bei Fehlern eine R"uckgabe
+!= 0 .
+
+\bigskip
+
+\hskip 0.5truecm int scanInit( void )
+
+\medskip
+
+Initialisiert den Scanner. Diese Funktion mu"s als erste Scannerfunktion
+aufgerufen werden. Die internen Initialisierungen betreffen im wesentlichen
+die Symboltabelle.
+
+\bigskip
+
+\hskip 0.5truecm int scanOpen( char *FileName )
+
+\medskip
+
+"Offnet eine Datei als Scannereingabe.
+
+\bigskip
+
+\hskip 0.5truecm int scanNext( Token token )
+
+\medskip
+
+Diese Funktion realisiert den eigentlichen Scan-Aufruf. Dieser Aufruf versorgt
+nach CMUG-Konverntion die durch token referenzierte Struktur. Die Arbeitsaktionen
+einer Scannerdefinition m"ussen also die Felder dieser Struktur versorgen. 
+
+In den Arbeitsaktionen ist diese Referenz mittels des Makros TOKEN zugreifbar.
+TOKEN representiert eine zum Aktionsmodul lokale Variable. Wird in einer
+Arbeitsaktion also eine Funktion aufgerufen, die diese Token-Struktur versorgen soll,
+so mu"s dieser Funktion die Referenz TOKEN als Parameter "ubergeben werden.
+
+Der Zugriff auf die Felder dieser Struktur darf nur "uber folgende
+Zugriffsmakros erfolgen (hier geschrieben in der Deklarationsform einer Funktion
+in ANSI-C):
+
+\begin{tabular}{ll}
+Klassencode:&int SYM( Token token )\\
+Relativcode:&int SEMVAL( Token token )\\
+Quellortangaben:&Quellort *QUELL\_ORT( Token token )\\
+\end{tabular}
+
+Der Typ Quellort ist dabei folgenderma"sen deklariert:
+
+\begin{verbatim}
+typedef struct QuellortR {
+                long      zeile;      /* Zeile in der Quelldatei       */
+                long      spalte;     /* Spalte in der Quelldatei      */
+                char      *fname;     /* Name der Quelldatei           */
+               } Quellort;
+\end{verbatim}
+
+Bemerkung:
+
+Der Speicherplatz f"u alle Teile der Token-Struktur wird vom Aufrufer
+automatisch bereitgestellt.
+
+\bigskip
+
+\hskip 0.5truecm char *scanDecode( char *text, Token token )
+
+\medskip
+
+Diese Funktion dient der Umwandlung eines Tokens (Klassen- und Relativcode) in
+Klartext. Der Klartext wird als Funktionsergebnis zur"uckgegeben. Ist der
+Parameter text kein NULL-Zeiger, so wird das dekodierte Token ebenfalls an die
+durch text spezifizierte Stelle kopiert.
+
+\bigskip
+
+\hskip 0.5truecm void scanClose( void )
+
+\medskip
+
+Schlie"st die Eingabedatei. Diese Funktion sollte das Scannen
+einer Quelldatei beenden.
+
+\bigskip
+
+Abschlu"sbemerkung:
+
+Die Beschreibung dieser Funktionen ist nicht vollst"ndig, ebenso sind nicht
+alle Funktionen beschrieben.
+Allerdings reicht die Kenntnis dieser Funktionen f"ur das Erstellen
+s"amtlicher Arbeitsaktionen aus.
+\section{Die CMUG-Anbindung mittels mugdefs.sci und mugactio.c}
+Um das Versorgen der Token-Struktur bei Scannern weitestm"oglich zu
+vereinfachen bietet ALEXIS eine Reihe von Funktionsaufrufen um eine
+Token-Struktur zu versorgen (mugactio.c) und vordefinierte Makros
+(Lexikalische Makros und Aktionsmakros in mugdefs.sci). F"ur einfache Scanner
+(z.B. MIMA) reicht die Funktionalit"at dieser Schnittstelle aus, ohne da"s
+sich der Benutzer mit den genauen Konventionen der CMUG-Scannerschnittstelle
+zu befassen braucht.
+Um diese vereinfachte M"oglichkeit nutzen zu k"onnen mu"s in der
+Scannerdefinition die Zeile 
+
+\bigskip
+
+\hskip 0.5truecm include 'mugdefs.sci' 
+
+\medskip
+
+an entsprechender Stelle zu finden sein.
+\subsection{Die Include-Datei mugdefs.sci}
+MUGDEFS.SCI enth"alt n"utzliche Definitionen f"ur Scanner (z.B. Makro f"ur White
+Space) und Standard-Makros f"ur MUG (z.B. IntNumber oder Ident ).
+Des weiteren existieren vordefinierte Aktionsmakros, um die R"uckgabe der
+Standard-Token zu vereinfachen ( Code(Cl,Re) oder RetInt(Cl) ).
+
+\begin{verbatim}
+LEXMAKROS
+   Eoln            = chr(10);        { Zeilenwechsel }
+   Tab             = chr(9);         { Tabulatoren }
+   Comment         = '{' not(.'}'.)* '}' |
+                     '(*' allbut('*)') '*)';
+   Ws              = (' ' | Eoln | Tab | Comment)+;
+   UpCaseLetter    = (.'A'..'I','J'..'R','S'..'Z'.);
+   LowCaseLetter   = (.'a'..'i','j'..'r','s'..'z'.);
+   Letter          = UpCaseLetter | LowCaseLetter;
+   Digit           = (.'0'..'9'.);
+
+   IntNumber       = Digit+;
+   String          = ( ('''' (allbut('''') | '''''') '''') | '#' Digit#1,3 )+;
+   Ident           = (letter | '_') (letter | digit | '_' )* ;
+
+MAKROEND
+ 
+ACTIONMAKROS
+
+   Code(%1,%2)        prog   MACRetCC(TOKEN,%1,%2);   progend
+   RetId(%1)          prog   MACRetId(TOKEN,%1);      progend
+   RetInt(%1)         prog   MACRetInt(TOKEN,%1);     progend
+   RetStr(%1)         prog   MACRetString(TOKEN,%1);  progend
+
+MAKROEND
+
+ScanInit
+prog
+  printf("ALEXIS: Scanner                 (c) TU Muenchen  2. Juli 1991\n");
+progend
+
+
+ScanEnd
+prog
+  MACRetCC(TOKEN,0,0);
+progend
+\end{verbatim}
+
+Bemerkung:
+
+Die Mokros Code, RetId, RetInt und RetStr versorgen automatisch die
+Token-Struktur vollst"andig, der Benutzer mu"s beim Einsatz dieser Makros
+weder auf Funktionen der Symboltabelle (SYMxxx) noch auf die Pufferverwaltung
+(BUFxxx) zur"uckgreifen.
+\subsection{Die Arbeitsaktionen in mugactio.c}
+Die Verwendung der Aktionsmakros aus MUGDEFS.SCI setzt voraus, da"s das
+Aktionsmodul MUGACTIO.C hinzugebunden wird. 
+
+Folgende Funktionen k"onnen als Arbeitsaktionen direkt aus der Scannerbeschreibung
+heraus gerufen werden:
+
+\bigskip
+
+\hskip 0.5truecm void MACRetCC( Token Tok, int Class, int Rel );
+
+\medskip
+
+R"uckgabe des Klassencodes Class und Relativcodes Rel. Das gelesene Token
+wird dabei unter Class und Rel in die Symboltabelle eingetragen. Dabei liest
+die Funktion MACRetCC selbstt"atig das Token aus dem Puffer.
+
+\bigskip
+
+\hskip 0.5truecm void MACRetInt( Token Tok, int Class );
+
+\medskip
+
+R"uckgabe einer Ganzzahl unter dem angegebenen Klassencode. Class mu"s
+bei jedem Aufruf identisch sein. Der automatisch erzeugte Relativcode
+entspricht dem Wert der Ganzzahl. Der zugeh"orige Makro IntNumber sollte aus
+MUGDEFS.SCI "ubernommen werden.
+
+\bigskip
+
+\hskip 0.5truecm void MACRetId( Token Tok, int Class );
+
+\medskip
+
+Erzeugt einen eindeutigen Relativcode f"ur den zuletzt gelesenen Ident
+und tr"agt ihn in die Symboltabelle ein. Der Typ beim Symboltabelleneintrag ist
+TYP\_ID.
+
+\bigskip
+
+\hskip 0.5truecm void MACRetString( Token Tok, int Class );
+
+\medskip
+
+Gibt einen String an den Parser zur"uck. Der String wird aus der Pufferverwaltung
+geholt und gem"a"s dem Pascal-Stringformat (siehe Makros) aufbereitet. Der String mu"s
+dabei dem in MUGDEFS.SCI definierten Format entsprechen. Der aufbereitete String wird
+danach mit Typ=TYP\_STR in die Symboltabelle eingetragen. Dabei wird gleichzeitig ein
+eindeutiger Relativcode erzeugt.
+
+\bigskip
+
+Au"serdem bietet mugactio.c Funktionen um die R"uckgabe von Token in
+benutzerdefinierten Arbeitsaktionen zu unterst"utzen:
+
+\bigskip
+
+\hskip 0.5truecm void MACRetProcessedString( Token Tok, int Class, char *str );
+
+\medskip
+
+Gibt einen String an den Parser zur"uck, der in die Symboltabelle mit Typ=TYP\_STR
+eingetragen wird. Im Unterschied zu MACRetString ist der Benutzer daf"ur zust"andig,
+die Zeichenkette aus dem Puffer zu lesen, ggf. aufzubereiten und anschlie"send an
+MACRetProcessedString zu "ubergeben.  
+
+Beispiel: 
+
+\begin{verbatim}
+'"'  ( allbut( '"' ) | '\"' )  '"'
+     ->  prog 
+           {
+           char tok[TOKMAX];
+
+           BUFGetToken( tok );   /*Token aus Puffer holen*/
+
+           Aufbereite( tok);     /* ggf. bearbeiten */
+
+           MACRetProcessedString( TOKEN,STRCLASS, tok );
+           }     
+         progend;
+\end{verbatim}
+\bigskip
+
+\hskip 0.5truecm void MACRetTok( Token Tok, int Class, int Rel, char *tok );
+
+\medskip
+
+R"uckgabe des Klassencodes Class und Relativcodes Rel. Dabei wird nicht
+das gelesene Token in die Symboltabelle eingetragen, sondern das vom Benutzer
+mit Tok "ubergebene. Der Benutzer mu"s also selbst"andig das Token aus dem
+Puffer lesen.
+
+Beispiel: 
+
+Bei einem gelesenen Token der angegebenen Form soll lediglich der
+Text innerhalb der spitzen Klammern in die Symboltabelle eingetragen werden.
+
+\begin{verbatim}
+'<'Ident'>'  
+     ->  prog 
+           {
+           char tok[TOKMAX];
+           char *help;
+
+           BUFGetToken( tok );   /*Token aus Puffer holen*/
+
+           help=tok+1;           /*1. Zeichen ueberlesen*/
+           help[strlen(help)-1]='\0'; /*..letztes Zeichen..*/
+
+           MACRetTok( TOKEN,NEWCLASS,NewRelcode(help),help );
+           }     
+         progend;
+\end{verbatim}
+\section{Fortgeschrittene Programmierung von Arbeitsaktionen}
+\subsection{Allgemeines zur Scannerdefinition}
+Zweckm"a"sigerweise realisiert man die Scannerdefinition in
+einer Datei der Form $<name>$.scb. Die vordefinierten Makros
+der CMUG-Anbindung befinden sich in der Datei mugdefs.sci.
+Ebenso sollten benutzerdefinierte Arbeitsaktionen (in Form von C-Quellcode)
+in eine Include-Datei 
+ausgelagert werden, da sie die "Ubersichtlichkeit einer 
+Scannerdefinition st"oren. Normalerweise sollte dies die Datei $<name>$.sci
+sein.
+\subsection{Realisierung von Include-Dateien mit ALEXIS}
+Die Pufferverwaltung unterst"utzt bis zu 10 verschachtelte Include-Ebenen. Die
+Realisierung des Scanners erlaubt es, nach Erkennen eines Tokens die
+Eingabedatei umzuschalten. Nach erreichen des Dateiendes wird dann automatisch
+auf die vorangegangene Eingabedatei Zur"uckgeschaltet.
+
+Im folgenden Beispiel soll f"ur einen Scanner ein Include-Mechanismus
+realisiert werden, der vom Parser "uberwacht werden kann (Der Parser
+kann in der Grammatik vorschreiben, an welchen Stellen Include-Dateien
+erlaubt sind). Aus diesem Grund liefert der Scanner beim Umschalten der
+Eingabedatei ein Token (Beispiel: Klassencode=1,Relativcode=1).
+
+Bei diesem Beispiel ist vorausgesetzt, da"s mugdefs.sci eingebunden wurde.
+
+Die Scannerbeschreibung (in $<name>$.scb) :
+
+\begin{verbatim}
+   'include ' string  -> prog IncludeFile(TOKEN,1); progend; 
+\end{verbatim}
+
+Die Arbeitsaktion (in $<name>$.sci) :
+
+\begin{verbatim}
+externals prog
+void IncludeFile(Tok,Class)
+Token Tok;
+int Class;
+  { 
+  char tok[TOKMAX];
+  char *help;
+  int Zeile,Spalte;
+  char *FileName;
+
+  BUFGetToken( tok );
+  BUFGetPosition( &FileName,&Zeile,&Spalte );  
+
+  SYM(Tok)= Class;
+  SEMVAL(Tok)=1;
+
+  QUELL_ORT(Tok)->zeile=Zeile;
+  QUELL_ORT(Tok)->spalte=Spalte;
+  QUELL_ORT(Tok)->fname=FileName;
+
+  help=tok+9;                      /*    'include ''' entfernen */
+  help[strlen(help)-1]='\0';       /*    ''''         entfernen */
+
+  BUFOpenBuffer( help );
+  }
+progend
+\end{verbatim}
+
+\bigskip
+
+Bemerkung:
+
+Soll kein Token an den Aufrufer geliefert werden, so mu"s in der
+Scannerbeschreibung das Schl"usselwort {\it IGNORE\/} eingef"ugt werden.
+In der Arbeitsaktion entf"allt dann das Versorgen der Token-Struktur.
+\chapter{Konvertierung von Sourcen des parametrisierten Scanners}
+Um Sourcen des alten parametrisierten Scanners in ALEXIS-Sourcen zu konvertieren,
+steht im Verzeichnis convert ein gleichnamiges Programm zur Verf"ugung. Dieses mu"s
+mit den Dateinamen der alten sowie der neuen Scannerbeschreibung als
+Parameter aufgerufen werden.
+
+Zugrunde liegt ein mit ALEXIS generierter Scanner, der die elementarsten Konstrukte
+des parametrisierten Scanners akzeptiert, sowie ein primitiver Parser, der die
+einzelnen Anweisungen erkennt und in ALEXIS Anweisungen umsetzt. Der Prolog und Epilog
+des ALEXIS-Programmes wird nicht generiert, sondern statisch abgesetzt. Es m"ussen
+also ggf. Optionen oder der Pfad f"ur die Include-Anweisung von Hand nachgebessert
+werden. 
+
+Die Scannerbeschreibung f"ur MIMA wurde ebenfalls per Konvertierung erzeugt,
+und konnte ohne jede Nachbesserung als korrekte ALEXIS-Eingabe verwendet werden.  
+\end{document}

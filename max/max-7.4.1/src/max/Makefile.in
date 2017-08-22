@@ -1,0 +1,190 @@
+##
+##  MAX Program Makefile 
+##
+@SET_MAKE@
+
+# -------------------------------------------------------------------
+# BUILD TOOLS
+# -------------------------------------------------------------------
+
+CP       = cp
+MV       = mv
+RM       = rm -f
+CHMOD    = chmod
+MKDIR    = ../../etc/mkinstalldirs
+STRIP    = strip
+
+CC       = @CC@
+AR       = @AR@
+RANLIB   = @RANLIB@
+DEFINES  = 
+DEBUG    = -g
+INCLUDES = -I../../config -I.
+CFLAGS   = @CFLAGS@ $(DEFINES) $(DEBUG) $(INCLUDES)
+LDFLAGS  =
+LEX      = @LEX@
+YACC     = @YACC@
+
+MAXOPTS  =
+MAX      = max
+
+PREFIX   = @prefix@
+
+# -------------------------------------------------------------------
+# DEFINITIONS
+# -------------------------------------------------------------------
+
+OBJS = \
+    max_main.o      \
+    max_parse.o     \
+    max_std.o       \
+    max_spec.o      \
+    max_extern.o    \
+    max_ygen.o      \
+    max_hgen.o      \
+    max_ggen.o      \
+    max_sgen.o      \
+    max_dgen.o      \
+    max_metasort.o  \
+    max_sigma.o     \
+    max_typecheck.o \
+    max_vers.o
+
+# -------------------------------------------------------------------
+# DEFAULT TARGET
+# -------------------------------------------------------------------
+
+all: max libmax.a max.1
+
+# -------------------------------------------------------------------
+# MAX PROGRAM
+# -------------------------------------------------------------------
+
+max: $(OBJS)
+	$(CC) $(LDFLAGS) $(DEBUG) -o max $(OBJS)
+
+max_parse.o: max_parse.c max_scan.c max_spec.h
+	$(CC) $(CFLAGS) -c max_parse.c
+
+max_parse.c: max_parse.y 
+	$(YACC) max_parse.y	
+	$(MV) y.tab.c max_parse.c
+
+max_scan.c: max_scan.l 
+	$(LEX) max_scan.l
+	$(MV) lex.yy.c max_scan.c
+
+max_std.o: max_std.c max_std.h
+	$(CC) $(CFLAGS) -c max_std.c
+
+max_spec.o: max_spec.c
+	$(CC) $(CFLAGS) -c max_spec.c
+
+max_spec.c max_spec.h: max_spec.m
+	@if [ -x $(MAX) ]; then \
+		$(MAX) $(MAXOPTS) max_spec.m; \
+	else \
+		$(CP) max_spec.c.B max_spec.c; \
+		$(CP) max_spec.h.B max_spec.h; \
+		$(CP) max_spec.g.B max_spec.g; \
+	fi
+
+max_extern.o: max_extern.c max_spec.h max_global.h
+	$(CC) $(CFLAGS) -c max_extern.c
+
+max_hgen.o: max_hgen.c max_spec.h max_global.h
+	$(CC) $(CFLAGS) -c max_hgen.c
+
+max_ggen.o: max_ggen.c  max_spec.h max_global.h
+	$(CC) $(CFLAGS) -c max_ggen.c
+
+max_sgen.o: max_sgen.c max_spec.h max_global.h
+	$(CC) $(CFLAGS) -c max_sgen.c
+
+max_ygen.o: max_ygen.c max_spec.h max_global.h
+	$(CC) $(CFLAGS) -c max_ygen.c
+
+max_dgen.o: max_dgen.c max_spec.h max_global.h
+	$(CC) $(CFLAGS) -c max_dgen.c
+
+max_main.o: max_main.c max_spec.h max_global.h
+	$(CC) $(CFLAGS) -c max_main.c
+
+max_typecheck.o: max_typecheck.c max_global.h max_spec.h max_metasort.h max_typecheck.h
+	$(CC) $(CFLAGS) -c max_typecheck.c
+
+max_metasort.o: max_metasort.c max_metasort.h max_typecheck.h max_spec.h
+	$(CC) $(CFLAGS) -c max_metasort.c
+
+max_sigma.o: max_sigma.c max_spec.h max_typecheck.h max_metasort.h
+	$(CC) $(CFLAGS) -c max_sigma.c
+
+max_vers.o: max_vers.c
+	$(CC) $(CFLAGS) -c max_vers.c
+
+# -------------------------------------------------------------------
+# COMMON STANDARD MAX LIBRARY
+# -------------------------------------------------------------------
+
+libmax.a: max_std.o
+	$(AR) r libmax.a max_std.o
+	$(RANLIB) libmax.a
+
+# -------------------------------------------------------------------
+# BOOTSTRAP
+# -------------------------------------------------------------------
+
+mkboot: max_spec.c max_spec.g max_spec.g
+	$(CP) -p max_spec.c max_spec.c.B
+	$(CP) -p max_spec.h max_spec.h.B
+	$(CP) -p max_spec.g max_spec.g.B
+
+# -------------------------------------------------------------------
+# DOCUMENTATION
+# -------------------------------------------------------------------
+
+max.1: max.pod max_vers.c
+	V=`../../etc/newvers -l c -D max_vers.c`; \
+	sed -e "s|\@V\@|$$V|g" -e "s|\@prefix\@|$(prefix)|" <max.pod >/tmp/max.pod; \
+	pod2man --section=1 \
+	        --center="TU Muenchen" \
+			--release="TUM" \
+			/tmp/max.pod >max.1 && \
+	rm -f /tmp/max.pod
+
+# -------------------------------------------------------------------
+# INSTALLATION
+# -------------------------------------------------------------------
+
+install: all
+	@$(MKDIR) $(PREFIX)/bin 
+	@$(MKDIR) $(PREFIX)/man 
+	@$(MKDIR) $(PREFIX)/lib 
+	@$(CP) max $(PREFIX)/bin/max
+	@$(CHMOD) a+rx $(PREFIX)/bin/max
+	@$(STRIP) $(PREFIX)/bin/max
+	@$(CP) max.1 $(PREFIX)/man/max.1
+	@$(CHMOD) a+r $(PREFIX)/man/max.1
+	@$(CP) libmax.a $(PREFIX)/lib/libmax.a
+	@$(CHMOD) a+r $(PREFIX)/lib/libmax.a
+
+# -------------------------------------------------------------------
+# CLEANUP
+# -------------------------------------------------------------------
+
+clean:
+	$(RM) $(OBJS)
+	$(RM) max
+	$(RM) libmax.a
+
+realclean: 
+	$(MAKE) clean
+	$(RM) max_spec.[chg]
+	$(RM) max_parse.c
+	$(RM) max_scan.c
+
+distclean:
+	$(MAKE) realclean
+	rm -f Makefile
+
+##EOF##

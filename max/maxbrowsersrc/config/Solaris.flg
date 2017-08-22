@@ -1,0 +1,29 @@
+# Pfade fuer die Installation
+
+INSTALLBINDIR=$(INSTALLDIR)/bin
+INSTALLIBDIR=$(INSTALLDIR)/lib
+INSTALLINCDIR=$(INSTALLDIR)/inc
+
+#verwendete Kommandos
+CP        = cp
+RM        = rm -rf
+MAKE      = make
+CHMOD     = chmod
+YACC      = bison
+LEX       = flex
+MKDIR	  = mkdir
+AR	  = ar rc
+RANLIB	  = true
+CC        = gcc
+
+#FLAGS
+INCLUDES        = -I$(HOMEDIR)/src/inc -I/usr/local/include
+DEFINES         =
+DEBUG           = -g
+CFLAGS		= $(DEFINES) $(DEBUG) $(INCLUDES)
+
+YACCFLAGS = -d
+LEXFLAGS  =
+
+#immer zu loeschende Muell-Dateien (relevant bei "make clean"
+RMFILES	= core *.o *.bak

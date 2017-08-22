@@ -1,0 +1,169 @@
+\chapter{The TIFL--Sources}
+\section{Predeclared constants and functions (tifl\_spec.h)}
+\begin{verbatim}
+
+/*---------------------------------------------------------------------
+  predefined functions 
+  ---------------------------------------------------------------------*/
+/*  The C-type for all elements of the MAX-universe including  nil :       */
+#define  ELEMENT            mxi_ELEMENT
+
+/*  The following functions convert C-values to corresponding MAX-elements */
+/*  in case of an error, the functions set the global variable conv_error  */
+/*  to 0 and yield  nil.                                                   */
+#define  conv_error          mxi_conv_error        
+#define  btoe(BOOLVAL)       mxi_btoe(__FILE__,__LINE__,BOOLVAL)
+#define  ctoe(CHARVAL)       mxi_ctoe(__FILE__,__LINE__,CHARVAL)
+#define  itoe(INTVAL)        mxi_itoe(__FILE__,__LINE__,INTVAL)
+#define  atoe(STRVAL)        mxi_atoe(__FILE__,__LINE__,STRVAL)
+#define  ptoe(POINTVAL)      mxi_ptoe(__FILE__,__LINE__,POINTVAL)
+
+/*  The following functions convert MAX-elements to corresponding C-values */
+/*  in case of an error, the functions set the global variable conv_error  */
+/*  to 0 and yield  0, '\0', 0, the empty string or NULL.                 */
+#define  etob(BOOLELEM)      mxi_etob(__FILE__,__LINE__,BOOLELEM)
+#define  etoc(CHARELEM)      mxi_etoc(__FILE__,__LINE__,CHARELEM)
+#define  etoi(INTELEM)       mxi_etoi(__FILE__,__LINE__,INTELEM)
+#define  etoa(STRELEM)       mxi_etoa(__FILE__,__LINE__,STRELEM)
+#define  etop(REFELEM)       mxi_etop(__FILE__,__LINE__,REFELEM)
+
+/*  stoid  enters a string into sort  Ident  containing a finite set of    */
+/*  hash-coded strings;  idtos  returns the string of an identifier        */
+#define  stoid(STRING)       mxi_stoid(__FILE__,__LINE__,STRING)
+#define  idtos(IDENT)        mxi_idtos(__FILE__,__LINE__,IDENT)
+
+/*  sort  returns the sort constant of a defined element; otherwise exits. */
+#define  sort(ELEM)          mxi_sort(__FILE__,__LINE__,ELEM)
+#define  index(ELEM,SORT)    mxi_index(__FILE__,__LINE__,ELEM,SORT)
+#define  element(INDEX,SORT) mxi_element(__FILE__,__LINE__,INDEX,SORT)
+#define  number(SORT)        mxi_number(__FILE__,__LINE__,SORT)
+
+/*  The following functions provide the inspection of the tree structure; */
+/*  if their obvious meaning is not defined, they return  nil :           */
+#define  fath(NODE)          mxi_fath(__FILE__,__LINE__,NODE)
+#define  lbroth(NODE)        mxi_lbroth(__FILE__,__LINE__,NODE)
+#define  rbroth(NODE)        mxi_rbroth(__FILE__,__LINE__,NODE)
+#define  son(ITH,NODE)       mxi_son(__FILE__,__LINE__,ITH,NODE)
+#define  numsons(NODE)       mxi_numsons(__FILE__,__LINE__,NODE)
+
+/*  subterm(i,t)  returns the ith subterm of term t;  numsubterms(t)      */
+/*  returns the number of subterms t; both functions exit on failure      */
+#define  subterm(ITH,TERM)   mxi_subterm(__FILE__,__LINE__,ITH,TERM)
+#define  numsubterms(TERM)   mxi_numsubterms(__FILE__,__LINE__,TERM)
+
+/*  The following functions provide the polymorphic handling of lists;    */
+/*  they exit on failure :                                                */
+#define  front(LIST)         mxi_front(__FILE__,__LINE__,LIST)
+#define  back(LIST)          mxi_back(__FILE__,__LINE__,LIST)
+#define  appfront(ELEM,LIST) mxi_appfront(__FILE__,__LINE__,ELEM,LIST)
+#define  appback(ELEM,LIST)  mxi_appback(__FILE__,__LINE__,ELEM,LIST)
+#define  conc(LIST1,LIST2)   mxi_conc(__FILE__,__LINE__,LIST1,LIST2)
+
+/*  The following functions relate nodes to the corresponding terms and   */
+/*  points; they exit on failure :                                        */
+#define  term(NODE)          mxi_term(__FILE__,__LINE__,NODE)
+#define  before(NODE)        mxi_before(__FILE__,__LINE__,NODE)
+#define  after(NODE)         mxi_after(__FILE__,__LINE__,NODE)
+#define  node(POINT)         mxi_node(__FILE__,__LINE__,POINT)
+
+/*  eq  is the equality predicate;  is  tests whether an element is in    */
+/*  the given sort;  desc tests whether node1 is the descendant of node2; */
+/*  bef  and  aft  establish the linear order on  points :                */
+#define  eq(ELEM1,ELEM2)     mxi_eq(__FILE__,__LINE__,ELEM1,ELEM2)
+#define  is(ELEM,SORT)       mxi_is(__FILE__,__LINE__,ELEM,SORT)
+#define  desc(N1,N2)         (before(N1)>before(N2) && after(N1)<after(N2))
+#define  bef(P1,P2)          (is(P1,_Point) && is(P2,_Point) && P1<P2)
+#define  aft(P1,P2)          (is(P1,_Point) && is(P2,_Point) && P1>P2)
+
+/*  The predefined constants are :                                        */
+#define  minimalInt()   -16777216L
+#define  maximalInt()   16777215L
+
+#define  root()         -939524095L
+#define  true()         -268435455L
+#define  false()        -268435456L
+#define  nil()          -536805377L
+/*  The sort constants :                                                  */
+/*---------------------------------------------------------------------
+  sort constants defined by the abstract syntax
+  ---------------------------------------------------------------------*/
+#define  _FctDeclList 		 -469696538L	/* -26 */
+#define  _FctDeclList_		 -469762022L	/* 26 */
+#define  _ParDeclList 		 -469696539L	/* -27 */
+#define  _ParDeclList_		 -469762021L	/* 27 */
+#define  _ExpList 		 -469696540L	/* -28 */
+#define  _ExpList_		 -469762020L	/* 28 */
+#define  _Env 		 -469696541L	/* -29 */
+#define  _Env_		 -469762019L	/* 29 */
+#define  _Program 		 -469696526L	/* -14 */
+#define  _Program_		 -469762034L	/* 14 */
+#define  _LetExp 		 -469696527L	/* -15 */
+#define  _LetExp_		 -469762033L	/* 15 */
+#define  _FctDecl 		 -469696528L	/* -16 */
+#define  _FctDecl_		 -469762032L	/* 16 */
+#define  _Boolean 		 -469696529L	/* -17 */
+#define  _Boolean_		 -469762031L	/* 17 */
+#define  _Integer 		 -469696530L	/* -18 */
+#define  _Integer_		 -469762030L	/* 18 */
+#define  _ParDecl 		 -469696531L	/* -19 */
+#define  _ParDecl_		 -469762029L	/* 19 */
+#define  _PredeclBody 		 -469696532L	/* -20 */
+#define  _PredeclBody_		 -469762028L	/* 20 */
+#define  _CondExp 		 -469696533L	/* -21 */
+#define  _CondExp_		 -469762027L	/* 21 */
+#define  _FctAppl 		 -469696534L	/* -22 */
+#define  _FctAppl_		 -469762026L	/* 22 */
+#define  _UsedId 		 -469696535L	/* -23 */
+#define  _UsedId_		 -469762025L	/* 23 */
+#define  _DeclId 		 -469696536L	/* -24 */
+#define  _DeclId_		 -469762024L	/* 24 */
+#define  _Pair 		 -469696537L	/* -25 */
+#define  _Pair_		 -469762023L	/* 25 */
+#define  _Element 		 -469696542L	/* -30 */
+#define  _Element_		 -469762018L	/* 30 */
+#define  _Exp 		 -469696543L	/* -31 */
+#define  _Exp_		 -469762017L	/* 31 */
+#define  _Type 		 -469696544L	/* -32 */
+#define  _Type_		 -469762016L	/* 32 */
+#define  _Body 		 -469696545L	/* -33 */
+#define  _Body_		 -469762015L	/* 33 */
+#define  _Decl 		 -469696546L	/* -34 */
+#define  _Decl_		 -469762014L	/* 34 */
+#define  _Scope 		 -469696547L	/* -35 */
+#define  _Scope_		 -469762013L	/* 35 */
+#define  _LineNo 		 -469696548L	/* -36 */
+#define  _LineNo_		 -469762012L	/* 36 */
+#define  _Value 		 -469696549L	/* -37 */
+#define  _Value_		 -469762011L	/* 37 */
+/*---------------------------------------------------------------------
+  predefined sort constants
+  ---------------------------------------------------------------------*/
+#define  _Point 		 -469762047L	/* 1 */
+#define  _Node 		 -469762046L	/* 2 */
+#define  _nil 		 -469696513L	/* -1 */
+#define  _Term 		 -469696514L	/* -2 */
+#define  _NodeSort 		 -469696515L	/* -3 */
+#define  _NodeSort_		 -469762045L	/* 3 */
+#define  _PredeclSort 		 -469696516L	/* -4 */
+#define  _PredeclSort_		 -469762044L	/* 4 */
+#define  _ClassSort 		 -469696517L	/* -5 */
+#define  _ClassSort_		 -469762043L	/* 5 */
+#define  _TupelSort 		 -469696518L	/* -6 */
+#define  _TupelSort_		 -469762042L	/* 6 */
+#define  _ListSort 		 -469696519L	/* -7 */
+#define  _ListSort_		 -469762041L	/* 7 */
+#define  _Ident 		 -469696520L	/* -8 */
+#define  _Ident_		 -469762040L	/* 8 */
+#define  _Bool 		 -469696521L	/* -9 */
+#define  _Bool_		 -469762039L	/* 9 */
+#define  _Char 		 -469696522L	/* -10 */
+#define  _Char_		 -469762038L	/* 10 */
+#define  _Int 		 -469696523L	/* -11 */
+#define  _Int_		 -469762037L	/* 11 */
+#define  _String 		 -469696524L	/* -12 */
+#define  _String_		 -469762036L	/* 12 */
+#define  _Reference 		 -469696525L	/* -13 */
+#define  _Reference_		 -469762035L	/* 13 */
+
+\end{verbatim}
+

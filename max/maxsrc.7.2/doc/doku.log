@@ -1,0 +1,331 @@
+This is TeX, C Version 3.14t3 (format=lplain 93.11.24)  1 JUL 1994 17:10
+**doku
+(doku.tex
+LaTeX Version 2.09 <25 March 1992>
+(/usr/local/dist/DIR/TeX/lib/inputs/latex/article.sty
+Standard Document Style `article' <14 Jan 92>.
+(/usr/local/dist/DIR/TeX/lib/inputs/latex/art12.sty)
+\c@part=\count79
+\c@section=\count80
+\c@subsection=\count81
+\c@subsubsection=\count82
+\c@paragraph=\count83
+\c@subparagraph=\count84
+\c@figure=\count85
+\c@table=\count86
+)
+(/usr/local/dist/DIR/TeX/lib/inputs/latex/german.sty
+Document Style Option `german' Version 2.4a of 12 Apr 1992
+\U@D=\dimen99
+)
+(/usr/local/dist/DIR/TeX/lib/inputs/misc/a4.sty
+Style option `A4' 1.2a <30 Nov 90> (NP and JLB)
+English documentation   <26 Feb 90> (JLB)
+) (doku.aux) (doku.toc [1
+
+])
+\tf@toc=\write3
+
+[2]
+Overfull \hbox (1.78644pt too wide) in paragraph at lines 71--71
+[][]\cmtt/m/n/12 FValue   = DefId@ | TWfath | TWson | TWrbroth | TWlbroth | Rel
+evAcc[] 
+
+\hbox(8.33331+0.99997)x411.93877
+.\hbox(0.0+0.0)x0.0
+.\setlanguage1 (hyphenmin 2,2)
+.\cmtt/m/n/12 F
+.\cmtt/m/n/12 V
+.\cmtt/m/n/12 a
+.etc.
+
+
+Overfull \hbox (14.13644pt too wide) in paragraph at lines 71--71
+[][]\cmtt/m/n/12 IntResExpr        = ComposedExpr | FuncAppl | ApplyEntity | Co
+ndition[] 
+
+\hbox(8.33331+2.66666)x411.93877
+.\hbox(0.0+0.0)x0.0
+.\setlanguage1 (hyphenmin 2,2)
+.\cmtt/m/n/12 I
+.\cmtt/m/n/12 n
+.\cmtt/m/n/12 t
+.etc.
+
+[3]
+Overfull \hbox (20.31145pt too wide) in paragraph at lines 110--110
+[][]\cmtt/m/n/12 Rside        = SortId | String | Parsnr | Parsline | Parscol |
+ Parspos[] 
+
+\hbox(8.33331+2.66666)x411.93877
+.\hbox(0.0+0.0)x0.0
+.\setlanguage1 (hyphenmin 2,2)
+.\cmtt/m/n/12 R
+.\cmtt/m/n/12 s
+.\cmtt/m/n/12 i
+.etc.
+
+[4] [5]
+Overfull \hbox (12.67578pt too wide) in paragraph at lines 174--174
+[][]\cmr/bx/n/14 Aufsammeln der Fun-cAppl@ in den R[]ump-fen von Funk-
+
+\hbox(9.99998+2.79999)x411.93877, glue set - 1.0
+.\hbox(9.27998+0.0)x36.89995
+..\glue 0.0
+..\cmr/bx/n/14 1
+..\cmr/bx/n/14 .
+..\cmr/bx/n/14 5
+..\glue 16.19998
+.\setlanguage1 (hyphenmin 2,2)
+.\cmr/bx/n/14 A
+.\cmr/bx/n/14 u
+.\cmr/bx/n/14 f
+.etc.
+
+[6]
+Overfull \hbox (14.53871pt too wide) in paragraph at lines 210--212
+[][]\cmr/m/n/12 Die Funk-ti-on []in-it[]eval[]groupnr`` in-itia-li-siert []eval
+[]groupnr`` und []eval[]prev[]grnum``. 
+
+\hbox(8.33331+2.33331)x411.93877, glue set - 1.0
+.\hbox(0.0+0.0)x0.0
+.\setlanguage1 (hyphenmin 2,2)
+.\cmr/m/n/12 D
+.\cmr/m/n/12 i
+.\cmr/m/n/12 e
+.etc.
+
+
+Overfull \hbox (4.73212pt too wide) in paragraph at lines 251--254
+[] [][]\cmtt/m/n/12 FCT enter[]attribute( Int, FctOrAtt@, Reference, Int ) Refe
+rence 
+
+\hbox(8.33331+1.66667)x382.56407
+.\hbox(0.0+0.0)x0.0
+.\glue 0.0
+.\hbox(5.33334+0.0)x0.0
+..\glue 0.0
+..\glue -23.49976
+..\glue -5.87494
+..\hbox(5.33334+0.0)x23.49976, glue set 23.49976fil
+...\glue 0.0 plus 1.0fil minus 1.0fil
+...\hbox(5.33334+0.0)x0.0, glue set - 6.00002fil []
+..\glue 5.87494
+.\penalty 0
+.\setlanguage1 (hyphenmin 2,2)
+.etc.
+
+[7]
+Underfull \hbox (badness 10000) in paragraph at lines 261--262
+
+
+\hbox(0.0+0.0)x382.56407
+.\glue(\rightskip) 0.0
+
+
+Overfull \hbox (4.41447pt too wide) in paragraph at lines 279--282
+\cmr/m/n/12 ver-ein-facht. F[]ur die Abh[]angig-keits-ana-ly-se wer-den die Lau
+f-zeit-wer-te der \cmtt/m/n/12 FuncAppl@
+
+\hbox(8.33331+2.66666)x411.93877, glue set - 1.0
+.\cmr/m/n/12 v
+.\kern-0.32639
+.\cmr/m/n/12 e
+.\cmr/m/n/12 r
+.\discretionary
+..\cmr/m/n/12 -
+.etc.
+
+[8] [9] [10] [11] [12]
+Underfull \hbox (badness 10000) in paragraph at lines 506--507
+
+
+\hbox(0.0+0.0)x382.56407
+.\glue(\rightskip) 0.0
+
+
+Overfull \hbox (52.40314pt too wide) in paragraph at lines 510--511
+[] [][]\cmtt/m/n/12 FCT aux[]intres[]right( Point, Point, Point, IntResList, In
+t ) IntResList 
+
+\hbox(8.33331+2.66666)x382.56407
+.\hbox(0.0+0.0)x0.0
+.\glue 0.0
+.\hbox(5.33334+0.0)x0.0
+..\glue 0.0
+..\glue -23.49976
+..\glue -5.87494
+..\hbox(5.33334+0.0)x23.49976, glue set 23.49976fil
+...\glue 0.0 plus 1.0fil minus 1.0fil
+...\hbox(5.33334+0.0)x0.0, glue set - 6.00002fil []
+..\glue 5.87494
+.\penalty 0
+.\setlanguage1 (hyphenmin 2,2)
+.etc.
+
+
+Overfull \hbox (17.08212pt too wide) in paragraph at lines 515--517
+[] [][]\cmtt/m/n/12 FCT intres[]union( IntResList, IntResList, IntResList ) Int
+ResList 
+
+\hbox(8.33331+1.66667)x382.56407
+.\hbox(0.0+0.0)x0.0
+.\glue 0.0
+.\hbox(5.33334+0.0)x0.0
+..\glue 0.0
+..\glue -23.49976
+..\glue -5.87494
+..\hbox(5.33334+0.0)x23.49976, glue set 23.49976fil
+...\glue 0.0 plus 1.0fil minus 1.0fil
+...\hbox(5.33334+0.0)x0.0, glue set - 6.00002fil []
+..\glue 5.87494
+.\penalty 0
+.\setlanguage1 (hyphenmin 2,2)
+.etc.
+
+[13] [14] [15] [16]
+Overfull \hbox (13.65022pt too wide) in paragraph at lines 710--712
+\cmr/m/n/12 Ausgabe ei-ner zus[]atz-lich not-wen-di-gen YACC-Regel (bei \cmtt/m
+/n/12 #prio\cmr/m/n/12 -Produktionen). 
+
+\hbox(9.0+3.0)x382.56407, glue set - 1.0
+.\cmr/m/n/12 A
+.\cmr/m/n/12 u
+.\cmr/m/n/12 s
+.\cmr/m/n/12 g
+.\cmr/m/n/12 a
+.etc.
+
+[17] [18]
+Overfull \hbox (12.63612pt too wide) in paragraph at lines 774--774
+ [][]\cmtt/m/n/12 static ELEMENT *insAttInst( EVALFCT attevalfct, ELEMENT attno
+de,[] 
+
+\hbox(8.33331+1.66667)x411.93877
+.\glue(\leftskip) 29.3747
+.\hbox(0.0+0.0)x0.0
+.\setlanguage1 (hyphenmin 2,2)
+.\cmtt/m/n/12 s
+.\cmtt/m/n/12 t
+.etc.
+
+
+Overfull \hbox (18.81113pt too wide) in paragraph at lines 774--774
+ []        []\cmtt/m/n/12 int state, AttInstSq* undefatt, long undefattix ) { .
+.. }[] 
+
+\hbox(8.33331+2.66666)x411.93877
+.\glue(\leftskip) 29.3747
+.\hbox(0.0+0.0)x0.0
+.\penalty 10000
+.\glue 6.175
+.\penalty 10000
+.etc.
+
+[19]
+Underfull \hbox (badness 10000) in paragraph at lines 850--851
+
+
+\hbox(0.0+0.0)x382.56407
+.\glue(\rightskip) 0.0
+
+[20]
+Overfull \hbox (18.85498pt too wide) in paragraph at lines 880--884
+\cmr/m/n/12 Die Pa-ra-me-ter wer-den noch um (\cmtt/m/n/12 EVALFCT mxw[]evf,ELE
+MENT mxw[]par\cmr/m/n/12 ) erg[]anzt,
+
+\hbox(9.0+3.0)x382.56407, glue set - 1.0
+.\cmr/m/n/12 D
+.\cmr/m/n/12 i
+.\cmr/m/n/12 e
+.\glue 3.91663 plus 1.95831 minus 1.30554
+.\cmr/m/n/12 P
+.etc.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 887--888
+
+
+\hbox(0.0+0.0)x382.56407
+.\glue(\rightskip) 0.0
+
+
+Overfull \hbox (1.81384pt too wide) in paragraph at lines 896--899
+\cmr/m/n/12 Der bis-he-ri-ge Aus-wer-tungs-zu-stand mu^^Y wie-der-her-ge-stellt
+ wer-den, dann
+
+\hbox(8.33331+2.33331)x356.71439, glue set - 1.0
+.\cmr/m/n/12 D
+.\cmr/m/n/12 e
+.\cmr/m/n/12 r
+.\glue 3.91663 plus 1.95831 minus 1.30554
+.\cmr/m/n/12 b
+.etc.
+
+[21]
+Underfull \hbox (badness 10000) in paragraph at lines 912--913
+
+
+\hbox(0.0+0.0)x382.56407
+.\glue(\rightskip) 0.0
+
+
+Overfull \hbox (6.67232pt too wide) in paragraph at lines 922--923
+[] [][]\cmtt/m/n/12 void prt[]init[]heap( ELEMENT, int, int, int, char *, char 
+* ) \cmr/m/n/12 und 
+
+\hbox(8.33331+2.66666)x382.56407, glue set - 1.0
+.\hbox(0.0+0.0)x0.0
+.\glue 0.0
+.\hbox(5.33334+0.0)x0.0
+..\glue 0.0
+..\glue -23.49976
+..\glue -5.87494
+..\hbox(5.33334+0.0)x23.49976, glue set 23.49976fil
+...\glue 0.0 plus 1.0fil minus 1.0fil
+...\hbox(5.33334+0.0)x0.0, glue set - 6.00002fil []
+..\glue 5.87494
+.\penalty 0
+.\setlanguage1 (hyphenmin 2,2)
+.etc.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 922--923
+
+
+\hbox(0.0+0.0)x382.56407
+.\glue(\rightskip) 0.0
+
+
+Overfull \hbox (27.70313pt too wide) in paragraph at lines 923--925
+[] [][]\cmtt/m/n/12 void prt[]choose[]heap( ELEMENT, ELEMENT, int, int, int, ch
+ar *, char
+
+\hbox(8.33331+2.66666)x382.56407
+.\hbox(0.0+0.0)x0.0
+.\glue 0.0
+.\hbox(5.33334+0.0)x0.0
+..\glue 0.0
+..\glue -23.49976
+..\glue -5.87494
+..\hbox(5.33334+0.0)x23.49976, glue set 23.49976fil
+...\glue 0.0 plus 1.0fil minus 1.0fil
+...\hbox(5.33334+0.0)x0.0, glue set - 6.00002fil []
+..\glue 5.87494
+.\penalty 0
+.\setlanguage1 (hyphenmin 2,2)
+.etc.
+
+[22] [23] (doku.aux)
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+ ) 
+Here is how much of TeX's memory you used:
+ 409 strings out of 4279
+ 3787 string characters out of 50686
+ 34954 words of memory out of 700001
+ 2536 multiletter control sequences out of 9500
+ 11172 words of font info for 44 fonts, out of 72000 for 255
+ 14 hyphenation exceptions out of 607
+ 18i,7n,17p,262b,255s stack positions out of 300i,40n,60p,3000b,4000s
+
+Output written on doku.dvi (23 pages, 54192 bytes).

@@ -1,0 +1,28 @@
+MAKING CHANGES TO THE CMAX sources
+==================================
+
+If you want to fix bugs or make extensions to cmax please follow the
+following rules:
+
+The file CHANGELOG contains a revision history.
+Enter a new entry describing the purpose of the change and the place where
+the change was made (filename/function).
+Include comments in the changed file(s) describing the change exactly.
+
+Bootstrapping notice:
+
+if you want to make changes to cmax_spec.cm make sure you can always
+generate a version of cmax that can compile the new specificaion.
+That means you always need working bootstrap files stdmax_spec.m.B and
+cmax_solver.c.B (a backup copy of a working cmax program is also useful).
+If your new cmax_spec.cm definitely works you can generate new
+bootstrap files with 'make bootstrapfiles' (takes some time). The
+old bootstrap files are saved in *.B.orig .
+
+
+Changing the code generator:
+
+If you change the MAX code that cmax emits you can use the tcl shell script
+stripscp.tcl in this directory to make the generated code readable.
+You can then locate errors much easier.
+(Simply execute ../stripscp.tcl stdmax_spec.m in the gen directory.)

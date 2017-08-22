@@ -1,0 +1,266 @@
+\documentstyle[11pt,german]{article}
+
+\begin{document}
+
+\title{
+Benutzeranleitung f"ur:\\
+\vspace*{1em}
+{\em maxbrowse} -\\
+Ein flexibler Browser f"ur das MAX-System}
+
+\author{
+  Andreas Graf
+\and
+  Boris Reichel
+\and
+  Stefan Duschl}
+
+\maketitle
+
+\pagebreak
+
+\tableofcontents
+
+\pagebreak
+
+\setcounter{section}{0}
+
+\section{"Uberblick}
+
+{\em maxbrowse} ist ein Werkzeug zur graphischen Darstellung von Syntaxb"aumen, die durch das am Lehrstuhl Prof. Dr. Eickel entwickelte "ubersetzergenerierende System MAX erzeugt werden. {\em maxbrowse} erm"oglicht dabei zus"atzlich z.B. das Anzeigen der zum Baum geh"origen Attribute, das Folgen von Verweisen auf Knoten oder Unterb"aume, die in Attributen enthalten sind sowie aus "Ubersichtlichkeitsgr"unden das Verstecken von Unterb"aumen, die momentan nicht ben"otigt werden. Des weiteren stellt {\em maxbrowse} Funktionen zur Verf"ugung, die das Navigieren durch alle Knoten einer Sorte gestatten. Schlie"slich ist es auch m"oglich, bestimmte Unterb"aume in einem eigenen Fenster anzeigen zu lassen.
+
+\section{Das {\em maxbrowse}-Fenster}
+
+Das Window, in dem der Syntaxbaum dargestellt wird, besteht aus einem Rechteck, das einen Ausschnitt des Baums graphisch darstellt. Links und oberhalb dieses Rechtecks befinden sich Scroll-Balken, mit deren Hilfe der sichtbare Ausschnitt verschoben wird und der gew"unschte Teil des Baums eingestellt werden kann. "Uber dem Rechteck befindet sich eine Men"uleiste, in der sechs verschiedene (Pulldown-)Men"us angesprochen werden k"onnen. Deren Funktionalit"at ist in Kap. 6 beschrieben. Im Startfenster von {\em maxbrowse} (also nach dem Aufruf) ist zun"achst allerdings nur der Wurzelknoten des Baums sichtbar. Das Vorhandensein des restlichen (Unter-)Baums wird durch ein Trapez unterhalb des Wurzelknotens angedeutet. Verschieben des sichtbaren Ausschnitts ist jetzt nat"urlich noch nicht n"otig. Wie der zur Wurzel geh"orende Unterbaum sichtbar gemacht wird, steht in Kap. 5.3 und 6.4 .
+
+\section{Funktionalit"at der Maus}
+
+F"ur die Bedienung von {\em maxbrowse} wurden drei Maustasten belegt. Unbedingt erforderlich f"ur die Bedienung ist dabei jedoch nur eine Maustaste (Taste 1, linke Taste). Mit den Tasten 2 und 3 (mittlere und rechte Taste) werden Funktionen ausgef"uhrt, die h"aufig ben"otigt werden, deren Ausf"uhrung etwas umst"andlicher aber auch mit Taste 1 erreicht werden kann.\\
+Des weiteren wird die Maus benutzt, um mit Hilfe der Scroll-Balken den sichtbaren Ausschnitt zu verschieben. Die Tasten werden dabei in den Feldern der Scroll-Balken in der gewohnten Weise benutzt:\\
+\hspace*{1em} Taste 1: stufenweises Verschieben des Auschnitts nach rechts bzw. unten.\\
+\hspace*{1em} Taste 2: stufenloses Verschieben in alle Richtungen.\\
+\hspace*{1em} Taste 3: stufenweises Verschieben nach links bzw. oben.
+
+
+\subsection{Maustaste 1 (linke Taste)}
+
+Mit dieser Taste k"onnen alle Funktionen zur Bedienung von {\em maxbrowse} ausgef"uhrt werden. Dies geschieht entweder durch Anklicken eines Men"utitels in der Men"uleiste oder eines der die Knoten darstellenden kleinen Rechtecke. An allen anderen  Stellen innerhalb des Windows (au"ser den Scroll-Balken, s.o.) bleibt ein Klick der Taste 1 wirkungslos. Nach Anklicken eines Men"u-Buttons oder eines Knotens erscheint ein Pulldown-Men"u. Pulldown-Men"u bedeutet, da"s die Taste nach dem Anklicken nicht losgelassen werden darf, sondern gewartet wird, bis das Men"u erscheint. Darauf wird mit dem Cursor (mit noch noch immer gehaltener Taste) ein Men"upunkt ausgew"ahlt (inverse Darstellung). Durch Loslassen der Taste wird nun die Funktion dieses Items zur Ausf"uhrung gebracht. F"ur die n"ahere Beschreibung der Men"us siehe Kap. 5 (Knoten,em"u) bzw. Kap. 6 (Men"uleiste).
+
+\subsection{Maustaste 2 (mittlere Taste)}
+
+Mit dieser Taste wird durch einfaches Anklicken eines Knotens die Markierung (inverse Darstellung, d.h. Vertauschung von Hintergrund- und Schriftfarbe) dieses Knoten bewirkt. War der Knoten bereits markiert, so wird die Markierung durch dieselbe Aktion r"uckg"angig gemacht. Diese Funktion kann in gleicher Weise durch Selektion des Men"upunkts 2 im Pulldown-Men"u eines Knotens erwirkt werden. An allen anderen Stellen innerhalb des Windows (au"ser den Scroll-Balken, s.o.) bleibt ein Klick der Taste 2 wirkungslos.
+
+\subsection{Maustaste 3 (rechte Taste)}
+
+Mit dieser Taste wird durch einfaches Anklicken eines Knotens ein evtl. versteckter Unterbaum dieses Knotens sichtbar gemacht. Ein Knoten besitzt genau dann einen versteckten Unterbaum, wenn scih unter dem Rechteck, das den Knoten darstellt, ein Trapez befindet. War ein evtl. vorhandener Unterbaum bereits sichtbar, so wird er durch dieselbe Aktion versteckt, also nur noch als Trapez angezeigt. An allen anderen Stellen innerhalb des Windows (au"ser den Scroll-Balken, s.o.) bleibt ein Klick der Taste 3 wirkungslos.
+
+\section{Darstellung der Attribute}
+
+Zu jedem Knoten geh"ort eine (mindestens leere) Menge von Attributen. Nach dem Start von {\em maxbrowse} sind diese jedoch an keinem Knoten zu sehen. Werden die Attribute sichtbar gemacht (s. Kap. 5 u. 6), so werden sie in einem Rechteck "uber dem Knoten, zu dem sie geh"oren, dargestellt. Im Falle einer leeren Attributmenge wird darin der Text ''No Attributes!'' ausgegeben. Sind Attribute vorhanden, so enth"alt das Rechteck "uber dem Knoten eine Liste dieser Attribute, die aus drei Spalten besteht, wobei jedem Attribut eine Zeile entspricht. Die erste Spalte enth"alt dabei die Namen, die zweite Spalte die Typen und die dritte Spalte die Werte der Attribute. Dabei existieren Attribute, deren Wert ein bestimmter Knoten (Typ ''MAX\_NODE'' oder Typ ''Point'') oder ein bestimmter Unterbaum (Typ ''Term'') ist, die also auf einen (zumeist anderen) Knoten oder Unterbaum verweisen. In diesen F"allen steht in der dritten Spalte kein Wert (da dieser nur eine f"ur den Benutzer wertlose Adresse w"are), sondern dort befindet sich ein kleines quadratisches Feld mit einem ''X''. Wird dieses Feld (Button) durch einfaches Anklicken bedient, so geschieht folgendes:\\
+\hspace*{1em} Typ MAX\_NODE / Typ Point: der Knoten, auf den das Attribut verweist, wird markiert und in der Mitte des Ausschnitts plaziert.\\
+\hspace*{1em} Typ TREE: es erscheint ein neues Window in dem der Unterbaum, auf den verwiesen wird, dargestellt wird. Das neue Window besitzt wieder eine Men"uleiste, so da"s auf dem Unterbaum in gewohnter Weise operiert werden kann.
+
+\section{Das Knotenmen"u}
+
+Wie schon erw"aehnt, erscheint bei Anklicken eines Knotens mit Hilfe von Maustaste 1 ein Pulldown-Men"u, das Knotenmen"u. Alle Funktionen, die durch Selektion eines Men"upunkts in diesem Knotenmen"u ausgef"uhrt werden k"onnen, beziehen auf den angeklickten Knoten. Diese Funktionen werden nun im folgenden in der Reihenfolge ihres Auftretens im Knotenmen"u n"aher beschrieben.
+
+\subsection{''Show/Hide Attributes''}
+
+Wurde dieser Men"upunkt gew"ahlt, wird in einem Rechteck direkt "uber dem betreffenden Knoten die Liste der zugeh"origen Attribute angezeigt (zum Aufbau dieser Liste s. Kap. 4). War diese Liste vor Selektion bereits angezeigt, so wird sie nun wieder versteckt und der Knoten im Ausgangszustand dargestellt.
+
+\subsection{''Mark/Unmark Node''}
+
+Die Auswahl dieses Men"upunkts bewirkt das Markieren des betreffenden Knotens, d.h. der Knoten wird mit vertauschter Hintergrund- und Schriftfarbe dargestellt. War der Knoten vor Selektion bereits markiert, so bewirkt diese Funktion die R"ucknahme der Markierung. Die Markierung von Knoten ist sinnvoll, um mit den Funktionen der globalen Men"us nicht auf allen Knoten oder auf allen Knoten einer Sorte operieren zu m"ussen, sondern um einen beliebigen Satz von Knoten ausw"ahlen zu k"onnen, auf dem operiert werden soll.
+
+\subsection{''Show/Hide Subtree''}
+
+Bewirkt die Darstellung eines zum betreffenden Knoten geh"origen versteckten Unterbaums. Wie schon oben erw"ahnt, besitzt ein Knoten genau dann einen versteckten Unterbaum, wenn sich unter ihm eine trapezf"ormige Figur befindet. Befinden sich unter einem Knoten weder diese trapezf"ormige Figur noch Verbindungslinien zu einem anderen Knoten, so besitzt dieser keinen Unterbaum, er ist also ein Blatt. Dann bleibt nat"urlich auch die hier beschriebene Aktion wirkungslos. Ist der Unterbaum eines Knotens sichtbar, so bewirkt die Selektion von ''Show/Hide Subtree'' an diesem Knoten das Verstecken dieses Unterbaums, also seine Darstellung als Trapez.
+
+\subsection{Markieren mehrerer Knoten}
+
+\subsubsection{''Mark Subtree''}
+
+Bewirkt die Markierung aller nicht markierten Knoten im zum betreffenden Knoten geh"origen Unterbaum, den angeklickten Knoten selbst eingeschlossen. Diese Aktion wird \underline{auch} in einem versteckten Unterbaum durchgef"uhrt.
+
+\subsubsection{''Unmark Subtree''}
+
+Bewirkt die R"ucknahme der Markierungen aller markierten Knoten im zum betreffenden Knoten geh"origen Unterbaum, den angeklickten Knoten selbst eingeschlossen. Diese Aktion wird \underline{auch} in einem versteckten Unterbaum durchgef"uhrt.
+
+\subsubsection{''Mark Showed Subtree''}
+
+Bewirkt die Markierung aller nicht markierten Knoten im zum betreffenden Knoten geh"origen Unterbaum, den angeklickten Knoten selbst eingeschlossen. Diese Aktion wird in einem versteckten Unterbaum \underline{nicht} durchgef"uhrt.
+
+\subsubsection{''Unmark Showed Subtree''}
+
+Bewirkt die R"ucknahme der Markierungen aller markierten Knoten im zum betreffenden Knoten geh"origen Unterbaum, den angeklickten Knoten selbst eingeschlossen. Diese Aktion wird in einem versteckten Unterbaum \underline{nicht} durchgef"uhrt.
+
+\subsubsection{''Mark Path''}
+
+Bewirkt die Markierung aller nicht markierten Knoten, die auf dem Pfad vom betreffenden Knoten zur Wurzel liegen, den angeklickten Knoten selbst eingeschlossen.
+
+\subsubsection{''Unmark Path''}
+
+Bewirkt die R"ucknahme der Markierungen aller markierten Knoten, die auf dem Pfad vom betreffenden Knoten zur Wurzel liegen, den angeklickten Knoten selbst eingeschlossen.
+
+\subsection{''Copy Subtree''}
+
+Die Auswahl dieser Option bewirkt die Erzeugung eines neuen Windows, in dem der zum betreffenden Knoten geh"orige Unterbaum dargestellt wird. Dabei wird der angeklickte Knoten zur Wurzel im neuen Window. Das neue Window besitzt wieder das Knotenmen"u sowie die Men"uleiste "uber dem Baum, so da"s auch hier wie im Eltern-Window operiert werden kann. Die durch ein oder mehrmaliges Anwenden von ''Copy Subtree'' entstehende Window-Hierarchie wird durch eine leicht einsichtige Namensgebung der Windows (am oberen Windowrand) wiedergegeben.
+
+\subsection{Suchfunktionen (Preorder)}
+
+(Zur Erinnerung: Ein Baum wird (rekursiv) in Preorder durchlaufen, indem zuerst seine Wurzel, dann der ganz linke Unterbaum, darauf dessen n"achster rechter Bruder usw. besucht wird, bis schlie"slich der ganz rechte Unterbaum besucht wird.)
+
+\subsubsection{''Goto first Node (Preorder)''}
+
+Diese Option bewirkt einen Suchdurchlauf durch den gesamten Baum, der nach dem Knoten von der gleichen Sorte wie der betreffende Knoten sucht, der in Preorder zuerst im Baum auftritt. Dieser Knoten wird dann markiert und in die Mitte des sichtbaren Ausschnitts ger"uckt.
+
+\subsubsection{''Goto last Node (Preorder)''}
+
+Diese Option bewirkt einen Suchdurchlauf durch den gesamten Baum, der nach dem Knoten von der gleichen Sorte wie der betreffende Knoten sucht, der in Preorder zuletzt im Baum auftritt. Dieser Knoten wird dann markiert und in die Mitte des sichtbaren Ausschnitts ger"uckt.
+
+\subsection{''Goto next Node (Preorder)''}
+
+Diese Option bewirkt einen beim angeklickten Knoten beginnenden Suchdurchlauf durch den Baum, der in Preorder nach dem n"achsten Knoten von derselben Sorte wie der Ausgangsknoten sucht. Wurde ein solcher Knoten gefunden, wird er markiert und in die Mitte des sichtbaren Ausschnitts ger"uckt.
+
+\subsubsection{''Goto previous Node (Preorder)''}
+
+Diese Option bewirkt einen beim angeklickten Knoten beginnenden Suchdurchlauf durch den Baum, der nach dem in Preorder vorausgehenden Knoten von derselben Sorte wie der Ausgangsknoten sucht. Wurde ein solcher Knoten gefunden, wird er markiert und in die Mitte des sichtbaren Ausschnitts ger"uckt.
+
+\subsection{Suchfunktionen (Postorder)}
+
+(Zur Erinnerung: Ein Baum wird (rekursiv) in Postorder durchlaufen, indem zuerst seine Wurzel, dann der rechte Unterbaum, darauf dessen n"achster linker Bruder usw. besucht wird, bis schlie"slich der ganz linke Unterbaum besucht wird.)
+
+\subsubsection{''Goto first Node (Postorder)''}
+
+Diese Funktion arbeitet analog zur entsprechenden Preorder-Funktion (s. voriger Abschnitt).
+
+\subsubsection{''Goto last Node (Postorder)''}
+
+Diese Funktion arbeitet analog zur entsprechenden Preorder-Funktion (s. voriger Abschnitt).
+
+\subsection{''Goto next Node (Preorder)''}
+
+Diese Funktion arbeitet analog zur entsprechenden Preorder-Funktion (s. voriger Abschnitt).
+
+\subsubsection{''Goto previous Node (Preorder)''}
+
+Diese Funktion arbeitet analog zur entsprechenden Preorder-Funktion (s. voriger Abschnitt).
+
+\section {Die globalen Men"us der Men"uleiste}
+
+Hier werden Funktionen zur Verf"ugung gestellt, die "uber mehreren Knoten bzw. "uber dem ganzen Baum operieren.\\
+In manchen F"allen ben"otigen die Funktionen die Angabe eines Sortennamens. Dann erscheint vor Ausf"uhrung der Funktion eine Liste aller im Baum auftretenden Sortennamen. Daraus mu"s durch Anklicken mit Maustaste 1 (links) ein Name ausgew"ahlt werden. Daraufhin wird die betreffende Funktion bzgl. dieses Sortennamens ausgef"uhrt. Wurde eine Funktion irrt"umlich gew"ahlt, so kann die Liste der Sortennamen mit dem Button ''Cancel'' zum Verschwinden gebracht werden.
+
+\subsection{Das Men"u ''Attributes''}
+
+In diesem Men"u k"onnen Funktionen zum Anzeigen und Verstecken von Attributlisten sowie zum Kreieren einer Attributmaske ausgew"ahlt werden.
+
+\subsubsection{''Hide Attr.(marked)''}
+
+Bewirkt das Verstecken aller Attributlisten, die sich "uber markierten Knoten befinden. Dies gilt auch f"ur Attributlisten von markierten Knoten, die sich in versteckten Unterb"aumen befinden.
+
+\subsubsection{''Hide Attr.(name)''}
+
+Bei Selektion dieser Funktion erscheint die Liste der vorkommenden Sortennamen (s.o.). Daraus mu"s ein Name gew"ahlt werden. Ist dies geschehen, werden alle Attributlisten, die sich "uber Knoten dieser Sorte befinden, versteckt. Dies gilt auch, wenn sich solche Knoten in versteckten Unterb"aumen befinden.
+
+\subsubsection{''Hide Attr.(all)''}
+
+Bewirkt das Verstecken aller angezeigten Attributlisten. Dies gilt auch f"ur Attributlisten, die zwar angezeigt sind, aber momentan nicht sichtbar sind, da sie sich "uber Knoten in versteckten Unterb"aumen befinden.
+
+\subsubsection{''Show Attr.(marked)''}
+
+Bewirkt das Anzeigen der Attributlisten an allen markierten Knoten. Befinden sich markierte Knoten in versteckten Unterb"aumen, so werden zwar dort die Attributlisten angezeigt, wirklich sichtbar werden sie jedoch erst, wenn der entspr. Unterbaum ge"offnet wird.
+
+\subsubsection{''Show Attr.(name)''}
+
+Bei Selektion dieser Funktion erscheint die Liste der vorkommenden Sortennamen (s.o.). Daraus mu"s ein Name gew"ahlt werden. Ist dies geschehen, werden die Attributlisten aller Knoten dieser Sorte angezeigt. Befindet sich ein Knoten dieser Sorte in einem versteckten Unterbaum, so wird zwar auch dort die Attributliste angezeigt, wirklich sichtbar wird diese aber erst nach "Offnen des betreffenden Unterbaums.
+
+\subsubsection{''Show Attr.(all)''}
+
+Bewirkt das Anzeigen der Attributlisten aller Knoten. Bei Knoten in versteckten Unterb"aumen werden diese Attributlisten erst durch "Offnen des Unterbaums sichtbar.
+
+\subsubsection{''Attribute Mask''}
+
+Durch Auswahl dieser Option kann eine Attributmaske erstellt werden. Das bedeutet, hier k"onnen die Namen bestimmter Attribute ausgew"ahlt werden. Werden daraufhin die Attributlisten bestimmter Knoten angezeigt, so tauchen darin Attribute, deren Name zuvor ausgew"ahlt (''maskiert'') wurde, nicht mehr auf. Wurden insbesondere alle Attribute einer Liste maskiert, so erscheint in der (ansonsten leeren) Liste der Text ''Attributes masked!''.\\
+Im einzelnen funktioniert das so:\\
+Nach Selektion von ''Attribute Mask'' im Men"u ''Attributes'' erscheint ein Popup-Window, das die Namen aller vorkommenden Attribute enth"alt. Jeder Attributname erscheint in einem eigenen Rahmen. Ein bestimmtes Attribut wird dadurch maskiert, da"s mit Maustaste 1 in den betreffenden Rahmen geklickt wird. Daraufhin erscheint der Name in wei"s vor schwarzem Hintergrund. Bez"uglich der Anzahl der auszuw"ahlenden Attribute bestehen keine Beschr"ankungen. Mit Hilfe des Buttons ''Unselect All'' werden dabei alle bestehenden Selektionen r"uckg"angig gemacht. Wurde die gew"unschte Wahl getroffen, so wird diese Maske durch Klick in das Feld ''OK'' g"ultig gemacht. Das Popup-Window verschwindet. Bei allen Aktionen, die das Anzeigen von Attributlisten betreffen, wird nun diese Maske ber"ucksichtigt. Wurde die Option ''Attribute Mask'' irrt"umlich gew"ahlt, so kann das Popup-Window durch ''Cancel'' zum Verschwinden gebracht werden. Auch evtl. bereits vorgenommene "Anderungen an der Attributmaske werden nicht ber"ucksichtigt, wenn mit ''Cancel'' abgebrochen wird. Es bleibt dann die Maske g"ultig, die bereits vor Erscheinen des Popup-Windows g"ultig war.
+
+\subsection{Das Men"u ''Find''}
+
+In diesem Men"u sind Funktionen zur Verf"ugung gestellt, die nach Knoten einer bestimmten Sorte suchen. Dabei kann der Baum in Preorder (s. 5.5) oder in Postorder (s. 5.6) durchlaufen werden.
+
+\subsubsection{''Goto First Named Node (Preord.)''}
+
+Bei Selektion dieser Funktion erscheint die Liste der im Baum vorkommenden Sortennamen. Daraus mu"s ein Name gew"ahlt werden. Darauf wird ein Suchdurchlauf durch den Baum gestartet, der nach dem \underline{ersten in Preorder} im Baum auftretenden Knoten der gew"ahlten Sorte sucht. Dieser Knoten wird dann markiert und in die Mitte des sichtbaren Ausschnitts ger"uckt.
+
+\subsubsection{''Goto Last Named Node (Preord.)''}
+
+Bei Selektion dieser Funktion erscheint die Liste der im Baum vorkommenden Sortennamen. Daraus mu"s ein Name gew"ahlt werden. Darauf wird ein Suchdurchlauf durch den Baum gestartet, der nach dem \underline{letzten in Preorder} im Baum auftretenden Knoten der gew"ahlten Sorte sucht. Dieser Knoten wird dann markiert und in die Mitte des sichtbaren Ausschnitts ger"uckt.
+
+\subsubsection{''Goto First Named Node (Postord.)''}
+
+Bei Selektion dieser Funktion erscheint die Liste der im Baum vorkommenden Sortennamen. Daraus mu"s ein Name gew"ahlt werden. Darauf wird ein Suchdurchlauf durch den Baum gestartet, der nach dem \underline{ersten in Postorder} im Baum auftretenden Knoten der gew"ahlten Sorte sucht. Dieser Knoten wird dann markiert und in die Mitte des sichtbaren Ausschnitts ger"uckt.
+
+\subsubsection{''Goto Last Named Node (Postord.)''}
+
+Bei Selektion dieser Funktion erscheint die Liste der im Baum vorkommenden Sortennamen. Daraus mu"s ein Name gew"ahlt werden. Darauf wird ein Suchdurchlauf durch den Baum gestartet, der nach dem \underline{letzten in Postorder} im Baum auftretenden Knoten der gew"ahlten Sorte sucht. Dieser Knoten wird dann markiert und in die Mitte des sichtbaren Ausschnitts ger"uckt.
+
+\subsection{Das Men"u ''Mark/Unmark''}
+
+Dieses Men"u stellt Funktionen zum Markieren bzw. zum R"ucksetzen der Markierungen mehrerer Knoten zur Verf"ugung.
+
+\subsubsection{''Mark on name''}
+
+Durch Auswahl dieser Option kann die Markierung aller Knoten einer Sorte durchgef"uhrt werden. Nach Selektieren des Men"upunkts erscheint dabei die Liste aller vorhandenen Sortennamen, aus denen ein Name ausgew"ahlt werden mu"s. Bei der Ausf"uhrung der Funktion spielt es dann keine Rolle, ob sich die betreffenden Knoten in versteckten Unterb"aumen befinden oder nicht.
+
+\subsubsection{''Unmark on name''}
+
+Durch Auswahl dieser Option kann die Markierung aller markierten Knoten einer Sorte zur"uckgesetzt werden. Nach Selektieren des Men"upunkts erscheint dabei die Liste aller vorhandenen Sortennamen, aus denen ein Name ausgew"ahlt werden mu"s. Bei der Ausf"uhrung der Funktion spielt es dann keine Rolle, ob sich die betreffenden Knoten in versteckten Unterb"aumen befinden oder nicht.
+
+\subsubsection{''Mark all''}
+
+Mit dieser Option werden alle Knoten des Baums markiert, auch solche, die sich in versteckten Unterb"aumen befinden.
+
+\subsubsection{''Unmark all''}
+
+Mit dieser Option werden die Markierungen aller markierten Knoten des Baums r"uckg"angig gemacht, auch von den Knoten, die sich in versteckten Unterb"aumen befinden.
+
+\subsubsection{''Mark showed''}
+
+Diese Funktion markiert alle sichtbaren Knoten, also alle Knoten, die sich nicht in versteckten Unterb"aumen befinden.
+
+\subsubsection{''Unmark showed''}
+
+Diese Funktion macht die Markierung aller sichtbaren markierten Knoten, also aller markierten Knoten, die sich nicht in markierten Unterb"aumen befinden, r"uckg"angig.
+
+\subsection{Das Men"u ''Hide/Show''}
+
+Dieses Men"u stellt Funktionen zum gleichzeitigen Verstecken oder "Offnen von mehreren Unterb"aumen zur Verf"ugung.
+
+\subsubsection{''Hide marked''}
+
+Diese Funktion versteckt alle ge"offneten Unterb"aume, deren Wurzel markiert ist. Dies gilt auch dann, wenn sich die Wurzel selbst in einem versteckten Unterbaum befindet.
+
+\subsubsection{''Hide on name''}
+
+Bei Auswahl dieser Option erscheint zun"achst die Liste der Sortennamen. Daraus mu"s ein Name ausgew"ahlt werden. Dann werden alle ge"offneten Unterb"aume versteckt, deren Wurzel von der angegebenen Sorte ist.
+
+\subsubsection{''Show marked''}
+
+Diese Funktion "offnet alle versteckten Unterb"aume, deren Wurzel markiert ist. Dies gilt auch dann, wenn sich die Wurzel selbst in einem versteckten Unterbaum befindet.
+
+\subsubsection{''Show on name''}
+
+Bei Auswahl dieser Option erscheint zun"achst die Liste der Sortennamen. Daraus mu"s ein Name ausgew"ahlt werden. Dann werden alle versteckten Unterb"aume ge"offnet, deren Wurzel von der angegebenen Sorte ist.
+
+\subsection{Das Men"u ''Copy''}
+
+Dieses Men"u enth"alt nur eine einzige Option, und zwar ''Copy Tree''. Diese Funktion bewirkt das Erzeugen eines neuen Windows, das eine Kopie des Baums enth"alt, in dessen Window ''Copy Tree'' aufgerufen wurde. Der kopierte Baum befindet sich dabei im selben Zustand wie der Ausgangsbaum. D.h. vorher markierte Knoten sind auch jetzt wieder markiert, angezeigte Attributlisten sind auch jetzt wieder angezeigt usw.. Das kopierte Window enth"alt dar"uber hinaus wieder eine Men"uleiste, so da"s auch hier wieder die komplette Funktionalit"at gegeben ist. Die durch ein oder mehrmaliges Anwenden von ''Copy Tree'' entstehende Window-Hierarchie wird durch eine leicht einsichtige Namensgebung der Windows (am oberen Windowrand) wiedergegeben.
+
+\subsection{Das Men"u ''Quit''}
+
+Dieses Men"u enth"alt nur eine einzige Option, und zwar ''Close Window''. Diese Funktion bewirkt das Zerst"oren des Windows, in dem sie aufgerufen wurde. Dar"uber hinaus werden auch alle Windows zerst"ort, die aus diesem Window durch ein- oder mehrmaliges Aufrufen von ''Copy Tree'' in der Men"uleiste oder von ''Copy Subtree'' im Knotenmen"u erzeugt wurden. Insbesondere werden durch Selektion von ''Close Window'' im zuerst erschienen Window alle bestehenden Windows zerst"ort und damit die Applikation beendet.
+
+\end{document}
+
+

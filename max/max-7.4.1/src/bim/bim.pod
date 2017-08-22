@@ -1,0 +1,30 @@
+
+=head1 NAME
+
+BIM - MAX Browser
+
+=head1 VERSION
+
+@V@
+
+=head1 SYNOPSIS
+
+B<bim>
+I<name>
+
+=head1 DESCRIPTION
+
+BIM is the MAX browser....
+
+=head1 COPYRIGHT
+
+ (C) 1993-1996 TU Muenchen,
+ Lehrstuhl Informatik II,
+ Prof. J. Eickel
+
+=head1 SEEALSO
+
+max(1)
+
+=cut
+

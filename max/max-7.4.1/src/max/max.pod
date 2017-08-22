@@ -1,0 +1,127 @@
+
+=head1 NAME
+
+MAX - Munich Attributation System for Unix
+
+=head1 VERSION
+
+@V@
+
+=head1 SYNOPSIS
+
+B<max>
+[B<-P>]
+[B<-E>]
+[B<-D> I<name>=I<value>]
+[B<-I> I<directory>]
+[B<-p>]
+[B<-t>]
+[B<-T>]
+[B<-W>]
+[B<-O> I<level>]
+[B<-y> I<type>]
+[B<-f>]
+[B<-m>]
+[B<-b>]
+I<specfile>.m
+
+=head1 DESCRIPTION
+
+MAX is a system which supports programming language specification and
+implementation. It is a generator for analyzers of abstract syntax trees which
+is programmed via a functional language providing tree definition, attributes,
+functions and conditions.
+
+=head1 OPTIONS
+
+=over 4
+
+=item B<-P>
+
+This enables the MAX preprocessor pass. MAX uses the program F<mpp> as its
+preprocessor which is an adapted F<cpp> from the GNU C Compiler. MAX provides
+full support  for the line control of the preprocessor.
+
+=item B<-E>
+
+Stop processing after the preprocessor phase. The output is sent
+to STDOUT.
+
+=item B<-D> I<name>=I<value>
+
+Sets the preprocessor variable I<name> to I<value>.
+This option can occur more than once.
+
+=item B<-I> I<directory>
+
+Specify a directory which is searched on include files (directive C<#include>
+of the preprocessor). This option can occur more than once.
+
+=item B<-p>
+
+Print the estimated value-terms of functions and attributes at end
+of processing.
+
+=item B<-t>
+
+Print the syntax tree at end of processing.
+
+=item B<-T>
+
+Enable the type checking. Use this option while developing, it is extremely
+essential for writing correct code.
+
+=item B<-W>
+
+Enable warnings on type checking.
+
+=item B<-O> I<level>
+
+Specifies the optimization level. The following values for I<level>
+are available:
+
+  0: optimize without strategy, without partial evaluation
+  1: optimize without strategy, with    partial evaluation
+  2: optimize with    strategy, without partial evaluation
+  3: optimize with    strategy, with    partial evaluation
+
+=item B<-y> I<type>
+
+Create scanner and parser for either the abstract (I<type>=C<a>) or concrete
+(I<type>=C<c>) syntax tree.
+
+=item B<-f> 
+
+Additionally generate a frame program source containing a suitable
+F<main> function.
+
+=item B<-m> 
+
+Additionally generate a F<Makefile>.
+
+=item B<-b> 
+
+This calls the MAX browser at the end of internal processing.
+Only for debugging the MAX system itself.
+
+=item B<-X> I<prefix>
+
+Rename the external symbols used in MAX so that they start with
+I<prefix>. For example, if you use B<-X MAX_>, the names
+I<ID>, I<scope> and I<code> become I<MAX_ID>,
+I<MAX_scope> and I<MAX_code>.
+
+=back
+
+=head1 COPYRIGHT
+
+ (C) 1993-1996 TU Muenchen,
+ Lehrstuhl Informatik II,
+ Prof. J. Eickel
+
+=head1 SEE ALSO
+
+lex(1), yacc(1)
+
+=cut
+

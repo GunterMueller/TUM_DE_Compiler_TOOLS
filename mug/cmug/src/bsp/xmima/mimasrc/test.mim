@@ -1,0 +1,16 @@
+program CALCULATOR
+begin
+  OPNO := 0;
+  if TRUE then
+    a := 1+e+g*g*h*j+y*y/y;
+    c := 1
+  else
+    b := 0;
+    c := 4
+  fi;
+  write('calculator stops',newline)
+end { program CALCULATOR }
+
+
+
+

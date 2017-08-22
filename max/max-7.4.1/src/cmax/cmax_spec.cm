@@ -1,0 +1,2190 @@
+/***************************************************************************
+
+  cmax_spec.cm
+
+  CMAX specification for CMAX Constraint MAX preprocessor
+  (requires existing cmax preprocessor)
+
+  part of CMAX V2.1.0 sources
+
+  (c) Copyright 1996-1998 by Aurel Huber, TU Muenchen, Germany
+
+  Last update: 31 Mar 1998
+
+ **************************************************************************/
+
+
+////////////////////////////////////////////////////////////////////////////
+// Abstract CMAX Syntax
+// extensions for Constraints indicated by //* - comments
+////////////////////////////////////////////////////////////////////////////
+
+Specification    *  GlobalDecl
+GlobalDecl       =  ProdList  |  PredDecl  |  FuncDecl  |  Structure  |
+                    RuleList  |  MaxCodeText                        //*
+
+ProdList         *  Production
+Production       =  ListProd  |  TupelProd |  ClassProd |  PredeclProd
+ListProd         (  DefId  SortId      )
+TupelProd        (  DefId  SortIdList  )
+ClassProd        (  DefId  SortIdList  )
+PredeclProd      (  DefId   )
+SortIdList       *  SortId
+
+PredDecl         (  DefId  SortIdList  )
+FuncDecl         (  DefId  SortIdList  SortId  )
+Structure        (  DefId  TermSortId  LocalDeclList  )
+LocalDeclList    *  LocalDecl
+LocalDecl        =  PredList  |  FuAtList  |  CondList  |
+                    PredDecl  |  FuncDecl  |  AttrDecl |
+                    DynFunc   |  DynSemInput |
+                    LatticeDefList |                                //*
+                    VarDeclList |  AssertionList |                  //*
+                    AssnDefList |                                   //*
+                    MaxCodeText                                     //*
+                                                                    //*
+MaxCodeText      (  String   )                                      //*
+
+PredList         *  Predicate
+FuAtList         *  FctOrAtt
+CondList         *  Condition
+Predicate        (  DefId  SortIdList  NameList  Formula  )
+Function         (  DefId  SortIdList  NameList  SortId  Expr  )
+Attribute        (  DefId  SortIdList  NameList  SortId  Expr  )
+Condition        (  PatternList  Formula  Expr  )
+PatternList      *  Pattern
+AttrDecl         (  DefId  SortIdList  SortId  )
+
+LatticeDefList   *  LatticeDef                                      //*
+VarDeclList      *  VarDecl                                         //*
+AssertionList    *  Assertion                                       //*
+AssnDefList      *  AssnDef                                         //*
+LatticeDef       (  DefId  SortId  ApplId  ApplId ApplId  )         //*
+VarDecl          (  DefId  SortIdList  NameList  SortId  Expr       //*
+                    LeqOrGeq )                                      //*
+LeqOrGeq         =  Leq | Geq                                       //*
+Leq() Geq()                                                         //*
+Assertion        (  AssnList   )                                    //*
+Assn             =  Constraint | PatternAssn | IfAssn | DefAssnAppl //*
+                    | LetAssn                                       //*
+Constraint       =  BasicConstr | CondConstr                        //*
+BasicConstr      =  LeqConstr | GeqConstr                           //*
+LeqConstr        (  Expr  VarExpr  )                                //*
+GeqConstr        (  Expr  VarExpr  )                                //*
+CondConstr       (  Formula  Constraint   )                         //*
+PatternAssn      (  Pattern  AssnList  )                            //*
+IfAssn           (  Formula  AssnList  AssnList  )                  //*
+LetAssn          (  Name  Expr  AssnList  )                         //*
+DefAssnAppl      (  ApplId  ExprList  )                             //*
+AssnDef          (  DefId  SortIdList  NameList  AssnList  )        //*
+AssnList         *  Assn                                            //*
+
+ExprList         *   Expr
+SExprList        *   Expr   // list of string exprs (used in StringExpr); 
+                            // this additional production
+                            // is useful to avoid ambiguities in function
+                            // outputMAXCode
+Expr             =   Constant |  Name  |  FuncAppl |  ComposedExpr  |
+                     StringExpr | DynUndef
+VarExpr          =   FuncAppl                                       //*
+
+Constant         =   CharConst   |  IntConst   |  StringConst   |  SortConst
+ComposedExpr     =   IfExpr   |  LetExpr
+CharConst        (   Char  Int  Int  String  )
+IntConst         (   Int  Int  Int  String  )
+StringConst      (   String  Int  Int  String  )
+SortConst        (   SortId  )
+FuncAppl         (   ApplId  ExprList  )
+IfExpr           (   CaseList   Expr  Int  Int  String  )
+LetExpr          (   Name  Expr  Expr  )
+StringExpr       (   SExprList  Int  Int  String  )
+CaseList         =   PatternCaseList  |  FormulaCaseList
+PatternCaseList  *   PatternCase
+FormulaCaseList  *   FormulaCase
+PatternCase      (   Pattern  Expr  )
+FormulaCase      (   Formula  Expr  )
+
+Formula          =   PredAppl  |  Or  |  And  |  Impl  |  Neg
+PredAppl         (   ApplId  ExprList  )
+Or               (   Formula   Formula  )
+And              (   Formula   Formula  )
+Impl             (   Formula   Formula  )
+Neg              (   Formula   )
+
+Pattern          (   SortPos  SubPatternPos  NamePos  )
+SortPos          =   SortId   |  Blank
+SubPatternPos    =   ItemList |  Blank
+NamePos          =   Name     |  Blank
+ItemList         *   Item
+Item             =   Pattern  |  Blank  |  Asterisk
+
+DefId            (   Ident  Int  Int  String  )
+UsedId           =   SortId      |  ApplId
+SortId           =   TermSortId  |  NodeSortId
+TermSortId       (   Ident  Int  Int  String  )
+NodeSortId       (   Ident  Int  Int  String  )
+ApplId           (   Ident  Int  Int  String  )
+Name             (   Ident  Int  Int  String  )
+NameList         *   Name
+Blank            (   Int  )
+Asterisk         (   )
+
+//////////////////////////////////////////////////////////////////////////////
+//
+//  End of abstract syntax definition 
+//
+//////////////////////////////////////////////////////////////////////////////
+
+
+
+////////////////////////////////////////////////////////////////////////////
+// Datatypes
+////////////////////////////////////////////////////////////////////////////
+
+Declaration      =   PredDecl    |  FuncDecl   |  AttrDecl
+Definition       =   Function  |  Attribute  |  Predicate  |  Production
+                 |  AssnDef  |  LatticeDef
+DeclNode         =   Declaration  |  Definition   // Declaration of identifiers
+DeclForConstraints = VarDecl | LatticeDef | Assertion | AssnDef
+DeclList          =  PredList | FuAtList | AssnDefList | ProdList
+                  |  LatticeDefList | VarDeclList | RuleList
+                  | CondList |  AssertionList | Specification | LocalDeclList
+
+DeclListForConstraints = AssnDefList
+       | LatticeDefList | VarDeclList | AssertionList
+
+//////////////////////////////////////////////////
+//  additional sorts for frontend-generation
+//////////////////////////////////////////////////
+
+ProdNodeList * Production@
+IdentList    * Ident
+CharList     * Char
+
+Rside        = SortId | String | Parsnr | Parsline | Parscol | Parspos
+Parsnr       ( Int )
+Parsline     ()
+Parscol      ()
+Parspos      ()
+RsideInfo    * Rside
+RsideList    * RsideInfo
+
+Lside        = Parsrule | Parsaddrule | Parsno | Parsaux
+             | Parsleft | Parsright | Parsprio | Int
+LsideList    * Lside
+
+Parsprio     ()
+Parsrule     ( StringList )
+Parsaddrule  ( StringList )
+Parsno       ()
+Parsleft     ()
+Parsright    ()
+Parsaux      ()
+
+LPinfoListlist * LPinfolist
+LPinfolist     * LPinfo
+LPinfo         = ParsStern | ParsPlus
+ParsStern      ( String )
+ParsPlus       ( String )
+
+IdentTripel    ( Ident Ident Ident )
+
+
+StringList     * String
+CPinfo         ( StringList SortId StringList )
+CPinfoList     * CPinfo
+CPinfoListlist * CPinfoList
+
+ParTup           (   SortIdList  NameList  )
+
+//////////////////////////////////////////////////
+//  Abstract Code for Constraint Activation
+//////////////////////////////////////////////////
+
+ActivationCode     * ActivationCodeElem
+ActivationCodeElem = AC_Cond | AC_For_Sorts | AC_For_Rbroths
+                     | AC_Block | AC_Bind | AC_Test | AC_Stmt
+
+// last Int-elements are ID for generating exit-labels
+
+AC_Cond         ( AC_Expr ActivationCode ActivationCode Int )
+AC_For_Sorts    ( AC_Ref  SortIdList ActivationCode Int )
+AC_For_Rbroths   ( AC_Ref  AC_Expr  ActivationCode Int )
+AC_Block        ( Set ActivationCode Int )  // Set contains declared idents!
+AC_Bind         ( AC_Ref  AC_Expr )
+AC_Test         ( AC_Expr )  /* boolean expression! */
+
+AC_Stmt         ( String )        /* C - statement */ 
+AC_Ref          ( String )        /* C - expression for modyfiable lvalue */
+AC_Expr         ( String )        /* C - expression */
+
+//////////////////////////////////////////////////
+//  Specification of dynamic semantic
+//////////////////////////////////////////////////
+
+DynFunc        (  DefId  SortIdList  NameList  SortId  Expr  )
+
+RuleList       *  Rule
+Rule           =  IfRule | CaseRule
+IfRule         (  Formula  UpdateList  UpdateList )
+
+CaseRule       (  Expr  CaseIsList  UpdateList )
+CaseIsList     *  CaseIs
+CaseIs         (  CaseConst UpdateList )
+CaseConst      =  CharConst | IntConst | SortConst
+
+UpdateList     *  UpdateOrRule
+UpdateOrRule   =  Update  |  Rule
+Update         (  FuncAppl  Expr )
+
+UListNodeList  *  UpdateList@
+
+DynUndef       ()
+DynSemInput    (  DefId  SortIdList  SortId  )
+
+/*CaseTripel     (  DefIdNodeList DefIdNodeList UpdateList@ )
+CaseTripelList *  CaseTripel
+*/
+
+FctOrAtt  = Function | Attribute
+
+NodeList       * Node   // for collecting occurences
+
+Set            * Element  // basic set type
+
+
+////////////////////////////////////////////////////////////////////////////
+// Declarations of functions implemented in C
+////////////////////////////////////////////////////////////////////////////
+
+//
+// File I/O functions. Currently only output is supported.
+// Functions returning a Bool value return true() on success and
+// false() on failure.
+//
+
+FCT out (String) Bool               // unbuffered output to stdout
+    
+FCT openFile (String, String) Int   // opens file ( second string describes
+             // mode like in C) and returns a file handle >=0 or -1.
+                                   
+FCT writeToFile (Int, String) Bool  // writes string to the file pointed
+                                    // to by the handle.
+                                   
+FCT closeFile (Int) Bool            // closes file pointed to by handle.
+    
+FCT inputFilePath () String         // if the command line argument specifying
+             // the file to be processed is <path>/<filname>
+             // the string "<path>" is returned. 
+
+FCT inputFileName () String         // returns "<filename>" in example above
+
+//
+// Error counter
+//
+        
+FCT error() Bool            // increment error counter
+FCT nrOfErrors() Int        // current error counter
+
+//
+// Calling options (currently just switches (-option) are supported).
+//
+    
+FCT checkOption (String) Bool   // checks if the given option is selected
+FCT getOption (String) Bool     // returns value of command line option
+                                // "true" or "" for switches
+
+//
+// Timing functions
+//
+    
+FCT startTimer () Bool
+FCT readTimer () Int        // read timer value in seconds
+            
+//
+// additional auxiliary functions
+//
+    
+FCT itos (Int) String       // Integer -> String
+FCT succ (Int) Int
+FCT prev (Int) Int
+FCT max (Int, Int) Int
+FCT add (Int, Int) Int
+FCT sub (Int, Int) Int
+FCT mult (Int, Int) Int
+FCT divide (Int, Int) Int
+FCT greater (Int, Int) Bool
+FCT greatereq (Int, Int) Bool
+FCT less (Int, Int) Bool
+FCT lesseq (Int, Int) Bool
+
+/****/
+
+FCT ctos (Char) String
+
+FCT strtoid (String) Ident
+FCT sortof (Element) String  // number identifying the sort of a term
+
+FCT collect_occurences(Node, Element/*Sort*/) NodeList
+
+
+////////////////////////////////////////////////////////////////////////////
+// Specification of static semantics
+////////////////////////////////////////////////////////////////////////////
+
+STRUC cmax [ Specification ] {
+
+/******************************************************************************
+        Auxiliary Functions
+******************************************************************************/
+
+//
+// The following functions are only used in parser specification
+//
+
+FCT SILfromCPIL (CPinfoList CPIL) SortIdList:
+  IF 0=CPIL.numsubterms:
+    SortIdList()
+  ELSE
+    appfront(subterm(2, subterm(1, CPIL)), SILfromCPIL(CPIL.back))
+
+FCT SILfromRSI (RsideInfo RI) SortIdList:
+  IF 0=RI.numsubterms:
+    SortIdList()
+  ELSE
+    LET REST == SILfromRSI (RI.back):
+    IF is[subterm(1, RI), _SortId]:
+      appfront(subterm(1, RI), REST)
+    ELSE
+      REST
+      
+/////////////////////////////////////////
+
+FCT idtos1 (Ident I) String: idtos(I)  // because idtos is not strict
+
+FCT lineOfId (Node N) Int: son(2, N).term
+FCT fileOfId (Node N) Int: son(4, N).term
+
+FCT fst(Node N) Node: son(1, N)
+FCT snd(Node N) Node: son(2, N)
+FCT thd(Node N) Node: son(3, N)
+FCT last(Node N) Node: son(-1, N)
+
+FCT idToStr (Node N) String: N.fst.term.idtos
+
+/*
+FCT ES () String: " "   // A bug in the MAX system caused errors when
+                        // real empty strings "" are 
+                        // concatenated with other strings.
+*/
+
+FCT debug( String S) Bool:
+  IF checkOption("debug")=true():
+    out(S)
+  ELSE
+    true()
+
+FCT info ( String S ) Bool:
+  IF checkOption("silent")=true():
+    true()
+  ELSE
+    out(S)
+
+FCT lookup_node_in_list(Node N, NodeList NL) Int:
+  IF NL.numsubterms=0: 0
+  ELSE
+    IF N=subterm(1, NL): 1
+    ELSE succ ( lookup_node_in_list(N, NL.back) )
+
+////// Set functions
+
+FCT iselem(Element E, Set S) Bool:
+  IF numsubterms(S)=0: false()
+  ELSE
+    IF subterm(1, S)=E: true()
+    ELSE iselem(E, S.back)
+
+//PRD iselemp[Element E, Set S]: iselem(E, S)=true()
+
+FCT union(Set S1, Set S2) Set:
+  IF S1.numsubterms=0: S2
+  ELSE
+    LET E==subterm(1, S1):
+    LET H==union(S1.back, S2):
+    IF iselem(E, S2)=true(): H
+    ELSE appfront(E, H)
+
+FCT intersection(Set S1, Set S2) Set:
+  IF S1.numsubterms=0: S2
+  ELSE
+    LET E==subterm(1, S1):
+    LET H==intersection(S1.back, S2):
+    IF iselem(E, S2)=false(): H
+    ELSE appfront(E, H)
+
+FCT setminus(Set S1, Set S2) Set:
+  IF S1.numsubterms=0: S1
+  ELSE
+    LET REST==setminus(S1.back, S2):
+    LET FST==subterm(1, S1):
+    IF iselem(FST, S2)=true():
+      REST
+    ELSE
+      appfront(FST, REST)
+
+FCT issubset(Set S1, Set S2) Bool:
+  IF S1.numsubterms=0: true()
+  ELSE
+    LET E==subterm(1, S1):
+    IF iselem(E, S2)=false(): false()
+    ELSE issubset(S1.back, S2)
+
+//PRD issubsetp[Set S1, Set S2]: issubset(S1, S2)=true()
+
+/******************************************************************************
+        Analysis of the specification
+******************************************************************************/
+
+ATT enclDecl (Node N) LocalDecl@:
+  IF LocalDecl@ N: N
+  ELSE N.fath.enclDecl
+
+ATT enclStructure (Node N) Structure@:
+  IF Structure@ N: N
+  ELSE N.fath.enclStructure
+
+ATT enclAssn (Node N) Assn@:
+  IF Assn@ N: N
+  ELSE N.fath.enclAssn
+
+ATT enclAssertionOrAssnDef (Node N) Node:
+  IF Assertion@ N: N
+  |  AssnDef@   N: N
+  ELSE N.fath.enclAssertionOrAssnDef
+
+ATT enclAssnList (Node N) AssnList@:
+  IF AssnList@ N: N
+  ELSE N.fath.enclAssnList
+
+ATT enclPattern (Node N) Pattern@:
+  IF Pattern@ N: N
+  ELSE N.fath.enclPattern
+
+/*
+  Variable Declarations
+*/
+
+FCT is_leq_var (VarDecl@ VD) Bool: IF is[VD.last, _Leq@]: true() ELSE false()
+FCT is_geq_var (VarDecl@ VD) Bool: IF is[VD.last, _Geq@]: true() ELSE false()
+
+/*
+  Lattice definitions
+  
+  A lattice is defined by the identifiers of a MAX sort and the
+  lattice operations (and maybe additional information)
+*/
+
+FCT lattice_sort (LatticeDef@ LD) Ident:
+  son(2, LD).fst.term
+
+FCT lattice_meet (LatticeDef@ LD) Ident:
+  son(3, LD).fst.term
+
+FCT lattice_join (LatticeDef@ LD) Ident:
+  son(4, LD).fst.term
+
+FCT lattice_leq (LatticeDef@ LD) Ident:
+  son(5, LD).fst.term
+
+FCT lattice_leq_update (LatticeDef@ LD) Ident: nil()  // not provided (yet)
+
+FCT lattice_geq_update (LatticeDef@ LD) Ident: nil()  // not provided (yet)  
+
+/*
+  Find declarations of used identifiers
+*/
+
+ATT Decl (UsedId@ I) DeclNode@:
+  IF ApplId@ I:
+    LET H== lookup( I , I.enclStructure.thd.fst ):
+    IF H#nil(): H
+    ELSE lookup( I , root().fst )
+  ELSE /* SortId@ */
+    LET H==lookup ( I, root().fst ): // production
+    IF H#nil(): H
+    ELSE
+      lookup(I, I.enclStructure.thd.fst) // lattice
+
+FCT lookup (UsedId@ I, Node LD) DeclNode@:
+/*
+   lookup searches list elements right of LD (recursively if necessary)
+   for local or global declarations matching I.
+   Dynamic functions are ignored.
+*/
+   
+  IF is[LD, _DeclList@]:
+    LET H == lookup ( I, LD.fst ):
+    IF H#nil(): H
+    ELSE lookup ( I , LD.rbroth )
+  ELSE
+    IF I.fst.term = LD.fst.fst.term : LD  // first son of LD is always
+                                          // DefId!
+    ELSE lookup ( I , LD.rbroth )
+
+/**************************************************************************
+
+  Names in Assertions (bound/unbound,etc.)
+
+**************************************************************************/
+
+// the following function makes a set of identifiers
+// from a list of occurences of sort Name@
+
+FCT nnl_to_identset (NodeList NL) Set:
+  IF NL.numsubterms=0: Set()
+  ELSE
+    LET REST==nnl_to_identset(NL.back):
+    LET FST==subterm(1, NL):
+    IF Name@<ID,*> FST:
+      LET FSTSET==appback(Set(), ID.term):
+      union(FSTSET, REST)
+    ELSE
+      LET O==out(`"internal error in nnl_to_identset: "
+                  "not applied to list of Name@-nodes!\n"'):
+      nil()
+ 
+/*
+  Names contained in patterns and constraints
+*/
+
+ATT names_in_pattern(Pattern@ P) Set:
+  nnl_to_identset( collect_occurences(P, _Name@) )
+
+ATT names_in_constraint(Constraint@ C) Set:
+  nnl_to_identset( collect_occurences(C, _Name@) )
+
+/*
+  Bound names in assertions (as sets of identifiers)
+*/
+
+ATT bound_names(Node N) Set:
+  IF AssnList@<*,N,*> AL:
+    AL.bound_names
+  |  AssnList@ N:
+    IF Assertion@<N>:
+      Set()
+    |  AssnDef@<_,_,PL,N>:
+      nnl_to_identset(collect_occurences(PL, _Name@))
+    |  PatternAssn@<P,N> A:
+      union(names_in_pattern(P), bound_names(A))
+    |  IfAssn@<_,N,_> A:
+      bound_names(A)
+    |  IfAssn@<_,_,N> A:
+      bound_names(A)
+    |  LetAssn@<<ID,*>,_,N> A:
+      LET S==appback(Set(), ID.term):
+      union(S, bound_names(A))
+    ELSE
+      LET O==out(`"internal error in bound_names: "
+                  "unknown occurence of AssnList@!\n"'):
+      nil()
+  ELSE N.enclAssnList.bound_names
+
+/*
+  Free occurences of names in patterns of PatternAssn@'s
+*/
+
+ATT free_pattern_names(PatternAssn@ PA) Set:
+  setminus(names_in_pattern(PA.fst), bound_names(PA))
+
+/*
+  Find out if a name in an Assn is bound
+*/
+
+/* ... */
+
+/*
+  Assertions and Assns in a structure are numbered to be able to produce
+  unique identifiers for C-functions etc.
+*/
+
+ATT StrucAssertions(Structure@ S) NodeList:
+  collect_occurences(S, _Assertion@)
+
+ATT assertion_nr(Assertion@ A) Int:
+  lookup_node_in_list(A, A.enclStructure.StrucAssertions)
+
+ATT StrucAssns(Structure@ S) NodeList: collect_occurences(S, _Assn@)
+
+ATT assn_nr(Assn@ A) Int:
+  lookup_node_in_list(A, A.enclStructure.StrucAssns)
+
+
+/*
+  For pattern items with no name (e.g. '_') temporary names
+  are generated.
+*/
+
+ATT unnamed_pattern_items(Pattern@ P) NodeList:
+  unnamed_items_filter(collect_occurences(P, _Item@))
+
+FCT unnamed_items_filter(NodeList NL) NodeList:
+  IF NL.numsubterms=0: NL
+  ELSE
+    LET REST==unnamed_items_filter(NL.back):
+    LET FST==subterm(1, NL):
+    IF Pattern@<_,_,Blank@> FST: appfront(FST, REST)
+    |  ItemList@<*,Blank@ FST,*>: appfront(FST, REST)
+    ELSE REST 
+
+ATT tmp_idents(Pattern@ P) Set:
+  tmp_idents_sub(unnamed_pattern_items(P))
+
+FCT tmp_idents_sub(NodeList NL) Set:
+  IF NL.numsubterms=0: Set()
+  ELSE
+    LET REST==tmp_idents_sub(NL.back):
+    LET FST==subterm(1, NL):
+    LET ID==`"__tmp_" index(FST, _Node).itos':
+    appfront(ID.strtoid, REST)
+
+
+////////////////////////////////////////////////////////////////////////////
+// Specification of constraints for finding out
+// attribute-variable dependencies
+////////////////////////////////////////////////////////////////////////////
+
+LATTICE SetL = ( Set, intersection, union, issubset)
+
+VAR <= used_attributes ( Node N ) SetL : Set()
+
+ASSERT
+  FOR Assertion@<A> N:          used_attributes(A) <= used_attributes(N) END;
+  FOR AssnList@<*,N1,*> N:     used_attributes(N1) <= used_attributes(N) END;
+  FOR PatternAssn@<P,AL> N:    used_attributes(AL) <= used_attributes(N) END;
+  FOR IfAssn@<F,AL1,AL2> N:   used_attributes(F)   <= used_attributes(N);
+                              used_attributes(AL1) <= used_attributes(N);
+                              used_attributes(AL2) <= used_attributes(N) END;
+  FOR LetAssn@<_,E,AL> N:       used_attributes(E) <= used_attributes(N);
+                               used_attributes(AL) <= used_attributes(N) END;
+  FOR DefAssnAppl@<ID,EL> N:
+                    used_attributes(Decl(ID).last) <= used_attributes(N);
+                    FOR <*,E,*> EL:
+                                used_attributes(E) <= used_attributes(N)
+                    END                                                  END;
+  FOR BasicConstr@<E, _> N:     used_attributes(E) <= used_attributes(N) END;
+  FOR CondConstr@<Cond,C> N: used_attributes(Cond) <= used_attributes(N);
+                                used_attributes(C) <= used_attributes(N) END;
+
+  FOR Attribute@<*,E> N:        used_attributes(E) <= used_attributes(N) END;
+  FOR Function@<*, E> N:        used_attributes(E) <= used_attributes(N) END;
+  FOR Predicate@<*, F> N:       used_attributes(F) <= used_attributes(N) END;
+
+  // expressions
+
+  FOR FuncAppl@<ID,EL> N: LET DECL==Decl(ID):
+                          IF DECL#nil() THEN
+                             used_attributes(DECL) <= used_attributes(N)
+                          FI;
+                          FOR <*,E,*> EL:
+                                used_attributes(E) <= used_attributes(N)
+                          END;
+                          IF is[DECL, _Attribute@] ||
+                             is[DECL, _AttrDecl@] THEN
+                              appback(Set(), DECL) <= used_attributes(N)
+                          FI END;
+  FOR FormulaCase@<F,E> N:      used_attributes(F) <= used_attributes(N);
+                                used_attributes(E) <= used_attributes(N) END;
+  FOR PatternCase@<_,E> N:      used_attributes(E) <= used_attributes(N) END;
+  FOR LetExpr@<_,E1,E2> N:     used_attributes(E1) <= used_attributes(N);
+                               used_attributes(E2) <= used_attributes(N) END;
+  FOR StringExpr@<*,E,*> N:     used_attributes(E) <= used_attributes(N) END;
+
+  // formulas
+
+  FOR PredAppl@<ID,EL> N: used_attributes(Decl(ID))<= used_attributes(N);
+                          FOR <*,E,*> EL:
+                                used_attributes(E) <= used_attributes(N)
+                          END                                            END;
+  FOR Formula@<Formula@ F1,Formula@ F2> N:
+                               used_attributes(F1) <= used_attributes(N);
+                               used_attributes(F2) <= used_attributes(N) END;
+  FOR Formula@<Formula@ F> N:   used_attributes(F) <= used_attributes(N) END
+END
+
+VAR <= attrs_used_in_assns (Structure@ S) SetL: Set()
+
+ASSERT
+  FOR Assertion@ A:
+    used_attributes(A) <= attrs_used_in_assns(enclStructure(A))
+  END
+END
+
+//VAR <= used_variables ( Node N ) SetL : Set()
+
+
+ATT all_vars (Structure@ S) NodeList:
+  collect_occurences(S, _VarDecl@)
+
+/******************************************************************************
+
+        Code Generation
+        
+******************************************************************************/
+
+/*
+  MAX Code
+
+  The standard parts of the given MAX specification are altered
+  in the following ways:
+    * additional information about source code positions is
+      generated
+
+  In addition the following functions/attributes are generated:
+    * a synchronization attribute which invokes the constraint
+      solver when evaluated
+    * an attribute for allocating memory for variables and
+      initializing the variables
+    * for each variable an attribute of the same name giving access
+      to the constraint solution for that variable
+*/
+
+
+/*
+  The following functions/constants define the identifiers
+  that are generated by cmax.
+  All have prefix or suffix "__" to avoid interference with user-defined
+  functions.
+*/
+
+
+FCT varPtrId (Ident I) Ident:  strtoid(`I.idtos "_PTR__"')               // MAX
+FCT syncAttId() Ident:         strtoid("CSSYNC__")                       // MAX
+FCT attSyncAllAttId() Ident:   strtoid("sync_all__")                     // MAX
+FCT attSyncAttId(Ident I) Ident: strtoid(`I.idtos "_sync__"')            // MAX
+
+
+FCT initFctId() Ident:         strtoid("init_var__")                     // C
+FCT getVarFctId() Ident:       strtoid("get_var_value__")                // C
+FCT activateFctId() Ident:     strtoid("activate_constrs__")             // C
+FCT solveFctId(Ident I) Ident: strtoid(`"solve__"')                      // C
+FCT localSolveFctId() Ident:   strtoid("sm__")                           // C
+FCT syncFctId() Ident:         strtoid("sync__")                         // C
+
+
+FCT maxSpecId() String:
+  LET F==getOption("o"):
+  IF F="":
+    "stdmax_spec"
+  ELSE F
+ 
+/*
+  Generation of the new MAX specification
+*/
+
+ATT MAXCodeForConstraints (Node N) LocalDeclList:
+  IF Structure@ <<STRUCID,*>,<I,*>,<LD,*>> N:
+    LET H==LD.MAXCodeForConstraintsL:
+    LET SYNCATT==MaxCodeText(`
+      "ATT " syncAttId().idtos "( Node N) Element:\n"
+      "  IF N=root():\n"
+      "    LET H==" attSyncAllAttId().idtos "(N):\n"
+      "    LET H==" activateFctId().idtos "():\n"
+      "    " solveFctId(STRUCID.term).idtos "()\n"
+      "  ELSE " syncAttId().idtos "( fath (N) )\n"
+    '):
+    LET H==appback(H, SYNCATT):
+    
+    LET SYNCATT1==LocalDeclList():
+    LET SYNCATT1==appback(SYNCATT1, MaxCodeText(`
+      "ATT " attSyncAllAttId().idtos "(" I.term.idtos "@ N) Bool:\n"
+      "  LET H==true():\n"
+    ')):
+    LET SYNCATT1==conc(SYNCATT1, att_sync_max_code(attrs_used_in_assns(N))):
+    LET SYNCATT1==conc(SYNCATT1, att_sync_max_code1(all_vars(N))):
+    LET SYNCATT1==appback(SYNCATT1, MaxCodeText("  H\n")):
+    conc(H, SYNCATT1)
+  | DeclList@<D,*> N: D.MAXCodeForConstraintsL
+  | DeclForConstraints@ N:
+    LET H==N.MAXCodeForConstraintsSub:
+      H
+  | Attribute@<ID,<SID,*>,_,_,_> N:
+    LET STRUCT== enclStructure (N):
+    IF iselem ( N, attrs_used_in_assns (STRUCT) )=true():
+      LET ID1==attSyncAttId(ID.fst.term).idtos:
+      LET ID2==`"_" codeForIdent(SID.term)':
+      LET O==
+        IF !is[ID2, _String]: debug(`"MaxCodeForConstraints: "
+                               "error in string conc.!\n"')
+        ELSE true()
+      :
+      LET ATTR==MaxCodeText(`
+        "ATT " ID1 "( Node N) Element:\n"
+        "  LET H1==IF <*,N1> N: " ID1 "(N1)\n"
+        "          ELSE true():\n"
+        "  LET H2==IF <*,N1,N,*>: " ID1 "(N1)\n"
+        "          ELSE true():\n"
+        "  LET H3==IF is[N, _" codeForIdent(SID.term) "]: " 
+                          ID.fst.term.idtos "(N)\n"
+        "          ELSE true():\n"
+        "  " syncFctId().idtos "( " syncFctId().idtos "( H1, H2 ), H3 )\n"
+      '): 
+      appback ( LocalDeclList(), ATTR )
+    ELSE LocalDeclList()
+  ELSE
+    LocalDeclList()
+
+FCT MAXCodeForConstraintsL (Node N) LocalDeclList:
+  LET H==N.MAXCodeForConstraints:
+  IF <*,N,NEXT,*>: conc(H, NEXT.MAXCodeForConstraintsL)
+  ELSE H
+
+FCT att_sync_max_code(Set ATTRS) LocalDeclList:
+  IF ATTRS.numsubterms=0: LocalDeclList()
+  ELSE
+    LET ID==attSyncAttId(subterm(1, ATTRS).fst.fst.term).idtos:
+    LET H==MaxCodeText(`"  LET H==" syncFctId().idtos "(H, " ID "(N)):\n"'):
+    appfront(H, att_sync_max_code(ATTRS.back))
+
+FCT att_sync_max_code1(NodeList NL) LocalDeclList:
+  IF NL.numsubterms=0: LocalDeclList()
+  ELSE
+    LET ID==attSyncAttId(varPtrId(subterm(1, NL).fst.fst.term)).idtos:
+    LET H==MaxCodeText(`"  LET H==" syncFctId().idtos "(H, " ID "(N)):\n"'):
+    appfront(H, att_sync_max_code1(NL.back))
+
+FCT MAXCodeForConstraintsSub ( DeclForConstraints@ LD ) LocalDeclList:
+  IF VarDecl@ <I, <SID,*> SIDL, <N,*> NL,LATT,E,_> LD:
+    LET EXPR==
+      LET INITFCTID == ApplId(initFctId(), 0, 0, "?" ):
+      FuncAppl ( INITFCTID, appback(ExprList(), E.term) ) :
+    LET H==LocalDeclList():
+    LET H==appback(H,
+      appback(FuAtList(), 
+        Attribute( DefId ( varPtrId(I.fst.term), 0, 0, "?" ), SIDL.term,
+          NL.term, TermSortId ( strtoid("Element"), 0, 0, "?" ), EXPR
+        )
+      )
+    ):
+    LET ID1==attSyncAttId(varPtrId(I.fst.term)).idtos:
+    LET ID2==varPtrId(I.fst.term).idtos: 
+    LET H==appback(H, MaxCodeText(`
+      "ATT " ID1 "( Node N) Element:\n"
+      "  LET H1==IF <*,N1> N: " ID1 "(N1)\n"
+      "          ELSE true():\n"
+      "  LET H2==IF <*,N1,N,*>: " ID1 "(N1)\n"
+      "          ELSE true():\n"
+      "  LET H3==IF is[N, _" codeForIdent(SID.term) "]: " ID2 "(N)\n"
+      "          ELSE true():\n"
+      "  " syncFctId().idtos "( " syncFctId().idtos "( H1, H2 ), H3 )\n"
+    ')):
+    LET H==appback(H, MaxCodeText(`
+      "ATT " I.idToStr "(" codeForIdent(SID.term) " N) "
+              lattice_sort ( Decl(LATT) ).idtos ":\n"
+      "  LET H==" syncAttId().idtos "(N):\n"
+      "  " getVarFctId().idtos "(" 
+             varPtrId(I.fst.term).idtos "(N))\n"
+    ')):   
+    H 
+  ELSE
+    LocalDeclList()
+
+FCT cfunc_decls(Structure@ S) Specification:
+  LET RES==Specification():
+  LET RES==appback(RES, MaxCodeText(`
+    "FCT " getVarFctId().idtos "(Element) Element\n"
+    "FCT " initFctId().idtos "(Element) Element\n"
+    "FCT " activateFctId().idtos "() Element\n"
+    "FCT " solveFctId(S.fst.fst.term).idtos "() Element\n"
+    "FCT " syncFctId().idtos "(Element, Element) Element\n"
+  ')):
+  RES
+
+ATT genMAXCode (Specification@ S) Specification:
+  IF <> S: Specification() ELSE collectGlobalDecls (S.fst)
+
+FCT collectGlobalDecls (GlobalDecl@ GD) Specification:
+  LET FRONT== 
+    IF Structure@<ID,SID,_> GD: appback(cfunc_decls(GD), makeNewStruc(GD))
+    ELSE                        appback(Specification(), GD.term)
+  :
+  IF <*,GD,NEXT,*>:
+    LET REST==collectGlobalDecls(NEXT):
+    conc ( FRONT, REST )
+  ELSE
+    FRONT
+
+FCT makeNewStruc (Structure@ S) Structure:
+  LET H==
+    IF <_,_,<LD,*>> S: collectLocalDecls ( LD )
+    ELSE               LocalDeclList()
+  :
+  LET NEWS==Structure ( S.fst.term, S.snd.term ,
+             conc ( S.MAXCodeForConstraints , H ) ):
+  LET O==
+    IF NEWS=nil(): debug("makeNewStruc: Structure is nil!\n")
+    ELSE true()
+  :
+  NEWS
+
+FCT collectLocalDecls ( LocalDecl@ LD ) LocalDeclList:
+  LET H ==
+    IF DeclListForConstraints@ LD:
+      LocalDeclList()
+    ELSE
+      appback( LocalDeclList(), LD.term )
+  :
+    IF <*,LD,NEXT,*>:  conc ( H, collectLocalDecls (NEXT) )
+    ELSE               H
+
+
+/*
+  C Code
+*/
+
+FCT gen_C_all ( Node N, Int FH ) Bool:
+  IF Structure@<I,_,DECLS> N:
+    LET VERBOSEDECL==
+      IF checkOption("verbosecode")=true():
+        "int Verbose = 1;"
+      ELSE
+	"int Verbose = 0;"
+    :
+    LET O==writeToFile(FH,
+        `"/* C-Code generated by cmax */\n\n"
+
+         "#include \"" maxSpecId() ".h\" \n"
+         "#include <stdio.h>\n"
+         "#include <stdlib.h>\n"
+         "#include \"solver.h\"\n\n"
+
+         "#define SORTERROR(e,a) fprintf(stderr, \\\n"
+         "         \"Error in usage of assn definition \" #a \\\n"
+         "         \": argument \" #e \" is of wrong sort!\\n \") \n" 
+         "#define IS(e,s,a)  if (!is(e,s)) {SORTERROR(e,a); return; }\n"
+         "#define ISNIL(e)     if (eq(e, nil())) return;\n\n"
+
+         VERBOSEDECL "\n\n"
+
+         "ELEMENT sync__(ELEMENT e1, ELEMENT e2){return btoe(1);}\n"
+         ')
+    :
+    LET O==gen_C_lists(DECLS.fst, FH):
+    LET O==writeToFile(FH,
+        `"ELEMENT " activateFctId().idtos "(void)\n"
+         "{\n"
+         "    if (Verbose) fprintf(stderr,\"activating constraints \");\n"
+        ')
+    :
+    LET O==gen_C_call_funcs(FH, activateFctId().idtos,
+                            N.StrucAssertions.numsubterms, 1)
+    :
+    LET O==writeToFile(FH,`
+         "    if (Verbose) fprintf(stderr,\"... done\\n\");\n"
+         "    return btoe(1);\n" 
+         "}\n"
+        ')
+    :
+    O
+  | DeclList@<FST,*> N: gen_C_lists(FST, FH)
+  | AssnList@ N:
+    gen_C_lists(N.fst, FH)
+  | Assn@ N:
+    LET NR==N.assn_nr:
+    IF Constraint@ N:
+      // Local solve function
+      LET O==writeToFile(FH,
+          `"static int " localSolveFctId().idtos "_" NR.itos
+                                             " (ELEMENT __args[])\n"
+           "{\n"
+          ')
+      :
+      LET O==gen_C_define_list(names_in_constraint(N), "__args", 0, FH):
+      LET O==writeToFile(FH,
+        "    int __update=0; ELEMENT __vptr,__v,__e; ELEMENT *__vptr1;\n"):
+      LET O==gen_C_constraint(N, FH, "    "):
+      LET O==writeToFile(FH, "    return __update;\n"):
+      LET O==gen_C_undef_list(names_in_constraint(N), 0, FH):
+      LET O==writeToFile(FH,
+          `"}\n"
+          ')
+      :
+      O
+    |  PatternAssn@<P,AL> N: gen_C_all(AL, FH)
+    |  IfAssn@<F,AL1,AL2> N:
+      LET O==gen_C_all(AL1, FH):
+      gen_C_all(AL2, FH)
+    |  LetAssn@<_,_,AL> N: gen_C_all(AL, FH)
+    ELSE true()
+  |  Assertion@<AL> N:
+
+    // ----------- local solve functions --------------------   
+
+    LET O==gen_C_all(AL, FH):
+         
+    // ----------- Activation function ----------------------
+
+    LET NR==N.assertion_nr:
+    LET O==writeToFile(FH,
+        `"static void " activateFctId().idtos "_" NR.itos "(void)\n"
+         "{\n"'):
+    LET O==gen_C_activation_assertion(N, FH):
+    LET O==writeToFile(FH,    
+         `"}\n"
+        ')
+    :
+    O
+  | VarDecl@<<I,*>,_,_,_,_,_> N:
+    LET O==writeToFile(FH,`
+        "#undef " I.term.idtos "/* non-synchronizing and strict variable "
+                                                           "access */\n"
+        "#define mxs_" I.term.idtos "(f,l,a) (!eq(" varPtrId(I.term).idtos
+                         "(a),nil()) ? ( (Variable*)mxi_etop(f,l,"
+                         varPtrId(I.term).idtos "(a) ) ) -> value : nil() )\n"
+        "#define " I.term.idtos "(a) (mxs_" I.term.idtos
+                              "(__FILE__,__LINE__,a))\n"     
+        '):
+    O
+  | AssnDef@<ID, SIDL, NL, AL> N:
+
+    // ----------- local solve functions --------------------   
+
+    LET O==gen_C_all(AL, FH):
+
+    // ----------- Activation function ----------------------
+
+    LET O==writeToFile(FH,
+        `"void " ID.idToStr "(" namelist_to_cparlist(NL.term) ")\n"
+         "{\n"
+         assndef_sorttests(N, SIDL, NL)
+        ')
+    :
+    LET O==gen_C_activation_assndef(N, FH):
+    LET O==writeToFile(FH,
+         "}\n"
+        ):
+    O 
+  ELSE
+    true()
+
+FCT assndef_sorttests(AssnDef@ A, SortIdList@ SIDL, NameList@ NL) String:
+  IF <> SIDL: ""
+  ELSE assndef_sorttests_sub(A, SIDL.fst, NL.fst)
+
+FCT assndef_sorttests_sub(AssnDef@ A, SortId@ SID, Name@ N) String:
+  LET H==`"ISNIL(" N.idToStr ") IS(" N.idToStr ", "
+               sortid_to_csortid(SID) ", " 
+               A.fst.idToStr ")\n"':
+  IF SID.rbroth#nil(): `H assndef_sorttests_sub(A, SID.rbroth, N.rbroth)'
+  ELSE H
+
+FCT sortid_to_csortid(SortId@ SID) String:
+  IF is[SID, _NodeSortId@]: `"_" SID.idToStr "_"'
+  ELSE `"_" SID.idToStr '
+
+FCT gen_C_lists (Node N, Int FH) Bool:
+  LET H==gen_C_all(N, FH):
+  IF <*,N,NEXT,*>:
+    gen_C_lists(NEXT, FH)
+  ELSE
+    H
+
+FCT namelist_to_cparlist(NameList NL) String:
+  IF NL.numsubterms=0: " "
+  ELSE
+     LET FST==`"ELEMENT " subterm(1, subterm(1, NL)).idtos':
+     IF NL.numsubterms=1: FST
+     ELSE `FST ", " namelist_to_cparlist(NL.back)'
+             
+//
+// Code for activation of constraints
+//
+
+ATT activation_code_assertion (Assertion@ A) ActivationCode:
+  LET PC==AC_Block(Set(), activation_code_assnlist(A.fst), index(A, _Node) ):
+  appback(ActivationCode(), PC)
+
+ATT activation_code_assndef (AssnDef@ AD) ActivationCode:
+  LET PC==AC_Block(Set(), activation_code_assnlist(AD.last), index(AD, _Node)):
+  appback(ActivationCode(), PC)
+
+ATT activation_code_assnlist (AssnList@ AL) ActivationCode:
+  IF <FSTASSN,*> AL:
+    activation_code_assnlist_sub(FSTASSN)
+  ELSE ActivationCode()
+
+FCT activation_code_assnlist_sub(Assn@ A) ActivationCode:
+  LET REST==
+    IF <*,A,A1,*>: activation_code_assnlist_sub(A1)
+    ELSE ActivationCode()
+  :
+  LET O==
+    IF !is[A.activation_code, _ActivationCode]:
+      debug(`"activation_code_assnlist_sub: act. code has"
+             "sort:" sortof(A.activation_code) "!\n"')
+    ELSE true():
+  LET O==
+    IF !is[REST, _ActivationCode]:
+      debug(`"activation_code_assnlist_sub: REST has"
+             "sort:" sortof(REST) "!\n"')
+    ELSE true():
+  conc(A.activation_code, REST)  
+
+ATT activation_statements(Constraint@ A) ActivationCode:
+  LET NR==A.assn_nr:
+  LET NAMED==names_in_constraint(A):
+  LET STMTS==ActivationCode():
+  LET STMTS==appback(STMTS, AC_Stmt(
+    `"__add_constraint(" 
+        localSolveFctId().idtos "_" NR.itos 
+    ", NULL, " NAMED.numsubterms.itos ", " constr_arglist(NAMED) ");" '
+  )):
+  STMTS
+
+FCT constr_arglist(Set S) String:
+  IF S.numsubterms=0: " "
+  |  S.numsubterms=1:
+    subterm(1, S).idtos
+  ELSE
+    `subterm(1, S).idtos ", " constr_arglist(S.back)'
+
+ATT activation_code (Assn@ A) ActivationCode:
+  IF PatternAssn@<P,AL> A:
+    LET FN==free_pattern_names(A):
+    LET TN==tmp_idents(P):
+    LET H==ActivationCode():
+    appback(H, AC_Block(conc(FN, TN),
+                        pattern_code (P, activation_code_assnlist(AL) ),
+                        index(A, _Node) ) )
+  |  IfAssn@<F,AL1,AL2> A:
+    appback(ActivationCode(), AC_Cond( AC_Expr(formula_to_cexpr(F)),
+                                    activation_code_assnlist(AL1),
+                                    activation_code_assnlist(AL2),
+                                    index(A, _Node) )  )
+  |  LetAssn@<I,E,AL> A:
+    LET PC==ActivationCode():
+    LET PC==appback(PC, AC_Bind( AC_Ref(idToStr(I)),
+                                AC_Expr(expr_to_cexpr(E))  )  ):
+    LET PC==conc(PC, activation_code_assnlist(AL)):
+    appback(ActivationCode(), AC_Block(appback(Set(), I.fst.term),
+                              PC, index(A, _Node) ) )
+  |  DefAssnAppl@<ID,EL> A:
+    appback(ActivationCode(),
+     AC_Stmt(`"{extern void " ID.idToStr "(); "
+               ID.idToStr "(" exprlist_to_carglist(EL) ");}" ')
+    )
+  |  Constraint@ A:
+    activation_statements(A)
+  ELSE nil()
+
+FCT rest_code(Item@ N, ActivationCode RC) ActivationCode:
+  LET N1==
+    IF Pattern@<_,ItemList@<FST,*>,_> N:
+      FST
+    ELSE
+      next_rbroth(N)
+  : 
+  IF N1#nil():
+    pattern_code(N1, RC)
+  ELSE
+    RC
+    
+FCT pattern_code(Item@ I, ActivationCode RC) ActivationCode:
+  IF !is[ fath (I), _ItemList@ ]:       // not a subpattern
+    LET SP==son(2, I):
+    LET B==bound_subpattern(I):
+    IF I.is_bound_item=true():
+      conc(item_sorttest(I), rest_code(I, RC))
+    | B#nil():
+      LET PC==ActivationCode():
+      LET PC==appback(PC, AC_Bind(AC_Ref(item_element(I)),
+        AC_Expr(
+             fath_expr(subpattern_level(B, I), item_element(B)) ) )  ):
+      LET PC==conc(PC, item_sorttest(I)):
+      conc(PC, rest_code(I, RC))
+    ELSE
+      LET M==possible_sorts(I):
+      LET PC==ActivationCode():
+      LET PC==appback(PC, AC_For_Sorts( AC_Ref(item_element(I)), M,
+        rest_code(I, RC), index(I, _Node) ) ):
+      LET O==
+        IF PC=nil():
+          LET O==debug("pattern_code: top pattern, for sorts:"):
+          outMAXCode(I.term)
+        ELSE true()
+      :
+      PC
+  ELSE                     // subpattern
+    IF is[I, _Asterisk@]:
+      rest_code(I, RC)
+    | I.is_bound_item=true():
+
+      //---------------- BOUND occurence --------------------------------
+
+      LET I1==next_item_no_ast(I):
+      IF I1#nil():
+        LET PC==ActivationCode():
+        LET PC==appback(PC, AC_Test(AC_Expr(`
+          "eq(fath(" item_element(I) ")," I.fath.fath.item_element ") && "
+          "bef(after(" item_element(I1) "),after(" item_element(I) "))"
+        '))):
+//        LET PC==conc(conc(PC, item_sorttest(I)), item_boundtest(I)):
+        LET PC==PC ++ item_sorttest(I) ++ item_boundtest(I):
+        conc(PC, rest_code(I, RC))
+      ELSE
+        LET PC==ActivationCode():
+        LET PC==appback(PC, AC_Test(AC_Expr(`
+          "eq(fath(" item_element(I) ")," I.fath.fath.item_element ")"
+        '))):
+        LET PC==conc(PC, item_sorttest(I)):
+        conc(conc(PC, rest_code(I, RC)), item_boundtest(I))
+
+    ELSE
+
+    //------------------- UNBOUND occurence ------------------------------
+
+      IF <I,*>:                           // <I,...>
+        LET PC==ActivationCode():
+        LET PC==appback(PC, AC_Bind(AC_Ref(item_element(I)),
+          AC_Expr(`"son(1," I.fath.fath.item_element ")"') ) )
+        :
+        LET PC==conc(conc(PC, item_sorttest(I)), item_boundtest2(I)):
+        conc(PC, rest_code(I, RC))
+      ELSE
+        LET I1==I.lbroth:
+        IF !is[I1, _Asterisk@]:            // <...,I1,I,...>
+          LET PC==ActivationCode():
+          LET PC==appback(PC, AC_Bind(AC_Ref(item_element(I)),
+            AC_Expr(`"rbroth(" I1.item_element ")"') ) ):
+          LET PC==conc(conc(PC, item_sorttest(I)), item_boundtest2(I)):
+          conc(PC, rest_code(I, RC))
+        ELSE
+          LET I2==next_item_no_ast(I1):
+          IF I2#nil():                     // <...,I1,*,I,...>
+            LET PC==ActivationCode():
+            LET PC==appback(PC, mk_AC_For_Rbroth(I, I2, RC ) ):
+            PC
+          ELSE                             // <*,I,...>
+            LET PC==ActivationCode():
+            LET PC==appback(PC, mk_AC_For_First(I, RC)):
+            PC
+
+FCT mk_AC_For_First(Item@ I, ActivationCode RC) AC_For_Rbroths:
+  AC_For_Rbroths(AC_Ref(item_element(I)),
+               AC_Expr(`"son(1, " item_element(I.fath.fath)" )" '),
+               conc(conc(item_sorttest(I), item_boundtest2(I)),
+                    rest_code(I, RC) ),
+               index(I, _Node) )
+
+FCT mk_AC_For_Rbroth(Item@ I, Item@ I2, ActivationCode RC) AC_For_Rbroths:
+  AC_For_Rbroths(AC_Ref(item_element(I)),
+                AC_Expr(`"rbroth(" item_element(I2)" )"'),
+                conc(conc(item_sorttest(I), item_boundtest2(I)),
+                     rest_code(I, RC) ),
+                index(I, _Node) )
+
+FCT item_sorttest(Item@ I) ActivationCode:
+  IF Pattern@<SortId@ SID,_,_> I:
+    LET SORT==`"_" SID.idToStr':
+    LET SORT==IF is[SID, _NodeSortId@]: `SORT "_"' ELSE SORT:
+    LET TEST==AC_Test( AC_Expr(
+       `"is(" item_element(I) ", " SORT ")"' )  ):
+    appback(ActivationCode(), TEST  )
+  ELSE ActivationCode() 
+
+FCT item_boundtest(Item@ I) ActivationCode:
+  LET A==ActivationCode():
+  LET A1==IF ItemList@<I,*>:
+            appback(A,
+              AC_Test( AC_Expr(`"eq(lbroth(" item_element(I) "), nil())"')))
+          ELSE A:
+  conc(A1, item_boundtest2(I))
+  
+FCT item_boundtest2(Item@ I) ActivationCode:
+  LET A==ActivationCode():
+  IF ItemList@<*,I>:
+    appback(A, AC_Test( AC_Expr(`"eq(rbroth(" item_element(I) "), nil())"')))
+  ELSE A
+
+
+FCT enclAssertion(Node N) Assertion@:
+  IF Assertion@ N: N
+  ELSE N.fath.enclAssertion
+
+FCT item_element(Item@ I) String:
+  IF Pattern@<_,_,Name@ N> I:   N.fst.term.idtos
+  |  Pattern@<_,_,Blank@> I:    `"__tmp_" index(I, _Node).itos'
+  |  Blank@ I:                  `"__tmp_" index(I, _Node).itos'
+  ELSE
+    LET O==debug("item_element: unknown item:"):
+    LET O==outMAXCode(I.term):
+    LET O==debug("\n"):
+    nil()
+
+FCT is_bound_item(Item@ I) Bool:
+  IF Pattern@<_,_,Name@ N> I:
+    iselem(N.fst.term, I.enclAssn.bound_names)
+  ELSE false()
+
+FCT bound_subpattern(Pattern@ P) Item@:
+  IF <_,<Item@  FST,*>,_> P: // Attention: If sort Item@ is not given the
+                             // pattern matches wrong nodes (e.g. FST is 
+                             // an Int) (MAX error??)
+    bound_subpattern1(FST)
+  ELSE nil()
+  
+FCT bound_subpattern1(Item@ I) Item@:
+  IF I.is_bound_item=true(): I
+  ELSE
+    LET BELOW==
+      IF Pattern@<_,<Item@ FST,*>,_> I: bound_subpattern1(FST)
+      ELSE nil()
+    :
+    IF ItemList@<*,I,I1,*>:
+      LET RIGHT==bound_subpattern1(I1):
+      IF RIGHT#nil(): RIGHT
+      ELSE BELOW
+    ELSE
+      BELOW
+
+FCT subpattern_level(Item@ I1, Item@ I2) Int:
+  IF I1=I2: 0
+  ELSE subpattern_level(I1.fath.fath, I2).succ
+
+FCT possible_sorts(Item@ I) SortIdList:
+  IF Pattern@<SortId@ SID,_,_> I:
+    appback(SortIdList(), SID.term)
+  ELSE
+    appback(SortIdList(), TermSortId(strtoid("Node"), 0, 0, "?"))
+
+FCT next_rbroth(Node N) Node:
+  IF ItemList@ <*,N,N1,*>: N1
+  | <_,ItemList@<*,N>,_> N1: next_rbroth(N1)
+  ELSE nil()
+
+FCT next_item_no_ast(Item@ I) Item@:
+  IF ItemList@ <*,I1,I,*>:
+    IF Asterisk@ I1: next_item_no_ast(I1)
+    ELSE I1
+  ELSE nil()
+
+FCT fath_expr(Int N, String S) String:  // fath ( fath ( ... fath(S) ... ) )
+  IF N=0: S
+  ELSE `"fath(" fath_expr(N.prev, S) ")"'
+
+FCT formula_to_cexpr(Formula@ F) String:
+  IF Neg@<F1> F:
+    `"!(" formula_to_cexpr(F1) ")"'
+  | Or@<F1,F2> F:
+    `"(" formula_to_cexpr(F1) ")||("
+         formula_to_cexpr(F2) ")"'
+  | And@<F1,F2> F:
+    `"(" formula_to_cexpr(F1) ")&&("
+         formula_to_cexpr(F2) ")"'
+  | Impl@<F1,F2> F:
+    `"!(" formula_to_cexpr(F1) ")" " || ("
+         formula_to_cexpr(subterm(2,F)) ")"'
+  | PredAppl@<ID,EL>F:
+    LET ARGS==exprlist_to_carglist(EL):
+    `ID.idToStr "(" ARGS ")"'
+  ELSE
+    LET O==out("internal error in formula_to_cexpr: unknown formula!\n"):
+    "<??>"
+/*
+  C-Code for formulas and simple expressions
+*/
+
+FCT expr_to_cexpr(Expr@ E) String:
+  IF CharConst@<C,*> E: `"'" ctos(C.term) "'"'
+  | IntConst@<I,*> E: `"itoe(" I.term.itos ")"'
+  | StringConst@<S,*> E: `"atoe(\"" S.term "\")"'
+  | SortConst@<ID,*> E:
+    LET R==`"_" ID.idToStr':
+    IF is[ID, _NodeSortId@]: `R "_"' ELSE R
+  | Name@<ID,*> E: E.idToStr
+  | FuncAppl@<ID,EL> E:
+    LET H==IF is_external_fuat(ID)=true() || is[ID.Decl, _Production@]: true()
+           ELSE false()
+    :
+    LET FID==IF H=true(): ID.idToStr
+             ELSE
+               IF is_predefined_func(ID)=false(): `"mxs_" ID.idToStr'
+               ELSE `"mxi_" ID.idToStr' :
+    LET SCP==IF H=false(): `"\"" inputFileName() "\", " lineOfId(ID).itos'
+             ELSE " " :
+    LET SCP==IF 0#EL.numsons && H=false(): `SCP ", "' ELSE SCP:
+    LET ARGS==exprlist_to_carglist(EL):
+    `FID "(" SCP  ARGS ")"'
+  ELSE
+    LET O==out("internal error in expr_to_cexpr: unsupported type of Expr!\n"):
+    "<??>"
+
+ATT is_external_fuat( ApplId@ ID) Bool:  // ID externally implemented in C
+  // check for predefined constants
+  LET S==ID.idToStr:
+  IF S="nil" || S="true" || S="false" || S="root"
+     || S="minimalInt" || S="maximalInt" : true()
+  ELSE
+    LET D==ID.Decl:
+    IF is[D, _FuncDecl@] || is[D, _AttrDecl@]:
+      IF is_predefined_decl(D)=false(): true() ELSE false()
+    ELSE false()
+
+ATT is_predefined_func( ApplId@ ID) Bool: // ID is internal MAX function
+  is_predefined_decl(ID.Decl)
+
+FCT is_predefined_decl(Node N) Bool:
+  IF N.fath=root():
+    lesseq(N.numson, 30)
+  ELSE false()
+
+FCT numson(Node N) Int:
+  IF N.lbroth=nil(): 1
+  ELSE numson(N.lbroth).succ
+
+FCT exprlist_to_carglist(ExprList@ EL) String:
+  IF <E,*> EL:
+    exprlist_to_carglist_sub(E)
+  ELSE ""
+
+FCT exprlist_to_carglist_sub(Expr@ E) String:
+  LET H==E.expr_to_cexpr:
+  IF <*,E>: H
+  ELSE `H ", " exprlist_to_carglist_sub(E.rbroth)'
+    
+FCT gen_C_activation_assertion(Assertion@ A, Int FH) Bool:
+  write_ActivationCode(activation_code_assertion(A), FH)
+
+FCT gen_C_activation_assndef(AssnDef@ A, Int FH) Bool:
+  write_ActivationCode(activation_code_assndef(A), FH)
+
+FCT write_ActivationCode(ActivationCode PC, Int FH) Bool:
+  write_AC_sub(PC, 0, -1, FH)
+
+FCT write_AC_sub(ActivationCode PC, Int LEVEL, Int EXITID, Int FH) Bool:
+  IF PC.numsubterms=0: true()
+  ELSE
+    LET FRONT==
+      LET FST==subterm(1, PC):
+      IF is[FST, _AC_Stmt]:
+        writeToFile(FH, `"    " subterm(1, FST) "\n"')
+      | is[FST, _AC_Bind]:
+        writeToFile(FH, `"    " subterm(1, subterm(1, FST) )
+                            " = " subterm(1, subterm(2, FST) ) ";\n"' )
+      | is[FST, _AC_Test]:
+        writeToFile(FH, `"    if (!(" subterm(1, subterm(1, FST) ) ")) "
+                                 "goto __END_" EXITID.itos ";\n"' )
+      | is[FST, _AC_Cond]:
+        LET O==writeToFile(FH, `
+            "    if (" subterm(1, subterm(1, FST)) "){\n"
+        '):
+        LET O==write_AC_sub(subterm(2, FST), LEVEL.succ, subterm(4, FST), FH):
+        LET O==writeToFile(FH, `
+            "    }\n"
+            "    else {\n"
+        '):
+        LET O==write_AC_sub(subterm(3, FST), LEVEL.succ, subterm(4, FST), FH):
+        LET O==writeToFile(FH, `
+            "    }\n"
+            "    __END_" subterm(4, FST).itos ": ;\n"
+        '):
+        O
+      | is[FST, _AC_For_Rbroths]:
+        LET V==subterm(1, subterm(1, FST) ):
+        LET O==writeToFile(FH, `
+            "for(" V " = " subterm(1, subterm(2, FST) )
+                   "; !eq(nil()," V "); " 
+              V " = rbroth(" V ")) {\n" 
+        '):
+        LET O==write_AC_sub(subterm(3, FST), LEVEL.succ, subterm(4, FST), FH):
+        LET O==writeToFile(FH,`
+            "__END_" subterm(4, FST).itos ": ;\n"
+            "    }\n"
+        '):
+        O
+      | is[FST, _AC_For_Sorts]:
+        IF 1#numsubterms(subterm(2, FST)):
+          LET LI==LEVEL.itos:
+          LET SARRAY==sortidlist_to_carray(subterm(2, FST)):
+          LET O==writeToFile(FH,
+            `"    {ELEMENT __sarray_" LI "[] = {" SARRAY "};\n"
+             "    ELEMENT __sort_" LI ";\n"
+             "    long __sindex_" LI "=0;\n"
+             "    long __index_" LI ";\n"
+             "    long __number_" LI ";\n"
+             "    for(__sindex_" LI "=0; __sindex_" LI "<"
+                    numsubterms(subterm(2, FST)).itos "; __sindex_" LI "++){\n"
+             "    __sort_" LI " = __sarray_" LI "[__sindex_" LI "];\n"
+             "    __number_" LI "=number(__sort_" LEVEL.itos ");\n"
+             "    for(__index_" LI "=1; __index_" LI "<= __number_" LI 
+                    "; __index_" LI "++) {\n"
+             "    " subterm(1, subterm(1, FST) )
+                   " = element(__index_" LI ", __sort_" LI ");\n"
+          '):
+          LET O==write_AC_sub(subterm(3, FST), LEVEL.succ, subterm(4, FST), FH):
+          LET O==writeToFile(FH,`
+            "__END_" subterm(4, FST).itos ": ;\n"
+            "    }\n"
+            "    }\n"
+            "    }\n"
+          '):
+          O
+        ELSE
+          LET LI==LEVEL.itos:
+          LET SARRAY==sortidlist_to_carray(subterm(2, FST)):
+          LET O==writeToFile(FH,
+            `"    {long __index_" LI ";\n"
+             "    long __number_" LI "=number(" SARRAY ");\n"
+             "    for(__index_" LI "=1; __index_" LI "<= __number_" LI 
+                    "; __index_" LI "++) {\n"
+             "    " subterm(1, subterm(1, FST) )
+                   " = element(__index_" LI ", " SARRAY ");\n"
+          '):
+          LET O==write_AC_sub(subterm(3, FST), LEVEL.succ, subterm(4, FST), FH):
+          LET O==writeToFile(FH,`
+            "__END_" subterm(4, FST).itos ": ;\n"
+            "    }\n"
+            "    }\n"
+          '):
+          O
+      | is[FST, _AC_Block]:
+        LET O==writeToFile(FH, "{ "):
+        LET O==gen_C_namedecls(subterm(1, FST), FH):
+        LET O==write_AC_sub(subterm(2, FST), LEVEL.succ, subterm(3, FST), FH):
+        LET O==writeToFile(FH, `"__END_" subterm(3, FST).itos ": ;\n"'):
+        LET O==writeToFile(FH, "}\n"):
+        O    
+      ELSE
+        LET O==out("internal error in write_AC_sub: unknown  PC Element!\n"):
+	LET O==out(`sortof(FST) "\n"'):
+        true()
+    :
+    write_AC_sub(PC.back, LEVEL, EXITID, FH) 
+
+FCT sortidlist_to_carray(SortIdList SIDL) String:
+  IF SIDL.numsubterms=0: ""
+  ELSE
+    LET FST==`"_" subterm(1,  subterm(1, SIDL)).idtos':
+    LET FST1==IF is[subterm(1, SIDL),  _NodeSortId]: `FST "_"' ELSE  FST:
+    IF SIDL.numsubterms=1:
+      FST1
+    ELSE
+      `FST1 "," sortidlist_to_carray(SIDL.back)'
+
+FCT gen_C_define_list(Set NL, String ARRAY, Int I, Int FH) Bool:
+  IF less(I, NL.numsubterms)=true():
+    LET ELEM==subterm(I.succ, NL):
+    LET O==writeToFile(FH, `"#define " ELEM.idtos  " "
+                            ARRAY "[" I.itos "]\n"'):
+    gen_C_define_list(NL, ARRAY, I.succ, FH)
+  ELSE true()
+
+FCT gen_C_undef_list (Set NL, Int I, Int FH) Bool:
+  IF less(I, NL.numsubterms)=true():
+    LET ELEM==subterm(I.succ, NL):
+    LET O==writeToFile(FH, `"#undef " ELEM.idtos "\n"'):
+    gen_C_undef_list(NL, I.succ, FH)
+  ELSE true()  
+
+FCT gen_C_namedecls (Set S, Int FH) Bool:
+  IF S.numsubterms=0:
+    writeToFile(FH, "\n")
+  ELSE
+    LET O==writeToFile(FH, "ELEMENT "):
+    gen_C_namedecls_sub(S, FH)
+
+FCT gen_C_namedecls_sub (Set S, Int FH) Bool: // S non-empty!
+  LET O==writeToFile(FH, subterm(1, S).idtos): 
+  IF S.numsubterms=1:
+    writeToFile(FH, ";\n")
+  ELSE
+    LET O==writeToFile(FH, ","):
+    gen_C_namedecls_sub(S.back, FH)
+        
+FCT gen_C_constraint (Constraint@ CE, Int FH, String PF) Bool:
+  IF CondConstr@<F,C> CE:
+    LET O==writeToFile(FH, `PF "if (" formula_to_cexpr(F) ") {\n"'):
+    LET O==gen_C_constraint (C, FH, `PF "  "'):
+    LET O==writeToFile(FH, `PF "}\n"'):
+    O
+  | BasicConstr@<E,<<I,*> ID,EL> VE> CE:
+    LET LATT==son(4, ID.Decl).Decl:
+    LET O==
+      IF LATT=nil():
+        LET O==outMAXCode(ID.Decl.term): LET O==debug("\n"):
+        LET O==outMAXCode(son(4, ID.Decl).term): LET O==debug("\n"):
+        true()
+      ELSE true():
+    LET USER_DEF_UPDATECODE==
+      IF LeqConstr@ CE: `lattice_leq_update(LATT).idtos1 "(__e, __vptr)"'
+      ELSE              `lattice_geq_update(LATT).idtos1 "(__e, __vptr)"'
+    :
+    LET UPDATECODE==
+      IF USER_DEF_UPDATECODE#nil():
+        USER_DEF_UPDATECODE
+      ELSE
+        LET TEST==
+          IF LeqConstr@ CE:
+            `"!eq(" lattice_leq(LATT).idtos "(__e,__v),true())"'
+          ELSE
+            `"!eq(" lattice_leq(LATT).idtos "(__v,__e),true())"'
+        :
+        LET OP==
+          IF LeqConstr@ CE: `lattice_join(LATT).idtos "(__e,__v)"'
+          ELSE              `lattice_meet(LATT).idtos "(__e,__v)"'
+        :
+        LET O==
+          IF OP=nil():
+            LET O==debug("gen_C_constraint: OP is nil\n"): O
+          ELSE true()
+        :
+        LET O==
+          IF TEST=nil():
+            LET O==debug("gen_C_constraint: TEST is nil\n"): O
+          ELSE true()
+        :
+        `
+        PF "__v= __vptr1 != NULL ? *__vptr1 : nil();\n"
+        PF "if ((" TEST ") && __vptr1 != NULL){ *__vptr1="
+                                                     OP "; __update=1; }\n"
+        '
+    :
+    LET O==writeToFile(FH,
+      `PF "__e=" expr_to_cexpr(E) ";\n"
+       PF "__vptr=" varPtrId(I.term).idtos "("
+                                    exprlist_to_carglist(EL) ");\n"
+       PF "__vptr1= !eq(__vptr, nil()) ? etop(__vptr) : NULL; \n" 
+       UPDATECODE
+      '):
+    O
+  ELSE
+    out(`"gen_C_ConstrExpr: unknown constraint " sortof(CE) "!\n"')          
+
+FCT  gen_C_constraint_sub(Constraint@ CE, Int FH,  String PF) Bool:
+  LET O==gen_C_constraint(CE, FH, PF):
+  IF  CE.rbroth # nil():
+    gen_C_constraint_sub(CE.rbroth, FH,  PF)
+  ELSE  O
+ 
+FCT gen_C_call_funcs(Int FH, String FNAME, Int NR, Int I) Bool:
+  IF lesseq(I, NR)=true():
+    LET O==writeToFile(FH, `"    " FNAME "_" I.itos "();\n"'):
+    gen_C_call_funcs(FH, FNAME, NR, I.succ)
+  ELSE
+    true()
+  
+/******************************************************************************
+        Output of MAX Code
+******************************************************************************/
+
+ATT CodeGenCtrl (Specification@ S) Bool:
+  LET O1==outputMAXFile(root()):
+  codeGenCtrlSub(S.fst)
+
+FCT codeGenCtrlSub(GlobalDecl@ GD) Bool:
+  IF Structure@ GD:
+    LET H==outputCFile (GD):
+    codeGenCtrlSub (GD.rbroth)
+  ELSE
+    codeGenCtrlSub (GD.rbroth)
+
+FCT outputMAXFile (Node N) Bool:
+  IF checkOption("nocode")=false():
+    LET FILENAME == `inputFilePath() "/" maxSpecId() ".m"':
+    LET HANDLE == openFile(FILENAME, "w"):
+    IF greatereq(HANDLE, 0)=true():      
+      LET H==
+        LET O==IF checkOption("nosrcpos")=true(): true()
+               ELSE writeToFile(HANDLE, `"#line 1 \"" inputFileName()
+                                         "\"\n"')
+        :
+        LET MAXCODE == remove_predecls(root().genMAXCode):
+        outputMAXCode(MAXCODE, "", HANDLE)
+      :
+      LET H==closeFile(HANDLE):
+      info(`"File " FILENAME " written.\n"')
+    ELSE
+      out(`"error: cannot write file " FILENAME "!\n"')
+  ELSE
+    true()
+
+FCT remove_predecls(Specification S) Specification:
+  remove_predecls_sub(S, 30) // the first 30 declarations are predefined
+
+FCT remove_predecls_sub(Specification S, Int NR) Specification:
+  IF NR=0: S
+  ELSE remove_predecls_sub(S.back, NR.prev)
+
+FCT outMAXCode(Term T) Bool:
+  IF checkOption("debug")=true():
+    outputMAXCode(T, "", 1) // 1=stdout
+  ELSE
+    true()
+
+FCT outputMAXCode ( Term D, String PF, Int HANDLE ) Bool:
+  /**** Lists of declarations/definitions ****/
+  
+  IF is[D, _DeclList]:
+    IF 0#D.numsubterms:
+      LET O==outputMAXCode (subterm(1, D), "", HANDLE):
+      outputMAXCode (D.back, "", HANDLE)
+    ELSE
+      true()
+  
+  /**** Global declarations/definitions ****/
+
+  | is[D, _PredDecl]:
+    LET ID==subterm(1, D):
+      LET SIDL==subterm(2, D):
+      writeToFile (HANDLE, `"PRD " ID.codeForIdent "["
+        codeForSortIdList(SIDL, ", ") "]\n"')
+  | is[D, _FuncDecl]:
+    LET ID==subterm(1, D):
+      LET SIDL==subterm(2, D):
+      LET SID==subterm(3, D):
+      writeToFile (HANDLE, `"FCT " ID.codeForIdent "("
+        codeForSortIdList(SIDL, ", ") ") "
+        SID.codeForIdent "\n"')
+  | is[D, _AttrDecl]:
+    LET ID==subterm(1, D):
+    LET SIDL==subterm(2, D):
+    LET SID==subterm(3, D):
+    writeToFile (HANDLE, `"ATT " ID.codeForIdent "("
+      codeForSortIdList(SIDL, ", ") ") "
+      SID.codeForIdent "\n"')
+  | is[D, _Structure]:
+    LET ID==subterm(1, D):
+    LET TSID==subterm(2, D):
+    LET LDL==subterm(3, D):
+    LET O1==
+    writeToFile (HANDLE, `"STRUC " ID.codeForIdent "["
+      TSID.codeForIdent "] {\n"') :
+    LET O2==
+    outputMAXCode (LDL, "", HANDLE):
+    writeToFile (HANDLE, "}\n")
+  | is[D, _ListProd]:
+    LET ID==subterm(1, D):
+    LET SID==subterm(2, D):
+    writeToFile (HANDLE, `ID.codeForIdent " * " SID.codeForIdent
+                "\n"')
+  | is[D, _TupelProd]:
+    LET ID==subterm(1, D):
+    LET SIDL==subterm(2, D):
+    writeToFile (HANDLE, `ID.codeForIdent " ( "
+      codeForSortIdList (SIDL, " ") " )\n"')
+  | is[D, _ClassProd]:
+    LET ID==subterm(1, D):
+    LET SIDL==subterm(2, D):
+    writeToFile (HANDLE, `ID.codeForIdent " = "
+      codeForSortIdList (SIDL, "|") "\n"')
+  | is[D, _PredeclProd]: true()
+  
+  /**** Local declarations/definitions ****/
+  
+  | is[D, _Predicate]:
+    LET ID==subterm(1, D):
+    LET SIDL==subterm(2, D):
+    LET NL==subterm(3, D):
+    LET F==subterm(4, D):
+    LET O1==writeToFile (HANDLE, ` "PRD " ID.codeForIdent " [ "
+      codeForParList(SIDL, NL) " ] :\n"'):
+    LET O2==outputMAXCode(F, "    ", HANDLE):
+    writeToFile(HANDLE, "\n")
+  | is[D, _Function]:
+    LET ID==subterm(1, D):
+    LET SIDL==subterm(2, D):
+    LET NL==subterm(3, D):
+    LET SID==subterm(4, D):
+    LET E==subterm(5, D):
+    LET O1==writeToFile (HANDLE, `"FCT " ID.codeForIdent " ( "
+      codeForParList(SIDL, NL) " ) " SID.codeForIdent
+      " :\n"'):
+    LET O2==outputMAXCode(E, "    ", HANDLE):
+    writeToFile(HANDLE, "\n")
+  | is[D, _Attribute]:
+    LET ID==subterm(1, D):
+    LET SIDL==subterm(2, D):
+    LET NL==subterm(3, D):
+    LET SID==subterm(4, D):
+    LET E==subterm(5, D):
+    LET O1==writeToFile (HANDLE, `"ATT " ID.codeForIdent " ( "
+      codeForParList(SIDL, NL) " ) " SID.codeForIdent
+      " :\n"'):
+    LET O2==outputMAXCode(E, "    ", HANDLE):
+    writeToFile(HANDLE, "\n")
+  | is[D, _DynFunc]:
+    LET ID==subterm(1, D):
+    LET SIDL==subterm(2, D):
+    LET NL==subterm(3, D):
+    LET SID==subterm(4, D):
+    LET E==subterm(5, D):
+    LET O1==writeToFile (HANDLE, `"DYN " ID.codeForIdent " ( "
+      codeForParList(SIDL, NL) " ) " SID.codeForIdent
+      " :\n"'):
+    LET O2==outputMAXCode(E, "    ", HANDLE):
+    writeToFile(HANDLE, "\n")
+  | is[D, _Condition]:
+    LET PL==subterm(1, D):
+    LET F==subterm(2, D):
+    LET E==subterm(3, D):
+    LET O1==writeToFile (HANDLE,
+             "CND "):
+    LET O2==outputMAXCode (PL, "", HANDLE):
+    LET O3==writeToFile(HANDLE, ":\n"):
+    LET O4==outputMAXCode(F, "    ", HANDLE):
+    LET O5==writeToFile (HANDLE, "\n    |\n"):
+    LET O6==outputMAXCode(E, "    ", HANDLE):
+    writeToFile (HANDLE, "\n")
+  | is[D, _PatternList]:
+    IF D.numsubterms = 0:
+      true()
+    ELSE
+      LET O1==outputMAXCode(subterm(1, D), PF, HANDLE):
+      IF D.numsubterms = 1:
+        true()
+      ELSE
+        LET O2==writeToFile(HANDLE, " , "):
+        outputMAXCode(D.back, "", HANDLE)
+  | is[D, _MaxCodeText]:
+    writeToFile(HANDLE, subterm(1, D))
+
+  /**** Expressions ****/
+
+  | is[D, _CharConst]:
+    LET O==writeToFile(HANDLE, `PF "'" ctos(subterm(1, D)) "'" '):
+    writeToFile(HANDLE, `scp1(subterm(-3, D), subterm(-2, D),
+                                      subterm(-1, D)) ') 
+  | is[D, _IntConst]:
+    LET O==writeToFile(HANDLE, `PF subterm(1, D).itos'):
+    writeToFile(HANDLE, `scp1(subterm(-3, D), subterm(-2, D),
+                                      subterm(-1, D)) ') 
+  | is[D, _StringConst]:
+    LET O==writeToFile(HANDLE, `PF "\"" subterm(1, D) "\""'):
+    writeToFile(HANDLE, `scp1(subterm(-3, D), subterm(-2, D),
+                                      subterm(-1, D)) ')
+  | is[D, _SortConst]:
+    writeToFile(HANDLE, `PF "_" subterm(1, D).codeForIdent')
+  | is[D, _Name]:
+    writeToFile(HANDLE, `PF codeForIdent(D)')
+  | is[D, _FuncAppl]:
+    LET O1==writeToFile(HANDLE,
+                        `PF codeForIdent(subterm(1, D)) "("'):
+    LET O2==outputMAXCode(subterm(2, D), "", HANDLE):
+    writeToFile(HANDLE, ")")
+  | is[D, _ExprList]:
+    IF D.numsubterms = 0: true()
+    | D.numsubterms = 1: outputMAXCode(subterm(1, D), "", HANDLE)
+    ELSE
+      LET O1==outputMAXCode(subterm(1, D), "", HANDLE):
+      LET O2==writeToFile(HANDLE, ", "):
+      outputMAXCode(D.back, "", HANDLE)
+  | is[D, _IfExpr]:
+    LET FC==subterm(1, subterm(1, D)):
+    LET O1==writeToFile(HANDLE, `PF "IF"'):
+    LET O11==writeToFile(HANDLE, `scp1(subterm(3, D), subterm(4, D),
+                                      subterm(5, D)) " "'): 
+    LET O2==outputMAXCode(subterm(1, FC), "", HANDLE):
+    LET O3==writeToFile(HANDLE, ":\n"):
+    LET O4==outputMAXCode(subterm(2, FC), `PF "    "', HANDLE):
+    LET O5==writeToFile(HANDLE, "\n"):
+    LET O6==outputMAXCode(subterm(1, D).back, PF, HANDLE):
+    LET O7==writeToFile(HANDLE, `PF "ELSE\n"'):
+    outputMAXCode (subterm(2, D), `PF "    "', HANDLE)
+  | is[D, _CaseList]:
+    IF D.numsubterms=0: true()
+    ELSE
+      LET C==subterm(1, D):
+      LET O1==writeToFile(HANDLE, `PF "| "'):
+      LET O2==outputMAXCode(subterm(1, C), "", HANDLE):
+      LET O3==writeToFile (HANDLE, " :\n"):
+      LET O4==outputMAXCode(subterm(2, C), `PF "    "', HANDLE):
+      LET O5==writeToFile(HANDLE, "\n"):
+      outputMAXCode(D.back, "", HANDLE)
+  | is[D, _Pattern]:
+    LET SP==subterm(2, D):
+    IF is[SP, _Blank]:
+      LET O1==outputMAXCode(subterm(1, D), PF, HANDLE):
+      LET O2==writeToFile(HANDLE, " "):
+      outputMAXCode(subterm(3, D), "", HANDLE)
+    ELSE
+      LET O1==outputMAXCode(subterm(1, D), PF, HANDLE):
+      LET O2==writeToFile(HANDLE, "<"):
+      LET O3==outputMAXCode(SP, "", HANDLE):
+      LET O4==writeToFile(HANDLE, ">"):
+      outputMAXCode(subterm(3, D), "", HANDLE)
+  | is[D, _SortId]: writeToFile(HANDLE, `PF codeForIdent(D)')
+  | is[D, _Blank]: true()
+  | is[D, _ItemList]:
+    IF D.numsubterms=0: true()
+    | D.numsubterms=1:
+      LET FST==subterm(1, D):
+      IF is[FST, _Blank]: writeToFile(HANDLE, "_")
+      ELSE outputMAXCode(FST, PF, HANDLE)
+    ELSE
+      LET FST==subterm(1, D):
+      LET O1==
+      IF is[FST, _Blank]:
+        writeToFile(HANDLE, "_")
+      ELSE
+        outputMAXCode(FST, PF, HANDLE)
+      :
+      LET O2==writeToFile(HANDLE, ","):
+      outputMAXCode(D.back, PF, HANDLE)
+  | is[D, _Asterisk]:
+    writeToFile(HANDLE, "*")      
+  | is[D, _PredAppl]:
+    LET O1==writeToFile(HANDLE, `PF subterm(1, D).codeForIdent "["'):
+    LET O2==outputMAXCode(subterm(2, D), "", HANDLE):
+    writeToFile(HANDLE, "]")
+  | is[D, _Or]:
+    LET O1==outputMAXCode(subterm(1, D), PF, HANDLE):
+    LET O2==writeToFile(HANDLE, " || "):
+    outputMAXCode(subterm(2, D), "", HANDLE)
+  | is[D, _And]:
+    LET O1==outputMAXCode(subterm(1, D), PF, HANDLE):
+    LET O2==writeToFile(HANDLE, " && "):
+    outputMAXCode(subterm(2, D), "", HANDLE)
+  | is[D, _Impl]:
+    LET O1==outputMAXCode(subterm(1, D), PF, HANDLE):
+    LET O2==writeToFile(HANDLE, " -> "):
+    outputMAXCode(subterm(2, D), "", HANDLE)
+  | is[D, _Neg]:
+    LET O1==writeToFile(HANDLE, `PF "! "'):
+    outputMAXCode(subterm(1, D), "", HANDLE)
+  | is[D, _LetExpr]:
+    LET O1==writeToFile(HANDLE, `PF "LET " codeForIdent(subterm(1, D))
+                                 " ==\n"'):
+    LET O2==outputMAXCode(subterm(2, D), `PF "    "', HANDLE):
+    LET O3==writeToFile(HANDLE, `"\n" PF ":\n"'):
+    LET O4==outputMAXCode(subterm(3, D), `PF "    "', HANDLE):
+    writeToFile(HANDLE, "\n")
+  | is[D, _StringExpr]:
+    LET O1==writeToFile(HANDLE, `PF "`"'):
+    LET O11==writeToFile(HANDLE, `scp1(subterm(-3, D), subterm(-2, D),
+                                      subterm(-1, D)) " "'):
+    LET O2==outputMAXCode(subterm(1, D), "", HANDLE):
+    writeToFile(HANDLE, " '")
+  | is[D, _SExprList]:
+    IF D.numsubterms = 0: true()
+    ELSE
+      LET O1==outputMAXCode(subterm(1, D), "", HANDLE):
+      LET O2==writeToFile(HANDLE, " "):
+      outputMAXCode(D.back, "", HANDLE)
+  | is[D, _DynUndef]:
+    writeToFile(HANDLE, `PF "??"')
+
+  /**** Rules ****/
+
+  | is[D, _IfRule]:
+    LET C==subterm(1, D):
+    LET R1==subterm(2, D):
+    LET R2==subterm(3, D):
+    LET O==writeToFile(HANDLE, `PF "IF "'):
+    LET O==outputMAXCode(C, "", HANDLE):
+    LET O==writeToFile(HANDLE, "THEN\n"):
+    LET O==outputMAXCode(R1, `PF "    "', HANDLE):
+    LET O==IF 0#R2.numsubterms:
+             LET O==writeToFile(HANDLE, `PF "ELSE\n"'):
+             outputMAXCode(R2, `PF "    "', HANDLE)
+           ELSE true():
+    writeToFile(HANDLE, `PF "FI\n"')
+  | is[D, _CaseRule]:
+    LET E==subterm(1, D):
+    LET CIL==subterm(2, D):
+    LET R==subterm(2, D):
+    LET O==writeToFile(HANDLE, `PF "CASE "'):
+    LET O==outputMAXCode(E, "", HANDLE):
+    LET O==writeToFile(HANDLE, "\n"):
+    LET O==outputMAXCode(CIL, PF, HANDLE):
+    IF 0#R.numsubterms:
+      LET O==writeToFile(HANDLE, `PF "ELSE\n"'):
+      outputMAXCode(R, `PF "    "', HANDLE)
+    ELSE
+      true()
+  | is[D, _UpdateList] || is[D, _CaseIsList]:
+    IF D.numsubterms=0: true()
+    ELSE
+      LET O==outputMAXCode(subterm(1, D), PF, HANDLE):
+      outputMAXCode(back(D), PF, HANDLE)
+  | is[D, _Update]:
+    LET O==outputMAXCode(subterm(1, D), PF, HANDLE):
+    LET O==writeToFile(HANDLE, " := "):
+    LET O==outputMAXCode(subterm(2, D), "", HANDLE):
+    writeToFile(HANDLE, "\n")
+  | is[D, _CaseIs]:
+    LET O==writeToFile(HANDLE, `PF "IS "'):
+    LET O==outputMAXCode(subterm(1, D), "", HANDLE):
+    LET O==writeToFile(HANDLE, " :\n"):
+    outputMAXCode(subterm(2, D), `PF "    "', HANDLE)
+ 
+  ELSE
+    out(`"internal error in outputMAXCode: \n"
+                     "    unknown sort " sortof(D) "!\n"')
+    
+FCT outputCFile ( Structure@ S) Bool:
+  // collect CCode Attribute values of all nodes below S and write to
+  // file
+  IF checkOption("nocode")=false():
+    LET FILENAME == `inputFilePath() "/" S.fst.fst.term.idtos "_solver.c"':
+    LET HANDLE == openFile(FILENAME, "w"):
+    IF greatereq(HANDLE, 0)=true():
+      
+      LET H1==
+        gen_C_all(S, HANDLE)
+      :
+      LET H2==info(`"File " FILENAME " written.\n"'):
+      closeFile(HANDLE)
+    ELSE
+      out("error: cannot open output file!\n")
+  ELSE
+    true()
+
+
+//
+// Auxiliary functions for code output
+//
+
+FCT codeForIdent (Term T) String:   // Identifier with
+            // optional source code
+            // position.
+  LET I==subterm(1, T):
+  LET LINE==subterm(2, T):
+  LET COL==subterm(3, T):
+  LET FILE==subterm(4, T):
+  LET H==
+  IF checkOption("nosrcpos")=true():
+    I.idtos
+  ELSE
+    `I.idtos scp(T)'
+  :
+  IF is[T, _NodeSortId]:
+    `H "@"'
+  ELSE
+    H
+
+FCT scp ( Term T) String:
+  LET L==subterm(2, T):
+  LET C==subterm(3, T):
+  LET F==subterm(4, T):
+  scp1(L,C,F)
+
+FCT scp1 ( Int L, Int C, String F) String:
+  `"$" L.itos "," C.itos ",\"" F "\"$"'
+
+FCT codeForSortIdList (SortIdList SIDL, String SEP) String:
+  IF SIDL.numsubterms = 0: ""
+  ELSE
+    LET SID==subterm(1, SIDL):
+    LET I==SID.codeForIdent:
+    LET REST==SIDL.back:
+    IF REST.numsubterms = 0:
+      I
+    ELSE
+      `I SEP codeForSortIdList(REST, SEP)'
+
+FCT codeForParList (SortIdList SIDL, NameList NL) String:
+  IF SIDL.numsubterms = NL.numsubterms:
+    IF SIDL.numsubterms = 0:
+      ""
+    ELSE
+      LET SID==subterm(1, SIDL):
+      LET N==subterm(1, NL):
+      LET S1==SID.codeForIdent:
+      LET S2==N.codeForIdent:
+      IF SIDL.back.numsubterms = 0:
+        `S1 " " S2'
+      ELSE
+        `S1 " " S2 ", "
+         codeForParList(SIDL.back, NL.back)'
+  ELSE
+    LET O==out(`"internal error in FCT codeForParList: lists have "
+          "not the same length!\n"'):
+      ""
+
+////////////////////////////////////////////////////////////////////////////
+// Specification of context conditions
+////////////////////////////////////////////////////////////////////////////
+
+FCT scpinfo1(Node ID) String:
+  `"       \n(file: " ID.fileOfId " / line: " ID.lineOfId.itos ")\n"'
+
+FCT scpinfo2(Node ID) String:
+  `"       \n(ident: " ID.idToStr " / file: " ID.fileOfId
+   " / line: " ID.lineOfId.itos ")\n"'
+
+ 
+CND VarDecl@<ID,SIDL,NL,_,_,_>:
+  SIDL.numsons=1
+  | LET E==error():
+    `"error: Variable can only be assigned to single nodesort "
+     scpinfo2(ID)'
+
+CND VarDecl@<ID, <SID,*>,_,_,_,_>:
+  is[SID, _NodeSortId@] || SID.idToStr="Node"
+  | LET E==error():
+    `"error: given sort is not a node sort" scpinfo2(SID)'
+
+CND Name@ <I,*> N: N.enclAssnList # nil() && N.enclPattern = nil()
+                   && !is[N.fath, _LetAssn@] ->
+                   iselem(I.term, N.enclAssnList.bound_names)=true()
+  | LET E==error():
+    `"error: undeclared identifier "
+     scpinfo2(N)'
+
+
+/*
+  The right hand side of a <= or >= constraint must be a variable
+*/
+
+CND LeqConstr@<_,<I,_> VE>: is[I.Decl, _VarDecl@]
+  | LET E==error():
+    `"error: right-hand-side of <= constraint is no variable "
+     scpinfo2(I)'
+
+CND GeqConstr@<_,<I,_> VE>: is[I.Decl, _VarDecl@]
+  | LET E==error():
+    `"error: right-hand-side of >= constraint is no variable "
+     scpinfo2(I)'
+
+/*
+  A variable can only appear on the right hand side of a propagation
+  constraint of the right kind
+*/
+
+CND LeqConstr@<_,<I,_> VE>: is[I.Decl, _VarDecl@] -> is_leq_var(I.Decl)=true()
+  | LET E==error():
+    `"error: <= constraint cannot be used with this variable "
+     scpinfo2(I)'
+
+CND GeqConstr@<_,<I,_> VE>: is[I.Decl, _VarDecl@] -> is_geq_var(I.Decl)=true()
+  | LET E==error():
+    `"error: >= constraint cannot be used with this variable "
+     scpinfo2(I)'
+
+CND UsedId@ I: I.Decl#nil()
+  | LET E==error():
+    `"error: Identifier not declared" scpinfo2(I)'
+
+CND DefAssnAppl@<ID,EL> A: EL.numsons=ID.Decl.thd.numsons
+  | LET E==error():
+    `"error: Application of user defined Assertion with "
+     "wrong nr. of arguments" scpinfo2(ID)'
+
+CND FuncAppl@<ID,EL>: is[ID.Decl,_FctOrAtt@] -> EL.numsons=ID.Decl.snd.numsons
+  | LET E==error():
+    `"error: identifier used with "
+     "wrong number of arguments" scpinfo2(ID)'
+
+CND FuncAppl@<ID,EL>: is[ID.Decl,_TupelProd@] -> EL.numsons=ID.Decl.snd.numsons
+  | LET E==error():
+    `"error: constructor used with "
+     "wrong number of arguments" scpinfo2(ID)'
+
+CND FuncAppl@<ID,EL>: is[ID.Decl,_ListProd@] -> EL.numsons=0
+  | LET E==error():
+    `"error: no arguments allowed for list constructor" scpinfo2(ID)'
+  
+} /* end of STRUC */
+
+
+

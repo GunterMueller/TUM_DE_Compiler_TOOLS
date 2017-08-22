@@ -1,0 +1,193 @@
+\documentstyle[12pt,german,a4]{article}
+\newcommand{\MAX}{{\sf MAX }}
+\newcommand{\BIM}{{\sf BIM }}
+\begin{document}
+\section{Einf"uhrung}
+
+Im Rahmen unseres Fortgeschrittenenpraktikums entwickelten und implementierten
+wir einen grafischen Browser f"ur das \MAX-System.
+
+\section{Problemstellung und L"osung}
+F"ur das \MAX-System war ein grafischer Browser f"ur Parseb"aume zu entwickeln,
+der die Kontrolle und das Debuggen des Zielcompilers vereinfachen soll. Dabei
+waren folgende Punkte ausschlaggebend:\\
+\begin{enumerate}
+    \item Unabh"angigkeit vom Zielcompiler: Der Browser soll f"ur alle mit
+	\MAX erzeugten Systeme verwendbar sein.
+    \item Informationsf"ulle: Dem Benutzer sollen m"oglichst alle Informationen
+	"uber den erzeugten Baum angeboten werden.
+    \item Benutzerfreundlichkeit: Ein einfaches und effektives Arbeiten mit dem
+	Browser soll m"oglich sein.
+\end{enumerate}
+
+Den Punkt Benutzerfreundlickeit beschreibt ein anderer Teil der Dokumentation. Hier
+wird nun erl"autert, wie die Punkte Unabh"angigkeit und Informationsf"ulle realisiert
+wurden.\\
+
+Den Ansatz, einen Modul zu entwickeln, der sich f"ur alle Zielsysteme verwenden
+l"a\3t, mu\3ten wir schnell verwerfen, da sich in den Zielsystemen nicht mehr
+gen"ugend Informationen "uber die zu Grunde liegende Grammatik findet, als da\3
+ein Parsebaum zufriedenstellend darstellbar w"are. Deswegen mu\3ten wir das Projekt
+in zwei Teile aufspalten: Die Visualisierungsroutinen (Baumdarstellung, Navigation,
+etc.), die f"ur jedes Zielsystem gleich sind, und die Erstellung des Baumes, f"ur
+den je nach Grammatik unterschiedliche Schritte notwendig sind. Beide Teile zusammen
+stellen dann den Browser dar.\\
+
+\subsection{Modifikationen am \MAX-System}
+Ein Gro\3teil der Informationen, die wir visualisieren, sind im Zielcompiler nicht
+mehr vorhanden. Sie m"u\3en daher w"ahrend des \MAX-Laufs gerettet werden, soda\3
+sie uns zur Verf"ugung stehen. Daher wurde von uns in Absprachen mit Arnd Poetzsch-Heffter
+in \MAX die Erzeugung der Datei {\tt <Sprache>.g} eingebaut, die diese Informationen
+f"ur uns enth"alt. Diese Datei enth"alt folgende Informationen:\\
+\begin{itemize}
+    \item Liste aller Sorten und deren Klassenabh"angigkeiten. Wird zur Benennung
+	der Baumknoten ben"otigt.
+    \item Definition der Klassen, Tupel und Listen. Wird ben"otigt, um Attribute, die
+	Terme sind, als Baum darstellen zu k"onnen.
+    \item Signaturen der Attributfunktionen. Wird zur Darstellung der Attribute eines
+	Knotens ben"otigt.
+\end{itemize}
+Die genaue Struktur der Datei findet sich im Anhang.
+
+\subsection{Die sprachspezifische Datei}
+Aus der Datei {\tt <Sprache>.g} erzeugen wir mit Hilfe des Tools \BIM (Browser
+Interface to \MAX) ein grammatikspezifisches Modul {\tt 42.c}, das die Routinen
+zum Aufbau und zur Auswertung des Baumes enth"alt. Die Beschreibung von {\tt 42.c}
+findet sich im Anhang.
+
+\section{\BIM,{\tt .g} und {\tt 42.c}}
+Die Datei {\tt <Sprache>.g} wird von \BIM mit Hilfe von flex und bison eingelesen,
+verarbeitet und daraus C-Code in der Datei {\tt 42.c} erzeugt. Diese Datei enth"alt
+vier wesentliche Funktionsgruppen:\\
+\begin{itemize}
+    \item Bereitstellung von Informationen "uber die Grammatik (Zahl der Sorten,
+	Attribute etc.)
+    \item Bereitstellung von Informationen "uber einen \MAX-Element
+    \item Aufbau eines grafischen Baumes aus einem \MAX-Baum und
+    \item Aufbau eines grafischen Baumes aus einem \MAX-Term.
+\end{itemize}
+Wiederkehrende Funktionen wurden in die Datei {\tt bim\_std.c} ausgelagert, diese
+wird von \BIM automatisch einkopiert und mu\3 beim Lauf von \BIM immer im aktuellen
+Verzeichnis sein. Die bereitgestelleten Funktionen werden nun genauer erl"autert:
+
+\subsubsection{Grammatikinformationen}
+    \begin{itemize}
+	\item Klassenhierarchie der Sorten
+	\item Liste aller Attribute
+	\item Liste aller Sorten
+    \end{itemize}
+\subsubsection{Elementinformationen}
+    \begin{itemize}
+	\item Anzahl der Attribute eines \MAX-Elements.
+	\item Sortenname des Elements
+	\item Liste aller Attribute
+    \end{itemize}
+\subsubsection{Aufbau eines Baumes aus einem \MAX-Baum}
+    Beim Aufbau eines Baumes aus einem \MAX-Baum wird der \MAX-Baum rekursiv
+    durchlaufen. F"ur jeden \MAX-Knoten wird ein Knoten angelegt und mit Informationen
+    zur Visualisierung ausgef"ullt. Alle zur Darstellung benoetigten Daten werden ermittelt,
+    noch bevor das Fenster auf dem Schirm ge"offnet wird. Besondere
+    Beachtung erfordern hier die Attribute, die Verweise auf andere Knoten sind.\\
+    Ein Knotenattribut beschreibt nach dem Erstellen unseres Baumes immer noch einen
+    \MAX-Knoten. Deswegen ist ein Durchlaufen durch den Baum n"otig, um aus den
+    Verweisen auf \MAX-Knoten Verweise auf grafische Knoten zu machen. Dies wird
+    mit der Routine {\tt Bim\_UpdateAttributes()} aus dem Modul {\tt bim\_util.c}
+    erm"oglicht.
+
+	Ein Knoten im grafischen Baum hat folgende Struktur:
+
+	\begin{verbatim}
+   typedef struct _NOD_ {
+   struct _NOD_ * parent;     /* Parent node */
+   struct _NOD_ * children;   /* First child node */
+   struct _NOD_ * next, * prev; /* Linked list of children */
+   NODE_INFO * node_info;     /* Information about the node */
+   X_INFO      * x_info;        /* Information for Xt handling */
+   void * origin_node;
+	}MAX_NODE;
+	\end{verbatim}
+
+	\begin{tabular}{ll}
+	\tt parent & Verweis auf den Vaterknoten\\
+	\tt children & Verweis auf den ersten Sohn\\
+	\tt next, prev & Verkettung aller S"ohne eines Knotens\\
+	\tt node\_info & Spezifische Information. Siehe unten\\
+	\tt x\_info & Grafische Information. Siehe unten\\
+	\tt origin\_node & Wird zum Herstellen der Verweise ben"otigt.\\
+	\end{tabular}\\
+
+	{\tt x\_info} ist ein Teil der Grafik und wird deswegen in dem Teil der Dokumentation
+	beschrieben, der die X-Programmierung behandelt.
+
+	In dieser Struktur befindet sich keinerlei Information "uber die Attribute des Baumes.
+	Der Bezug zu \MAX wird mit dem Verweis {\tt node\_info} hergestellt.
+
+	\begin{verbatim}
+	typedef struct _NIS_ {
+   char * name;            /* Sort of this Node as C-String */
+   char ** parent_sorts;   /* NULL-pointer terminated array of parent sorts */
+   int no_of_attributes;   /* Number of attributes that are defined for this 
+                           // node
+                           */
+   ATTR_INFO * attributes; /* Array of attribute descriptions */
+	 
+	}NODE_INFO
+	\end{verbatim}
+	\begin{tabular}{ll}
+	\tt name & Name der Sorte dieses Knotens\\
+	\tt parent\_sorts & Liste der Namen der Vatersorten. NULL-terminiert.\\
+	\tt no\_of\_attributes & Anzahl der f"ur diesen Knoten definierten Attribute\\
+   	\tt attributes & Zeiger auf ein Feld von Attribut-Beschreibungen\\
+	\end{tabular}
+
+	\begin{verbatim}
+	typedef struct _AIS_ {
+
+   char * name;            /* Name of the attribute */
+   char * defined_by_sort; /* Sort that defined this aattribute */
+   ATTR_TYPE type;         /* Type of the attribute */
+   long attr_value;        /* Value of the attribute, has to be interpreted 
+                           // Depending on the type
+                           */
+   
+}ATTR_INFO;
+	\end{verbatim}
+
+	\begin{tabular}{ll}
+	\tt name & Name des Attributs\\
+	\tt defined\_by\_sort & Sorte, f"ur die dieses Attribut definiert ist.\\
+	\tt type & Typ des Attributs ( Int, Bool, Knotenverweis, etc. )\\
+	\tt attr\_value & Wert des Attributs.
+	\end{tabular}
+		
+\subsubsection{Aufbau eines Baumes aus einem \MAX-Term}
+    F"ur den Aufbau eines Baumes aus einem \MAX-Term wird von \BIM eine Tabelle
+    angelegt, die Informationen "uber die Produktionen in der Grammatik enth"alt.
+    Trifft der Browser beim Baumaufbau auf ein Termattribut, so ''hangelt'' er
+    sich mit Hilfe der Tabellen durch den Term und baut einen entsprechenden
+    Baum auf. Es handelt es sich hier um einen simplen recursive-descendant-Parser,
+	der als Eingabe einen Term nimmt.
+\section{Installation}
+\subsection{Modifikationen am \MAX-System}
+In das \MAX-System m"u\3en an zwei Stellen neue Zeilen eingef"ugt werden: Bei der
+Ausgabe der Dateien die Routine zur Ausgabe der {\tt .g}-Datei und der Aufruf des
+grafischen Browsers. Beide Aufrufe wuden schon von Roland Merk in die neueste Version
+des \MAX eingebaut und stehen deswegen schon zur Verf"ugung.
+\begin{appendix}
+\subsection{Modifikationen am Makefile}
+In das Makefile m"u\3en die neuen Module f"ur den Browser aufgenommen werden.
+F"ur die Erzeugung des Moduls 42.o neben der Standard"ubersetzung mit dem Compiler
+ist das noch die Erzeugung durch \BIM:\\
+\begin{verbatim}
+42.c: <sprache.g>
+    bim <sprache>
+\end{verbatim}
+Beim Endlinken m"u\3en dann hinzugelinkt werden: \verb| 42.o browse.a -lX11 -lXt -lXmu|
+
+\input{bimsem}
+\input{bimcode}
+\input{bimstd}
+\input{bimutil}
+\end{appendix}
+
+\end{document}

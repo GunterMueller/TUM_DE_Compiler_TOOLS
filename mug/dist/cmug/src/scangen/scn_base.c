@@ -1,0 +1,597 @@
+
+/* ************************************************************* */
+/* scn_base.c : Funktionslibrary des tabellengetriebenen         */
+/*   parametrisierten Scanners, immer benoetigte Funktionen	 */
+/* Aenderung 22.01.91, Ulrich Vollath, IDLEN und STRLEN groesser */
+/* erstellt  22.01.91, Ulrich Vollath, aus scan[1234].c		 */
+/* ************************************************************* */
+#ifndef NO_FAST_SCAN
+#define FAST_SCAN
+#endif
+
+/*
+ * (c) copyright 1989,1991 by Technische Universitaet Muenchen, Germany
+ *
+ *      This product is part of CMUG
+ *      CMUG is a part of the compiler writing system
+ *      MUG (Modularer Uebersetzer-Generator, TU Muenchen)
+ *
+ * Permission to use, duplicate or disclose this software must be
+ * obtained in writing. Requests for such permissions may be sent to
+ *
+ *      Prof. Dr. J. Eickel
+ *      Institut fuer Informatik
+ *      Technische Universitaet Muenchen
+ *      Postfach  20 24 20
+ *      Arcisstr. 21
+ *      D-8000 Muenchen 2
+ *      Germany
+ *
+ * No version of this implementation may be used or distributed for gain,
+ * all listings must contain our copyright notice, and the headings
+ * produced by MUG-Modules must contain the text "MUG" and "TU - Muenchen".
+ */
+
+#ifdef __STDC__
+#include <stddef.h>
+#include <stdlib.h>
+#else
+extern char *getenv();
+extern char *malloc();
+#endif
+#include <varargs.h>
+#include <limits.h>
+#include "dbg.h"
+#ifdef FAST_SCAN
+#include <fcntl.h>
+#endif /* FAST_SCAN */
+
+#include <string.h>
+#include <stdio.h>
+#include <ctype.h>
+#ifdef unix
+#include <sys/types.h>
+#include <sys/stat.h>
+#endif
+#ifdef amiga
+#include <sys/types.h>
+#endif
+
+#include "allocate.h"  /* Speicherverwaltung mit Freilisten            */
+#include "ps_token.h"  /* allgemeine Definitionen fuer Scanner         */
+#include "pstokenP.h"  /* private Definitionen fuer Scanner            */
+#include "scanfunk.h"  /* Funktionalitaten Scanner                     */
+#include "ps_tab.h"    /* Datenstruktur Scannertabelle		       */
+#include "scn_glob.h"  /* globale Vereinbarungen und Variablen         */
+#include "semfunk.h"
+
+
+/* ==================================================================== */
+/* dummy-Routine, fuer Semantikteile ohne Ambitionen, an den Tokens     */
+/*   herumzubiegen							*/
+/* ==================================================================== */
+#ifdef __STDC__
+int (*changeToken)(Token) = NULL;
+#else
+int (*changeToken)() = NULL;
+#endif
+
+static Hash fl_hash = NULL; /* Freiliste fuer Hashtabelleneintraege    */
+#define ALLOCHASH() ((Hash)flAllocate(sizeof(HashRec),(char **)&fl_hash))
+
+/* =============================================================== */
+/* Fehlermeldung des Scanners                                      */
+/* =============================================================== */
+#ifdef __STDC__
+void psScanerror(char *meld)
+#else
+void psScanerror(meld)
+ char *meld; /* Fehlermeldungstext  */
+#endif
+ {
+  wErrorf(&ps_errref,meld);
+  scanerrors++;
+ } /* psScanerror */
+
+#ifdef FAST_SCAN
+/* =============================================================== */
+/* liest das naechste Eingabezeichen in ezchn 			   */
+/* =============================================================== */
+#ifdef __STDC__
+static void psNextz(void)
+#else
+static void psNextz()
+#endif
+ {
+  if (ps_file_ptr < ps_file_len) 
+   {
+    if ((ps_ezchn = ps_file_buffer[ps_file_ptr++]) == '\n')
+     {
+      ps_quellref.zeile++;
+      ps_quellref.spalte = 0;
+     }
+    else
+      ps_quellref.spalte++;
+#if 0
+    if ( (ps_ezchn>126) || (ps_ezchn<32) ) 
+      ps_ezchn=' ';  /* Kontrollzeichen in Blanks umwandeln */
+#endif
+   } /* Pufferende */
+  else 
+    ps_ezchn = ' ';
+  DEBUG_PRT(("<%c> ",ps_ezchn));
+ } /* psNextz */
+#else /* FAST_SCAN */
+/* =============================================================== */
+/* liest das naechste Eingabezeichen in ezchn                      */
+/* =============================================================== */
+#ifdef __STDC__
+static void psNextz(void)
+#else
+static void psNextz()
+#endif
+ {
+  while ( !feof(ps_scanein) && (ps_lein<1) )
+    /* bis Zeichen vorhanden oder Dateiende */
+   {
+    ps_quellref.zeile++;
+    ps_quellref.spalte = 0;
+    if (fgets(ps_einz,LEIN,ps_scanein) != NULL)
+      ps_lein = strlen(ps_einz);
+    else  /* Lesen nicht erfolgreich, Dateiende */            
+     {                                        
+      ps_lein  = 0;        /* Puffer ist leer               */
+      *ps_einz = '\0';     /* Eingabezeile leer             */
+      break;               /* Leseschleife beenden          */
+     }
+   }
+  if ( ps_lein<1 )         /* Dateiende und Puffer leer     */
+   {
+    ps_ezchn = ' ';        /* als Whitespace interpretieren */
+    ps_lein = 0;
+   }
+  else
+   {
+    ps_ezchn = ps_einz[ps_quellref.spalte++];
+    ps_lein--;
+   }
+  /* Kontrollzeichen in Blanks umwandeln */
+#if 0
+  if ( (ps_ezchn>126) || (ps_ezchn<32) ) 
+    ps_ezchn=' ';
+#endif
+  DEBUG_PRT(("<%c> ",ezchn));
+ } /* psNextz */
+#endif /* FAST_SCAN */
+
+/* =============================================================== */
+/* liest naechstes Zeichen ein, wenn moeglich                      */
+/* =============================================================== */
+#ifdef __STDC__
+void psLiesn(void)
+#else
+void psLiesn()
+#endif
+ {
+  if (!EndeEin ) 
+    psNextz();
+ } /* psLiesn */
+
+/* =============================================================== */
+/* Ueberlesen von Eingabezeichen (nach lookahead) 		   */
+/* sowie Ausgabe der erkannten Zeichen in token 		   */
+/* =============================================================== */
+#ifdef __STDC__
+void psSkipein(long anz)
+#else
+void psSkipein(anz)
+ long anz; /* Anzahl der zu ueberlesenden Zeichen */
+#endif
+ {
+  int i;
+
+  for (i=1;i<=anz;i++)
+    psLiesn();  /* naechstes Zeichen einlesen */
+ } /* psSkipein */
+
+/* =============================================================== */
+/* initialisiert die Keywords					   */
+/* =============================================================== */
+#ifdef __STDC__
+static void psInitkeywords(void)
+#else
+static void psInitkeywords()
+#endif
+ {
+  Keywddef *keywd;  /*aktuelles Keyword */
+
+  for (keywd = scantab.keywords; keywd->strg != NULL; keywd++)
+    psEnterhashtab(NULL,keywd->strg,keywd->kc,keywd->val,keywd->ign,
+                   NULL,scantab.case_sensitive,TRUE,FALSE);
+ } /* psInitkeywords */
+
+/* =============================================================== */
+/* initialisiert die Specials					   */
+/* =============================================================== */
+#ifdef __STDC__
+static void psInitspecials(void)
+#else
+static void psInitspecials()
+#endif
+ {
+  Specdef *spec;  /*aktuelles Keyword */
+
+  for (ps_maxspec = 0,spec = scantab.specdefs; 
+       spec->strg != NULL; spec++,ps_maxspec++);
+ } /* psInitspecials */
+
+/* ***************************************** */
+/* Routinen zur Hashtabellenverwaltung       */
+/* ***************************************** */
+#define MAXHASH 1021 /* Groesse Hashtabelle, Primzahl */
+static Hash hashtab[MAXHASH];
+/* =============================================================== */
+/* initialisiert die Datenstrukturen der Hashtabelle               */
+/* =============================================================== */
+#ifdef __STDC__
+static void psInithash(void)
+#else
+static void psInithash()
+#endif
+ {
+  int i;
+
+  for (i=0; i < MAXHASH; i++)  
+    hashtab[i] = NULL;              /* Kollisionsklasse leer           */
+  ps_nextid   = scantab.sv_idents;  /* naechste zu vergebende Idnummer */
+  ps_nextstr  = 0;                  /* naechste zu vergebende Idnummer */
+  ps_nextreal = 0;                  /* naechste zu vergebende Idnummer */
+ } /* psInithash */
+
+/* ======================================================== */
+/* Bestimmen des Hashcodes eines Tokens                     */
+/* ======================================================== */
+#ifdef __STDC__
+static unsigned long hashStr(char *tokstr,int case_sens)
+#else
+static unsigned long hashStr(tokstr, case_sens)
+ char *tokstr;
+ int  case_sens;
+#endif
+ {
+  unsigned long hc;   /* berechneter Hashcode         */
+  unsigned char *zp;  /* Zeiger auf aktuelles Zeichen */
+
+  zp = (unsigned char *)tokstr;
+  if (case_sens)
+    for (hc = 0; *zp != '\0'; zp++)
+      hc = ( (hc << 8) + (*zp) ) % MAXHASH;
+  else /* Gross- und Kleinschreibung ignorieren */
+    for (hc = 0; *zp != '\0'; zp++)
+      hc = ( (hc << 8) + (islower(*zp) ? toupper(*zp) : *zp) ) % MAXHASH;
+  DEBUG_MSG(("hashStr(\"%s\") = %ld\n",tokstr,(long)hc));
+  return (hc);
+ } /* hashStr */
+
+/* ============================================================= */
+/* nachsehen, ob id vorhanden, falls nicht, mit Klasse eintragen */
+/* falls cont != NULL : rcode = *count++, sonst Relcode          */
+/* Ausgeben Hashzeiger des Eintrags                              */
+/* ============================================================= */
+#ifdef __STDC__
+Hash psEnterhashtab(Token token,char *strg,long klasse,long relcode,long ign,
+                    long *count,int case_sens, int is_kwd, int is_ident)
+#else
+Hash psEnterhashtab(token,strg,klasse,relcode,ign,
+                    count,case_sens,is_kwd,is_ident)
+ Token token;
+ char *strg;
+ long klasse;
+ long relcode;
+ long ign;
+ long *count;
+ int  case_sens;
+ int  is_kwd;
+ int  is_ident;
+#endif
+ {
+  Hash hash;       /* Hashtabelleneintrag */
+  Hash *cclass;    /* Kollisionsklasse    */
+
+  DEBUG_MSG(("psEnterhashtab(%s,%ld,%ld)\n",strg,klasse,relcode));
+  cclass = &hashtab[hashStr(strg,case_sens)]; /* Kollisionsklasse */
+  /* ------------------------------------------------------- */
+  /* Token in der Kollisionsklasse suchen                    */
+  /* Vergleichskriterium: syntakt. Klasse + String           */
+  /* ------------------------------------------------------- */
+  if (case_sens)
+   { /* genau vergleichen */
+    for (hash = *cclass; hash != NULL; hash = hash->next)
+     {
+      if ((!klasse && hash->iskwd || 
+	    klasse && (hash->kcode == klasse || hash->iskwd && is_ident) ) &&
+          !strcmp(strg,hash->strg) )
+        break;
+     }
+   } /* genau vergleichen */
+  else
+   { /* Gross- und Kleinschreibung ignorieren */
+    for (hash = *cclass; hash != NULL; hash = hash->next)
+     {
+      char *p,*q;
+
+      if (!klasse && hash->iskwd || 
+	   klasse && (hash->kcode == klasse || hash->iskwd && is_ident) )
+       {
+        for (p = strg,q = hash->strg; 
+             *p && *q && 
+	     (islower(*p) ? toupper(*p) : *p) ==
+	     (islower(*q) ? toupper(*q) : *q);
+             p++, q++);
+        if (!*p && !*q) /* gefunden */
+          break;
+       }
+     }
+   } /* Gross- und Kleinschreibung ignorieren */
+  if (hash == NULL)
+   {
+    /* ------------------------------------------------------- */
+    /* neuen Eintrag in der Hashtabelle erzeugen               */
+    /* ------------------------------------------------------- */
+    if ((hash = ALLOCHASH()) == NULL)
+     {
+      memError();
+      return(NULL);
+     }
+    hash->next  = *cclass;
+    *cclass     = hash;
+    if (is_kwd)
+      hash->strg = strg;  /* feste Kopie bereits vorhanden */
+    else
+     {
+      if ((hash->strg  = (char *)malloc(strlen(strg)+1)) == NULL)
+       {
+        memError();
+        return(NULL);
+       }
+      strcpy(hash->strg,strg);
+     }
+    hash->kcode = klasse;
+    if (count == NULL) /* keine Numerierung */
+      hash->rcode = relcode;
+    else
+      hash->rcode = (*count)++;
+    hash->ign     = ign;
+    hash->iskwd   = is_kwd;
+    hash->semptr  = NULL;
+   } /* neuer Eintrag */
+  if (token != NULL)
+   { 
+    /* ------------------------------------------------------- */
+    /* alle Werte in das Token eintragen 		       */
+    /* ------------------------------------------------------- */
+    SYM(token)    = hash->kcode;
+    SEMVAL(token) = hash->rcode;
+    token->decinf = hash->strg;
+    token->semptr = &hash->semptr;
+   }
+  return(hash);
+ } /* psEnterhashtab */
+
+/* =================================================================== */
+/* Scannt das naechste Symbol und legt es im Token ab                  */
+/* =================================================================== */
+#ifdef __STDC__
+int scanNext(Token tok)
+#else
+int scanNext(tok)
+ Token tok;
+#endif
+ {
+  if (ps_endeeingem) /* Dateiende bereits gemeldet, fataler Fehler */
+   {
+    ps_errref = ps_quellref; /* Ort fuer Fehlermeldungen setzen */
+    psScanerror(serrEOF);
+    return(0);
+   }
+  while ( !EndeEin )
+   {
+    ps_errref = ps_quellref; /* Ort fuer Fehlermeldungen setzen */
+    if (IS_WHITE_SPACE(ps_ezchn)) /* Leerzeichen ueberlesen */
+      psLiesn();
+    else if (scantab.linedirs != NULL && ps_ezchn == '#')
+      scantab.linedirs();
+    else
+     {
+      int res;
+
+      *(QUELL_ORT(tok)) = ps_quellref; /* Quellreferenz setzen */
+      tok->decinf = NULL;          
+      tok->semptr = NULL;
+      res = 0;
+      if ( (scantab.idents   != NULL && 
+              IS_IDENT_BEGIN(ps_ezchn) && 
+              (res = scantab.idents(tok)) ||
+            scantab.numbers  != NULL && 
+	      IS_NUMBER_BEGIN(ps_ezchn,psScanlah(1L)) && 
+              (res = scantab.numbers(tok)) ||
+            scantab.specials != NULL && 
+              (res = scantab.specials(tok)) ) &&
+ 	   res == 1)
+       {
+	if (changeToken != NULL)
+	  return changeToken(tok);
+	else
+          return(1);            /* Token erfolgreich gelesen  */
+       }
+      if (!res)
+       {
+        psScanerror(serrUNG); /* falls noch kein Ergebnis :
+                                      ungueltiges Zeichen */
+        psLiesn();
+       }
+     } /* Ende Zeichen != ' ' */
+   } /* while !EndeEin */
+  ps_endeeingem = TRUE; /* merken, dass bereits Dateiende gemeldet */
+  SYM(tok) = Keof;      /* feof : Eof-Symbol ausgeben              */
+  return(1);            /* Dateiende erfolgreich gelesen           */
+ } /* scanNext */
+
+/* ===================================================== */
+/* neue Schnittstelle: Initialisierung des Scanners      */
+/* ===================================================== */
+#ifdef __STDC__
+int scanInit(void)
+#else
+int scanInit()
+#endif
+ {
+  DEBUG_MSG(("scanInit()\n"));
+  psInithash();
+  psInitkeywords();
+  psInitspecials();
+  return(1);
+ } /* scanInit */
+
+/* ===================================================== */
+/* neue Schnittstelle: Initialisierung des Scanners      */
+/* ===================================================== */
+#ifdef __STDC__
+int scanOpen(char *f_name)
+#else
+int scanOpen(f_name)
+ char *f_name;
+#endif
+ {
+  char *file_name;
+  char *cpreprocessor, *cppcommand;
+#ifdef FAST_SCAN
+  extern int read();
+  extern int close();
+  extern long lseek();
+  int  efile;
+  long cur_pos;
+#endif
+
+  DEBUG_MSG(("scanOpen(%s)\n",f_name));
+  ps_quellref.fname = f_name;  /* Datei in Quellreferenz setzen */
+  
+  if ( (cpreprocessor=getenv("MUGCPP")) != NULL )
+     {
+     if ((cppcommand=malloc(strlen(cpreprocessor)+strlen(f_name)+50)) == NULL)
+	{
+	memError();
+	return(0);
+        }
+     sprintf(cppcommand,"%s %s > cpp.tmp",
+		cpreprocessor,f_name);
+     if (system(cppcommand) != 0 )
+        {
+	fprintf(stderr,"%s failed!\n",cppcommand);
+	exit(1);
+	}
+     file_name="cpp.tmp";
+     }
+  else file_name=f_name;
+     
+#ifdef FAST_SCAN
+  /* ------------------------------------------ */
+  /* Datei komplett in ein char-Array einlesen 	*/
+  /* ------------------------------------------ */
+  if ((efile = open(file_name,O_RDONLY,(mode_t)0) ) == -1)
+   {
+    perror("scanOpen(): can't open input file");
+    return(0);
+   }
+#ifdef unix
+  {
+   /* ---------------------------- */
+   /* Laenge mit fstat bestimmbar  */
+   /* ---------------------------- */
+   struct stat stat_buf;
+
+   if (fstat (efile, &stat_buf) == -1)
+    {
+     perror("scanInit: fstat() failed");
+     return(0);
+    }
+   if ((cur_pos = lseek(efile,0L,1)) == -1)
+    {
+     perror("scanInit: lseek() failed");
+     return(0);
+    }
+   ps_file_len = stat_buf.st_size - cur_pos;
+  }
+#else
+   /* ---------------------------- */
+   /* Laenge mit lseek bestimmen   */
+   /* ---------------------------- */
+  if ((ps_file_len = lseek(efile,0L,2)) == -1 ||
+      lseek(efile,-ps_file_len,2)      == -1   )
+   {
+    perror("scanInit: lseek() failed");
+    return(0);
+   }
+#endif
+  if ((ps_file_buffer = (char *)malloc(ps_file_len) ) == NULL)
+   {
+    memError();
+    return(0);
+   }
+  read(efile,ps_file_buffer,ps_file_len);
+  close(efile);
+  ps_file_ptr = 0;   /* Zeiger auf Pufferanfang */
+#else /* ! FAST_SCAN */
+  /* ------------------------------------- */
+  /* Datei fuer gepufferte E/A oeffnen     */
+  /* ------------------------------------- */
+  if ((ps_scanein = fopen(file_name,"r")) == NULL)
+   {
+    perror("scanOpen(): can't open input file");
+    return(0);
+   }
+#endif /* FAST_SCAN */
+#ifdef FAST_SCAN
+  ps_quellref.zeile  = 1; /* Quellreferenz initialisieren        */
+#else /* !FAST_SCAN */
+  ps_quellref.zeile  = 0; /* Quellreferenz initialisieren        */
+#endif /* ! FAST_SCAN */
+
+  ps_quellref.spalte = 0;
+  ps_endeeingem = FALSE;  /* Dateiende noch nicht gemeldet       */
+
+#ifndef FAST_SCAN
+  ps_lein = 0;            /* Lesen der ersten Zeile ermoeglichen */
+#endif /* FAST_SCAN */
+  scanerrors = 0 ;        /* Anzahl der erkannten Fehler         */
+  if ( !EndeEin )
+    psNextz(); /* erstes Eingabezeichen lesen */
+  return(1);
+ } /* scanOpen */
+
+/* ===================================================== */
+/* neue Schnittstelle: Beendigen eines Scannerlaufes     */
+/* ===================================================== */
+#ifdef __STDC__
+void scanClose(void)
+#else
+void scanClose()
+#endif
+ {
+#ifdef FAST_SCAN
+  free(ps_file_buffer);
+#else
+  fclose(ps_scanein);
+#endif
+ } /* scanClose */
+
+/* ===================================================== */
+/* neue Schnittstelle: Abbruch eines Scannerlaufes       */
+/* ===================================================== */
+#ifdef __STDC__
+void scanAbort(void)
+#else
+void scanAbort()
+#endif
+ {
+ } /* scanAbort */

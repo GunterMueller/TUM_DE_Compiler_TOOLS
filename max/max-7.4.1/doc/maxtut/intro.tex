@@ -1,0 +1,58 @@
+\chapter{Introduction}
+
+This tutorial gives an introduction into the first version of the
+MAX\footnote{MAX stands for {\bf M}unich {\bf A}ttribution system for
+UNI{\bf X} environments.} system, a system to support 
+programming language specification and implementation. The MAX 
+system is based on an
+entirely formal framework that properly generalizes attribute grammar like
+frameworks. In addition to other features, the framework
+\begin{itemize}
+\item
+provides free access to the syntax tree, thereby enabling the inspection
+of distant attribute occurrences;
+\item
+allows attributes to have tree nodes as values; so
+we can compute and represent global relations between distant parts of
+the syntax tree, like the relation between applications and declarations;
+\item
+enables the formulation of context conditions by first--order predicate
+formulae;
+\item
+provides a simple and purely functional interface between semantic analysis
+and later tasks of language processing; e.g.~it provides an excellent basis
+for recursively defined interpreters.
+\end{itemize}
+The notable aspect of the second feature is that it allows to define additional
+edges in the syntax tree, which is very useful to represent identification
+and type information.
+
+Even though the MAX system was developped for programming
+language specification and implementation, MAX is designed in a way that 
+it can be used in many other applications. Given a specification,
+the MAX system generates an analysor
+that takes an abstract syntax term as input and produces a 
+rich data structure based on the attributed syntax tree. This data
+structure can be accessed through a powerful functional interface so 
+that it can be directly used for further processing tasks.
+
+
+The following chapter gives an introduction into the specification language
+of MAX. The specification language allows to define abstract syntax
+by order--sorted terms, and attributes, recursive functions, as well as
+context conditions.
+Chapter 3 explains the interface between MAX specifications and 
+C--programs and shows how the MAX system is used in a UNIX environment.
+The appendix contains the complete sources of the example specification,
+we used throughout the tutorial to illustrate the explanations.
+
+
+\vspace{1.5cm}
+
+The MAX system is still under development. This tutorial attempts to 
+help people in using the version 1.0 of the MAX system. It has to be
+understood as an intermediate report. The authors thank in advance
+for any questions,
+corrections, comments, and suggestions concerning the system or the
+tutorial. Thanks for support so far, go to J.~Eickel, W.~Heinrich,
+A.~Liebl, S.~Schreiber, W.~Schreiber, U.~Vollath, H.~Wittner. 

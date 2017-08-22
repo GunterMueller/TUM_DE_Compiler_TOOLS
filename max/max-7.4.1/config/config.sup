@@ -1,0 +1,134 @@
+#!/bin/sh
+##
+##  config.sup -- choose supported system types out of possible ones
+##  Copyright (c) Ralf S. Engelschall, <rse@en.muc.de>
+##
+##  USAGE: <new_gnu-triple>=`config.sup <gnu-triple>`
+##
+
+canonical=$1
+
+#   Now choose the cpu, vendor and os types out of
+#   the canonical ``GNU triple'', i.e. all supported
+#   cpu, vendor and os are set to _our_ names and
+#   all other become the tag "generic".
+#   i.e. we take only the needed ones!
+
+   cpu=generic
+vendor=generic
+    os=generic
+
+case "${canonical}" in
+
+    ## HP 9000 series 700, running HP/UX
+    hppa1.1-hp-hpux9* )
+        cpu=hp700 vendor=hp os=hpux901
+        ;;
+    hppa1.1-hp-hpux10* )
+        cpu=hp700 vendor=hp os=hpux10
+        ;;
+
+    ## Suns
+    *-sun-sunos* | *-sun-bsd* | *-sun-solaris* )
+	    vendor=sun
+        case "${canonical}" in
+            sparc* ) cpu=sun4 ;;
+        esac
+
+        #   determine os type
+        case "${canonical}" in
+            ## The Sun386 didn't get past 4.0.
+            i386-*-sunos4 )
+                os=sunos40
+                ;;
+            *-sunos4.0* )
+                os=sunos40
+                ;;
+            *-sunos4.1.3* )
+                os=sunos413
+      		NON_GCC_TEST_OPTIONS=-Bstatic
+                GCC_TEST_OPTIONS=-static
+		;;
+            *-sunos4shr* )
+                os=sunos4shr
+                ;;
+            *-sunos4* | *-sunos )
+                os=sunos41
+		NON_GCC_TEST_OPTIONS=-Bstatic
+                GCC_TEST_OPTIONS=-static
+		;;
+            *-sunos5.3* | *-solaris2.3* )
+		os=solaris2.3
+		NON_GNU_CPP=/usr/ccs/lib/cpp
+		;;
+            *-sunos5* | *-solaris* )
+		os=solaris2
+		NON_GNU_CPP=/usr/ccs/lib/cpp
+		;;
+            * ) os=bsd4-2 ;;
+        esac
+
+    ;;
+
+
+    ## Intel x86 cpus where we don't care about the manufacturer
+    i[345]86-*-* )
+        cpu=intelx86
+        case "${canonical}" in
+            *-freebsd* )
+                os=freebsd
+                ;;
+            *-linux* )
+                os=linux
+                ;;
+            *-univel-sysv* )
+                os=sysv
+                ;;
+            ## Otherwise, we'll fall through to the generic os code at the bottom.
+        esac
+        ;;
+
+
+    ## Nixdorf Targon 31, running TOS
+    m68*-nixdorf-sysv* )
+        cpu=targon31 os=usg522
+        ;;
+
+
+    * ) unknown=true
+  ;;
+esac
+
+### If the code above didn't choose an operating system, just choose
+### an operating system based on the configuration name.  You really
+### only want to use this when you have no idea what the right
+### operating system is; if you know what operating systems a cpu
+### runs, it's cleaner to make it explicit in the case statement
+### above.
+if [ x"${os}" = x ]; then
+    case "${canonical}" in
+        *-gnu* )			os=gnu ;;
+        *-bsd4.[01] )			os=bsd4-1 ;;
+        *-bsd4.2 )			os=bsd4-2 ;;
+        *-bsd4.3 )			os=bsd4-3 ;;
+        *-sysv0 | *-sysvr0 )		os=usg5-0 ;;
+        *-sysv2 | *-sysvr2 )		os=usg5-2 ;;
+        *-sysv2.2 | *-sysvr2.2 )	os=usg5-2-2 ;;
+        *-sysv3 | *-sysvr3 )		os=usg5-3 ;;
+        *-sysv4 | *-sysvr4 )		os=usg5-4 ;;
+        *-sysv4.1 | *-sysvr4.1 )    NON_GNU_CPP=/usr/lib/cpp
+                                    os=usg5-4 ;;
+        *-sysv4.2 | *-sysvr4.2 )	os=usg5-4-2 ;;
+        * )
+            unknown=true
+            ;;
+    esac
+fi
+
+if [ x$unknown = xtrue ]; then
+	cpu=unknown
+	vendor=unknown
+	os=unknown
+fi
+
+echo $cpu-$vendor-$os
